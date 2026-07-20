@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<!-- saved from url=(0060)file:///C:/Users/bashar.shalabi/Downloads/preview%20(2).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Coordination Board Live</title>
+<style>
+:root{
+  --bg:#f5f6f8;
+  --panel:#ffffff;
+  --panel-2:#f8fafc;
+  --ink:#1f2937;
+  --muted:#64748b;
+  --line:#1d4f8f;
+  --border:#334155;
+  --soft-border:#cbd5e1;
+  --drop:#e0f2fe;
+  --danger:#dc2626;
+  --good:#15803d;
+  --shadow:0 8px 24px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}
+.app{min-height:100vh;display:flex;flex-direction:column}
+.app-title{
+  text-align:center;
+  font-size:22px;
+  line-height:1.15;
+  font-weight:950;
+  letter-spacing:.045em;
+  text-transform:uppercase;
+  padding:11px 20px 10px;
+  background:var(--panel);
+  border-bottom:1px solid var(--soft-border);
+  box-shadow:0 2px 12px rgba(15,23,42,.06);
+}
+.toolbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;
+  padding:9px 14px;background:var(--panel);border-bottom:1px solid var(--soft-border);box-shadow:0 2px 12px rgba(15,23,42,.06)
+}
+.tb-btn{
+  border:1px solid var(--soft-border);background:#fff;color:var(--ink);border-radius:8px;
+  min-height:36px;padding:8px 12px;font-size:14px;font-weight:800;cursor:pointer;
+}
+.tb-btn:hover{background:#f1f5f9}
+.tb-btn.danger{color:var(--danger)}
+.tb-btn.save{color:#0f62fe;border-color:#93c5fd;background:#eff6ff}
+.tb-btn.save:hover{background:#dbeafe}
+.sep{width:1px;height:24px;background:var(--soft-border);margin:0 2px}
+.swatch-wrap{display:flex;align-items:center;gap:5px}
+.swatch{
+  width:26px;height:26px;border-radius:5px;border:2px solid transparent;cursor:pointer;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.16)
+}
+.swatch:hover{transform:scale(1.08)}
+.swatch.selected{border-color:#111827;box-shadow:0 0 0 2px rgba(17,24,39,.15)}
+.small-label{font-size:13px;font-weight:800;color:var(--muted)}
+.counter{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+.footer-help{font-size:13px;color:#64748b;margin-left:4px;white-space:nowrap}
+.live-status{
+  display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:5px 10px;
+  border:1px solid #cbd5e1;border-radius:999px;background:#f8fafc;color:#475569;
+  font-size:12px;font-weight:900;white-space:nowrap;
+}
+.live-status:before{content:"";width:9px;height:9px;border-radius:50%;background:#94a3b8;box-shadow:0 0 0 3px rgba(148,163,184,.16)}
+.live-status.live{color:#14532d;border-color:#86efac;background:#f0fdf4}
+.live-status.live:before{background:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.16)}
+.live-status.connecting{color:#854d0e;border-color:#fde047;background:#fefce8}
+.live-status.connecting:before{background:#eab308;box-shadow:0 0 0 3px rgba(234,179,8,.16)}
+.live-status.offline,.live-status.error{color:#991b1b;border-color:#fca5a5;background:#fff1f2}
+.live-status.offline:before,.live-status.error:before{background:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.16)}
+.toast{
+  position:fixed;left:50%;bottom:22px;z-index:1200;transform:translate(-50%,20px);
+  max-width:min(520px,calc(100vw - 32px));padding:10px 15px;border-radius:9px;
+  background:#0f172a;color:#fff;font-size:13px;font-weight:800;box-shadow:0 12px 35px rgba(15,23,42,.25);
+  opacity:0;pointer-events:none;transition:.2s ease;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.error{background:#991b1b}
+.board-shell{flex:1;overflow:auto;padding:18px 18px 28px}
+.board{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(160px,1fr) 64px) minmax(160px,1fr);
+  grid-template-rows:195px 76px 195px 76px 195px 126px;
+  gap:10px;
+  min-width:1730px;
+  align-items:stretch;
+}
+.stage{position:relative;min-height:0;overflow:hidden}
+.department{
+  background:var(--panel);
+  border:2px solid var(--border);
+  border-radius:6px;
+  padding:8px;
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  min-height:0;
+  overflow:hidden;
+}
+.department.drop-active{background:#e6f4ff;border-color:#0369a1}
+.special{border-style:dashed;border-width:2px;background:#fffdf6}
+.completed-stage{background:#f0fdf4;border-color:#166534}
+.stage-title{
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  min-height:31px;
+  flex:0 0 auto;
+  padding:4px 5px;margin-bottom:6px;
+  border:1px solid var(--soft-border);
+  background:var(--panel-2);
+  color:#0f172a;
+  text-transform:uppercase;
+  letter-spacing:.035em;
+  font-size:13px;font-weight:900;text-align:center;
+}
+.special .stage-title{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
+.completed-stage .stage-title{background:#dcfce7;color:#14532d;border-color:#86efac}
+.completed-count-pill{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:22px;padding:0 7px;border-radius:999px;
+  background:#166534;color:#fff;font-size:13px;font-weight:900;
+}
+.slots{
+  flex:1;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(58px,1fr));
+  gap:3px;
+  align-content:start;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:2px;
+}
+.split-wrap{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:5px;flex:1;min-height:0;overflow:hidden}
+.split-col{
+  display:flex;flex-direction:column;gap:3px;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;
+  padding:3px;border:1px dashed #cbd5e1;background:#f8fafc;
+}
+.split-col .slots{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));overflow:visible;flex:0 0 auto}
+.split-col.drop-active{background:#dbeafe;border-color:#0369a1}
+.split-name{text-align:center;font-size:12px;font-weight:900;color:#475569;margin-bottom:1px}
+.arrow-stage{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:0 1px;
+  background:transparent;border:none;box-shadow:none;
+  overflow:hidden;
+}
+.arrow-stage.drop-active{background:rgba(186,230,253,.45);outline:2px dashed #38bdf8;outline-offset:2px;border-radius:8px}
+.arrow-line{position:relative;width:100%;height:28px;margin-top:10px;margin-bottom:4px;flex:0 0 auto}
+.arrow-line:before{
+  content:"";position:absolute;left:0;right:12px;top:13px;height:4px;background:var(--line);border-radius:10px
+}
+.arrow-line:after{
+  content:"";position:absolute;right:0;top:6px;width:0;height:0;
+  border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:14px solid var(--line)
+}
+.arrow-stage.left .arrow-line:before{left:12px;right:0}
+.arrow-stage.left .arrow-line:after{
+  left:0;right:auto;border-left:none;border-right:14px solid var(--line)
+}
+.arrow-line-v{position:relative;width:28px;height:48px;margin:4px auto 3px;flex:0 0 auto}
+.arrow-line-v:before{
+  content:"";position:absolute;left:12px;top:0;bottom:12px;width:4px;background:var(--line);border-radius:10px
+}
+.arrow-line-v:after{
+  content:"";position:absolute;left:5px;bottom:0;width:0;height:0;
+  border-left:9px solid transparent;border-right:9px solid transparent;border-top:14px solid var(--line)
+}
+.arrow-stage.up .arrow-line-v:before{top:12px;bottom:0}
+.arrow-stage.up .arrow-line-v:after{
+  top:0;bottom:auto;border-top:none;border-bottom:14px solid var(--line)
+}
+.arrow-slots{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(50px,1fr));
+  gap:3px;
+  align-content:start;
+  align-items:start;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+.job{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  min-width:0;max-width:100%;min-height:28px;padding:5px 3px;border-radius:4px;
+  border:1px solid rgba(0,0,0,.3);font-size:12px;font-weight:900;line-height:1.12;letter-spacing:.01em;
+  text-align:center;cursor:grab;user-select:none;overflow:hidden;
+}
+.job:active{cursor:grabbing}
+.job.dragging{opacity:.45}
+.job:hover{filter:brightness(.96)}
+.job-label{
+  display:block;width:100%;min-width:0;max-width:100%;pointer-events:none;
+  white-space:normal;overflow-wrap:anywhere;word-break:normal;
+}
+.job-x{
+  display:none;position:absolute;left:2px;top:2px;width:15px;height:15px;border-radius:50%;
+  background:rgba(15,23,42,.88);color:#fff;font-size:11px;line-height:15px;text-align:center;cursor:pointer;z-index:3
+}
+.job:hover .job-x{display:block}
+.job-note-corner{
+  position:absolute;right:0;top:0;width:0;height:0;z-index:2;cursor:help;
+  border-top:13px solid #f8fafc;border-left:13px solid transparent;
+  filter:drop-shadow(-1px 1px 1px rgba(15,23,42,.35));
+}
+.job-note-corner:after{
+  content:"";position:absolute;right:1px;top:-14px;width:6px;height:6px;border-top:1px solid #94a3b8;border-right:1px solid #94a3b8;
+}
+.board-note{
+  position:fixed;right:18px;bottom:16px;z-index:30;
+  width:330px;max-width:calc(100vw - 36px);background:var(--panel);border:1px solid var(--soft-border);border-radius:12px;
+  box-shadow:var(--shadow);padding:12px;display:none
+}
+.board-note.open{display:block}
+.board-note label{display:block;font-size:13px;font-weight:900;color:#475569;margin-bottom:6px}
+.board-note textarea{width:100%;height:100px;resize:vertical;border:1px solid var(--soft-border);border-radius:8px;padding:9px;font-size:14px}
+.bottom-panel{
+  min-width:1730px;margin-top:14px;
+  display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap;
+  background:var(--panel);border:1px solid var(--soft-border);border-radius:12px;
+  box-shadow:var(--shadow);padding:14px;
+}
+.goal-box{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  min-width:430px;padding:8px 10px;border:1px solid var(--soft-border);border-radius:10px;background:#f8fafc;
+}
+.goal-box label{font-weight:900;font-size:15px;color:#0f172a}
+.goal-box input{width:96px;border:1px solid var(--soft-border);border-radius:7px;padding:8px 9px;font-size:14px;font-weight:800;background:#fff}
+.goal-stat{font-size:14px;font-weight:900;color:#334155;background:#fff;border:1px solid var(--soft-border);border-radius:999px;padding:7px 11px}
+.goal-stat.remaining{color:#14532d;border-color:#86efac;background:#f0fdf4}
+.week-panel{
+  display:grid;grid-template-columns:repeat(6,auto);gap:8px 10px;align-items:center;
+}
+.week-title{grid-column:1/-1;font-size:14px;font-weight:900;color:#334155;text-transform:uppercase;letter-spacing:.04em}
+.week-row{display:flex;align-items:center;gap:6px;padding:7px 8px;border:1px solid var(--soft-border);border-radius:10px;background:#f8fafc}
+.week-row label{font-size:13px;font-weight:900;color:#475569;white-space:nowrap}
+.week-row input{width:62px;border:1px solid var(--soft-border);border-radius:7px;padding:7px 8px;font-size:13px;font-weight:800;background:#fff;text-align:center}
+.week-row input.invalid{border-color:#dc2626;background:#fff1f2}
+.week-color-button{width:27px;height:27px;border-radius:5px;border:2px solid rgba(15,23,42,.18);cursor:pointer;flex:0 0 auto}
+.week-color-select{border:1px solid var(--soft-border);border-radius:7px;padding:6px 7px;background:#fff;font-size:13px;font-weight:700;max-width:98px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}
+.modal-backdrop.open{display:flex}
+.modal{width:440px;max-width:100%;background:#fff;border-radius:14px;box-shadow:0 30px 90px rgba(15,23,42,.28);padding:20px;border:1px solid var(--soft-border)}
+.modal h2{margin:0 0 14px;font-size:20px}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:13px;font-weight:900;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.form-row input,.form-row select,.form-row textarea{width:100%;border:1px solid var(--soft-border);border-radius:8px;padding:10px 11px;font-size:15px;background:#fff}
+.form-row textarea{height:82px;resize:vertical}
+.modal-colors{display:flex;flex-wrap:wrap;gap:7px}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.primary{background:#0f62fe;color:#fff;border-color:#0f62fe}
+.primary:hover{background:#0353e9}
+@media print{
+  .toolbar,.board-note,.modal-backdrop,.bottom-panel,.toast{display:none!important}
+  .board-shell{padding:0;overflow:visible}
+  .board{min-width:0;transform:scale(.63);transform-origin:top left}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="app-title">Production Coordination Board</header>
+  <div class="toolbar">
+    <button class="tb-btn" id="btnAdd">+ Add job</button>
+    <button class="tb-btn" id="btnUndo">Undo</button>
+    <button class="tb-btn" id="btnRedo">Redo</button>
+    <button class="tb-btn" id="btnNotes">Notes</button>
+    <button class="tb-btn save" id="btnSaveBoard">Save board</button>
+    <button class="tb-btn danger" id="btnClear">Clear board</button>
+    <div class="sep"></div>
+    <span class="counter" id="counter">0 jobs</span>
+    <span class="live-status connecting" id="liveStatus">Connecting</span>
+  </div>
+  <div class="board-shell">
+    <div class="board" id="board"><section class="stage department" style="grid-area: 1 / 1;"><div class="stage-title">Winding</div><div class="slots"></div></section><section class="stage department" style="grid-area: 1 / 3;"><div class="stage-title">Lacing</div><div class="slots"></div></section><section class="stage department" style="grid-area: 1 / 5;"><div class="stage-title">Core &amp; Coil</div><div class="slots"></div></section><section class="stage department" style="grid-area: 1 / 7;"><div class="stage-title">Oven</div><div class="split-wrap" style="--cols: 3;"><div class="split-col"><div class="split-name">A</div><div class="slots"></div></div><div class="split-col"><div class="split-name">B</div><div class="slots"></div></div><div class="split-col"><div class="split-name">C</div><div class="slots"></div></div></div></section><section class="stage department" style="grid-area: 1 / 9;"><div class="stage-title">Tanking</div><div class="split-wrap" style="--cols: 2;"><div class="split-col"><div class="split-name">1st</div><div class="slots"></div></div><div class="split-col"><div class="split-name">2nd</div><div class="slots"></div></div></div></section><section class="stage department" style="grid-area: 1 / 11;"><div class="stage-title">Testing</div><div class="slots"></div></section><section class="stage department" style="grid-area: 1 / 13;"><div class="stage-title">Final Weld</div><div class="slots"></div></section><section class="stage department" style="grid-area: 1 / 15;"><div class="stage-title">Final Buffing</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 1;"><div class="stage-title">Welding / Buffing</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 3;"><div class="stage-title">M-Blast</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 5;"><div class="stage-title">Prime / Paint</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 7;"><div class="stage-title">Radiator</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 9;"><div class="stage-title">T-Complete</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 15;"><div class="stage-title">Final Paint</div><div class="slots"></div></section><section class="stage department completed-stage" style="grid-area: 5 / 9;"><div class="stage-title">Completed<span class="completed-count-pill" id="completedBoxCounter">0</span></div><div class="slots"></div></section><section class="stage department" style="grid-area: 5 / 11;"><div class="stage-title">QC</div><div class="slots"></div></section><section class="stage department" style="grid-area: 5 / 13;"><div class="stage-title">Engineering</div><div class="slots"></div></section><section class="stage department" style="grid-area: 5 / 15;"><div class="stage-title">Final Finish</div><div class="slots"></div></section><section class="stage department special" style="grid-area: 6 / 8 / auto / span 2;"><div class="stage-title">RMA</div><div class="slots"></div></section><section class="stage department special" style="grid-area: 6 / 10;"><div class="stage-title">WT</div><div class="slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 2;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 4;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 6;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 8;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 10;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 12;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 14;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage down" style="grid-area: 2 / 15;"><div class="arrow-line-v"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage down" style="grid-area: 4 / 15;"><div class="arrow-line-v"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage left " style="grid-area: 5 / 14;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage left " style="grid-area: 5 / 12;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage left " style="grid-area: 5 / 10;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 3 / 2;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 3 / 4;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 3 / 6;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 3 / 8;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage up " style="grid-area: 2 / 9;"><div class="arrow-line-v"></div><div class="arrow-slots"></div></section></div>
+    <div class="bottom-panel">
+      <div class="goal-box">
+        <label for="goalInput">Goal (In units):</label>
+        <input id="goalInput" type="number" min="0" step="1" placeholder="____">
+        <span class="goal-stat">Completed: <span id="completedTotal">0</span></span>
+        <span class="goal-stat remaining">Remaining: <span id="remainingTotal">100</span></span>
+      </div>
+      <div class="week-panel" id="weekPanel"><div class="week-title">W/E Color Key</div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(139, 47, 63);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(47, 95, 158);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(39, 133, 106);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(245, 200, 75);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(220, 38, 38);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(124, 58, 237);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="board-note" id="notesPanel">
+  <label for="notesText">Comments / Notes</label>
+  <textarea id="notesText" placeholder="Example: broken switch, supply chain issue, critical jobs, RMA notes..."></textarea>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 id="modalTitle">Add job</h2>
+    <div class="form-row">
+      <label for="jobText">Job number / text inside box</label>
+      <input id="jobText" maxlength="40" placeholder="Example: 25328-1">
+    </div>
+    <div class="form-row" id="stageRow" style="display: block;">
+      <label for="stageSelect">Place job in</label>
+      <select id="stageSelect"><optgroup label="Departments"><option value="dept:winding">Winding</option><option value="dept:lacing">Lacing</option><option value="dept:core_coil">Core &amp; Coil</option><option value="dept:oven:A">Oven A</option><option value="dept:oven:B">Oven B</option><option value="dept:oven:C">Oven C</option><option value="dept:tanking:1st">Tanking 1st</option><option value="dept:tanking:2nd">Tanking 2nd</option><option value="dept:testing">Testing</option><option value="dept:final_weld">Final Weld</option><option value="dept:final_buffing">Final Buffing</option><option value="dept:welding_buffing">Welding / Buffing</option><option value="dept:m_blast">M-Blast</option><option value="dept:prime_paint">Prime / Paint</option><option value="dept:radiator">Radiator</option><option value="dept:t_complete">T-Complete</option><option value="dept:final_paint">Final Paint</option><option value="dept:completed">Completed</option><option value="dept:qc">QC</option><option value="dept:engineering">Engineering</option><option value="dept:final_finish">Final Finish</option><option value="dept:rma">RMA</option><option value="dept:wt">WT</option></optgroup><optgroup label="Arrow drop spots"><option value="arrow:winding_to_lacing">Winding to Lacing</option><option value="arrow:lacing_to_core_coil">Lacing to Core &amp; Coil</option><option value="arrow:core_coil_to_oven">Core &amp; Coil to Oven</option><option value="arrow:oven_to_tanking">Oven to Tanking</option><option value="arrow:tanking_to_testing">Tanking to Testing</option><option value="arrow:testing_to_final_weld">Testing to Final Weld</option><option value="arrow:final_weld_to_final_buffing">Final Weld to Final Buffing</option><option value="arrow:final_buffing_to_final_paint">Buffing to Paint</option><option value="arrow:final_paint_to_final_finish">Paint to Finish</option><option value="arrow:final_finish_to_engineering">Finish to Engineering</option><option value="arrow:engineering_to_qc">Engineering to QC</option><option value="arrow:qc_to_completed">QC to Completed</option><option value="arrow:welding_buffing_to_m_blast">Weld to Blast</option><option value="arrow:m_blast_to_prime_paint">Blast to Paint</option><option value="arrow:prime_paint_to_radiator">Prime to Radiator</option><option value="arrow:radiator_to_t_complete">Radiator to T-Complete</option><option value="arrow:t_complete_to_tanking">T-Complete to Tanking</option></optgroup></select>
+    </div>
+    <div class="form-row">
+      <label>Box color</label>
+      <div class="modal-colors" id="modalColors"><button class="swatch" title="Maroon" aria-label="Maroon" style="background: rgb(139, 47, 63);"></button><button class="swatch" title="Blue" aria-label="Blue" style="background: rgb(47, 95, 158);"></button><button class="swatch" title="Green" aria-label="Green" style="background: rgb(39, 133, 106);"></button><button class="swatch" title="Yellow" aria-label="Yellow" style="background: rgb(245, 200, 75);"></button><button class="swatch selected" title="Orange" aria-label="Orange" style="background: rgb(245, 158, 11);"></button><button class="swatch" title="Purple" aria-label="Purple" style="background: rgb(124, 58, 237);"></button><button class="swatch" title="Gray" aria-label="Gray" style="background: rgb(107, 114, 128);"></button><button class="swatch" title="Black" aria-label="Black" style="background: rgb(17, 24, 39);"></button><button class="swatch" title="Red" aria-label="Red" style="background: rgb(220, 38, 38);"></button><button class="swatch" title="Teal" aria-label="Teal" style="background: rgb(20, 184, 166);"></button></div>
+    </div>
+    <div class="form-row">
+      <label for="jobNote">Job notes</label>
+      <textarea id="jobNote" maxlength="400" placeholder="Optional note for this job. The folded corner will show this note on hover."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="tb-btn" id="btnCancel">Cancel</button>
+      <button class="tb-btn primary" id="btnSubmit">Add</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script id="initialBoardState" type="application/json">null</script>
+<script>
+const COLORS=[
+  {name:'Maroon',bg:'#8b2f3f',tx:'#fff7f7'},
+  {name:'Blue',bg:'#2f5f9e',tx:'#eef6ff'},
+  {name:'Green',bg:'#27856a',tx:'#eefdf8'},
+  {name:'Yellow',bg:'#f5c84b',tx:'#2f2400'},
+  {name:'Orange',bg:'#f59e0b',tx:'#2b1600'},
+  {name:'Purple',bg:'#7c3aed',tx:'#f5f3ff'},
+  {name:'Gray',bg:'#6b7280',tx:'#f8fafc'},
+  {name:'Black',bg:'#111827',tx:'#f9fafb'},
+  {name:'Red',bg:'#dc2626',tx:'#fff1f2'},
+  {name:'Teal',bg:'#14b8a6',tx:'#042f2e'}
+];
+
+const DEPTS=[
+  {id:'winding',label:'Winding',col:'1',row:'1'},
+  {id:'lacing',label:'Lacing',col:'3',row:'1'},
+  {id:'core_coil',label:'Core & Coil',col:'5',row:'1'},
+  {id:'oven',label:'Oven',col:'7',row:'1',split:['A','B','C']},
+  {id:'tanking',label:'Tanking',col:'9',row:'1',split:['1st','2nd']},
+  {id:'testing',label:'Testing',col:'11',row:'1'},
+  {id:'final_weld',label:'Final Weld',col:'13',row:'1'},
+  {id:'final_buffing',label:'Final Buffing',col:'15',row:'1'},
+
+  {id:'welding_buffing',label:'Welding / Buffing',col:'1',row:'3'},
+  {id:'m_blast',label:'M-Blast',col:'3',row:'3'},
+  {id:'prime_paint',label:'Prime / Paint',col:'5',row:'3'},
+  {id:'radiator',label:'Radiator',col:'7',row:'3'},
+  {id:'t_complete',label:'T-Complete',col:'9',row:'3'},
+  {id:'final_paint',label:'Final Paint',col:'15',row:'3'},
+
+  {id:'completed',label:'Completed',col:'9',row:'5',completed:true},
+  {id:'qc',label:'QC',col:'11',row:'5'},
+  {id:'engineering',label:'Engineering',col:'13',row:'5'},
+  {id:'final_finish',label:'Final Finish',col:'15',row:'5'},
+
+  {id:'rma',label:'RMA',col:'8 / span 2',row:'6',special:true},
+  {id:'wt',label:'WT',col:'10',row:'6',special:true}
+];
+
+const ARROWS=[
+  {id:'winding_to_lacing',label:'Winding to Lacing',col:'2',row:'1',dir:'right'},
+  {id:'lacing_to_core_coil',label:'Lacing to Core & Coil',col:'4',row:'1',dir:'right'},
+  {id:'core_coil_to_oven',label:'Core & Coil to Oven',col:'6',row:'1',dir:'right'},
+  {id:'oven_to_tanking',label:'Oven to Tanking',col:'8',row:'1',dir:'right'},
+  {id:'tanking_to_testing',label:'Tanking to Testing',col:'10',row:'1',dir:'right'},
+  {id:'testing_to_final_weld',label:'Testing to Final Weld',col:'12',row:'1',dir:'right'},
+  {id:'final_weld_to_final_buffing',label:'Final Weld to Final Buffing',col:'14',row:'1',dir:'right'},
+  {id:'final_buffing_to_final_paint',label:'Buffing to Paint',col:'15',row:'2',dir:'down'},
+  {id:'final_paint_to_final_finish',label:'Paint to Finish',col:'15',row:'4',dir:'down'},
+  {id:'final_finish_to_engineering',label:'Finish to Engineering',col:'14',row:'5',dir:'left'},
+  {id:'engineering_to_qc',label:'Engineering to QC',col:'12',row:'5',dir:'left'},
+  {id:'qc_to_completed',label:'QC to Completed',col:'10',row:'5',dir:'left'},
+  {id:'welding_buffing_to_m_blast',label:'Weld to Blast',col:'2',row:'3',dir:'right'},
+  {id:'m_blast_to_prime_paint',label:'Blast to Paint',col:'4',row:'3',dir:'right'},
+  {id:'prime_paint_to_radiator',label:'Prime to Radiator',col:'6',row:'3',dir:'right'},
+  {id:'radiator_to_t_complete',label:'Radiator to T-Complete',col:'8',row:'3',dir:'right'},
+  {id:'t_complete_to_tanking',label:'T-Complete to Tanking',col:'9',row:'2',dir:'up'}
+];
+
+const SUPABASE_URL='https://fithcsswvfczgpspywtw.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_0y7-2mefbQs77HN-wACHBw_c7DFK3cq';
+const BOARD_ID='main';
+
+let db=null;
+let liveChannel=null;
+let liveReady=false;
+let remotePositions={};
+let settingsTimer=null;
+let toastTimer=null;
+
+function setLiveStatus(kind,text){
+  const el=document.getElementById('liveStatus');
+  if(!el)return;
+  el.className='live-status '+kind;
+  el.textContent=text;
+}
+function showToast(message,isError){
+  const el=document.getElementById('toast');
+  if(!el)return;
+  clearTimeout(toastTimer);
+  el.textContent=message;
+  el.className='toast show'+(isError?' error':'');
+  toastTimer=setTimeout(()=>{el.className='toast'},3600);
+}
+function findJobLocation(jobId){
+  return Object.keys(state.locations).find(key=>(state.locations[key]||[]).includes(jobId))||'';
+}
+function remoteJobRow(jobId){
+  const job=state.jobs[jobId];
+  if(!job)return null;
+  const location=findJobLocation(jobId);
+  return {
+    id:jobId,
+    board_id:BOARD_ID,
+    job_text:job.text,
+    color:Number(job.color)||0,
+    note:job.note||'',
+    location_key:location,
+    position:Math.max((state.locations[location]||[]).indexOf(jobId),0),
+    created_at:job.created||new Date().toISOString()
+  };
+}
+function reportRemoteError(error,action){
+  console.error(action,error);
+  setLiveStatus('error','Sync error');
+  const setupMissing=error&&(error.code==='42P01'||/relation .* does not exist/i.test(error.message||''));
+  showToast(setupMissing?'Database setup is not finished yet. Run the setup SQL first.':action+' failed. Your local copy is still saved.',true);
+}
+async function upsertRemoteJob(jobId){
+  if(!liveReady||!db)return;
+  const row=remoteJobRow(jobId);
+  if(!row)return;
+  const {error}=await db.from('jobs').upsert(row,{onConflict:'id'});
+  if(error)reportRemoteError(error,'Saving job');
+}
+async function deleteRemoteJob(jobId){
+  if(!liveReady||!db)return;
+  const {error}=await db.from('jobs').delete().eq('board_id',BOARD_ID).eq('id',jobId);
+  if(error)reportRemoteError(error,'Deleting job');
+}
+function queueRemoteSettings(){
+  if(!liveReady||!db)return;
+  clearTimeout(settingsTimer);
+  settingsTimer=setTimeout(saveRemoteSettings,350);
+}
+async function saveRemoteSettings(){
+  if(!liveReady||!db)return;
+  const row={
+    board_id:BOARD_ID,
+    notes:state.notes||'',
+    goal:state.goal===''?null:Number(state.goal),
+    weeks:state.weeks
+  };
+  const {error}=await db.from('board_settings').upsert(row,{onConflict:'board_id'});
+  if(error)reportRemoteError(error,'Saving board settings');
+}
+async function syncEntireBoard(){
+  if(!liveReady||!db)return;
+  setLiveStatus('connecting','Synchronizing');
+  const rows=Object.keys(state.jobs).map(remoteJobRow).filter(Boolean);
+  const {data:remoteJobs,error:readError}=await db.from('jobs').select('id').eq('board_id',BOARD_ID);
+  if(readError){reportRemoteError(readError,'Reading shared jobs');return;}
+  if(rows.length){
+    const {error}=await db.from('jobs').upsert(rows,{onConflict:'id'});
+    if(error){reportRemoteError(error,'Synchronizing jobs');return;}
+  }
+  const localIds=new Set(rows.map(row=>row.id));
+  const removed=(remoteJobs||[]).map(row=>row.id).filter(id=>!localIds.has(id));
+  if(removed.length){
+    const {error}=await db.from('jobs').delete().eq('board_id',BOARD_ID).in('id',removed);
+    if(error){reportRemoteError(error,'Synchronizing deleted jobs');return;}
+  }
+  await saveRemoteSettings();
+  setLiveStatus('live','Live');
+}
+function applyRemoteJob(payload){
+  if(payload.eventType==='DELETE'){
+    const id=payload.old&&payload.old.id;
+    if(id){delete state.jobs[id];delete remotePositions[id];removeFromLocations(id);}
+  }else{
+    const row=payload.new;
+    if(!row||row.board_id!==BOARD_ID)return;
+    state.jobs[row.id]={
+      text:row.job_text,
+      color:Number(row.color)||0,
+      note:row.note||'',
+      created:row.created_at||new Date().toISOString()
+    };
+    remotePositions[row.id]=Number(row.position)||0;
+    removeFromLocations(row.id);
+    if(row.location_key){
+      if(!state.locations[row.location_key])state.locations[row.location_key]=[];
+      state.locations[row.location_key].push(row.id);
+      state.locations[row.location_key].sort((a,b)=>(remotePositions[a]||0)-(remotePositions[b]||0));
+    }
+  }
+  render();
+}
+function applyRemoteSettings(payload){
+  const row=payload.new;
+  if(!row||row.board_id!==BOARD_ID)return;
+  state.notes=row.notes||'';
+  state.goal=row.goal===null||typeof row.goal==='undefined'?'':String(row.goal);
+  state.weeks=Array.isArray(row.weeks)&&row.weeks.length===6?row.weeks:defaultWeeks();
+  render();
+}
+function subscribeToLiveChanges(){
+  if(liveChannel)db.removeChannel(liveChannel);
+  liveChannel=db.channel('production-board-'+BOARD_ID)
+    .on('postgres_changes',{event:'*',schema:'public',table:'jobs'},applyRemoteJob)
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'board_settings'},applyRemoteSettings)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'board_settings'},applyRemoteSettings)
+    .subscribe(status=>{
+      if(status==='SUBSCRIBED')setLiveStatus('live','Live');
+      else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setLiveStatus('offline','Reconnecting');
+      else if(status==='CLOSED')setLiveStatus('offline','Offline');
+      else setLiveStatus('connecting','Connecting');
+    });
+}
+async function loadSharedBoard(){
+  setLiveStatus('connecting','Loading');
+  const localCopy=JSON.parse(JSON.stringify(state));
+  const [jobsResult,settingsResult]=await Promise.all([
+    db.from('jobs').select('*').eq('board_id',BOARD_ID).order('location_key').order('position'),
+    db.from('board_settings').select('*').eq('board_id',BOARD_ID).maybeSingle()
+  ]);
+  if(jobsResult.error){reportRemoteError(jobsResult.error,'Loading shared jobs');return false;}
+  if(settingsResult.error){reportRemoteError(settingsResult.error,'Loading board settings');return false;}
+
+  state=normalizeState({locations:{},jobs:{},notes:'',goal:'',weeks:defaultWeeks()});
+  remotePositions={};
+  (jobsResult.data||[]).forEach(row=>{
+    state.jobs[row.id]={text:row.job_text,color:Number(row.color)||0,note:row.note||'',created:row.created_at};
+    remotePositions[row.id]=Number(row.position)||0;
+    if(row.location_key){
+      if(!state.locations[row.location_key])state.locations[row.location_key]=[];
+      state.locations[row.location_key].push(row.id);
+    }
+  });
+  Object.keys(state.locations).forEach(key=>state.locations[key].sort((a,b)=>(remotePositions[a]||0)-(remotePositions[b]||0)));
+  if(settingsResult.data){
+    const row=settingsResult.data;
+    state.notes=row.notes||'';
+    state.goal=row.goal===null||typeof row.goal==='undefined'?'':String(row.goal);
+    state.weeks=Array.isArray(row.weeks)&&row.weeks.length===6?row.weeks:defaultWeeks();
+  }
+  liveReady=true;
+  render();
+  subscribeToLiveChanges();
+
+  if(!(jobsResult.data||[]).length&&Object.keys(localCopy.jobs||{}).length){
+    if(confirm('The shared board is empty. Upload the jobs saved in this browser?')){
+      state=normalizeState(localCopy);
+      render();
+      await syncEntireBoard();
+    }
+  }
+  return true;
+}
+async function initializeLiveBoard(){
+  if(!window.supabase){
+    setLiveStatus('error','Service unavailable');
+    showToast('The live service could not load. Check the internet connection and refresh.',true);
+    return;
+  }
+  db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+    auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+  });
+  await loadSharedBoard();
+}
+
+let selectedColor=0;
+let editingJobId=null;
+let state={locations:{},jobs:{},notes:'',goal:'',weeks:[]};
+let history=[];
+let redo=[];
+let dragId=null;
+
+function storageKey(){return 'production_coordination_board_live_v1';}
+function defaultWeeks(){return Array.from({length:6},(_,i)=>({date:'',color:i%COLORS.length}));}
+function stateTime(obj){
+  const t=Date.parse((obj&&obj.updatedAt)||(obj&&obj.exportedAt)||'');
+  return Number.isFinite(t)?t:0;
+}
+function normalizeState(obj){
+  const base={locations:{},jobs:{},notes:'',goal:'',weeks:defaultWeeks(),updatedAt:''};
+  const next=Object.assign(base,obj&&typeof obj==='object'?obj:{});
+  if(!next.locations||typeof next.locations!=='object')next.locations={};
+  if(!next.jobs||typeof next.jobs!=='object')next.jobs={};
+  if(typeof next.notes!=='string')next.notes='';
+  if(typeof next.goal==='undefined'||next.goal===null)next.goal='';
+  next.goal=String(next.goal).replace(/[^0-9]/g,'');
+  if(!Array.isArray(next.weeks)||next.weeks.length!==6)next.weeks=defaultWeeks();
+  return next;
+}
+function embeddedState(){
+  try{
+    const el=document.getElementById('initialBoardState');
+    if(!el)return null;
+    const txt=(el.textContent||'').trim();
+    if(!txt||txt==='null')return null;
+    return JSON.parse(txt);
+  }catch(e){return null;}
+}
+function loadState(){
+  let stored=null;
+  try{
+    const raw=localStorage.getItem(storageKey());
+    if(raw)stored=JSON.parse(raw);
+  }catch(e){}
+  const embedded=embeddedState();
+  if(embedded&&(!stored||stateTime(embedded)>=stateTime(stored))){
+    state=normalizeState(embedded);
+  }else if(stored){
+    state=normalizeState(stored);
+  }else{
+    state=normalizeState(state);
+  }
+}
+function completedKey(){return locationKey('dept','completed');}
+function completedCount(){return jobsFor(completedKey()).filter(id=>state.jobs[id]).length;}
+function saveState(){
+  state.updatedAt=new Date().toISOString();
+  try{localStorage.setItem(storageKey(),JSON.stringify(state));}catch(e){}
+  updateCounters();
+}
+function updateCounters(){
+  const totalJobs=Object.keys(state.jobs).length;
+  const done=completedCount();
+  const goalNum=parseInt(state.goal,10);
+  const remaining=Number.isFinite(goalNum)?Math.max(goalNum-done,0):0;
+  const counter=document.getElementById('counter');
+  if(counter)counter.textContent=totalJobs+' jobs';
+  const completedTotal=document.getElementById('completedTotal');
+  if(completedTotal)completedTotal.textContent=done;
+  const remainingTotal=document.getElementById('remainingTotal');
+  if(remainingTotal)remainingTotal.textContent=remaining;
+  const titleCounter=document.getElementById('completedBoxCounter');
+  if(titleCounter)titleCounter.textContent=done;
+}
+function snapshot(){
+  history.push(JSON.stringify(state));
+  if(history.length>80)history.shift();
+  redo=[];
+}
+function undo(){
+  if(!history.length)return;
+  redo.push(JSON.stringify(state));
+  state=JSON.parse(history.pop());
+  render();saveState();syncEntireBoard();
+}
+function redoChange(){
+  if(!redo.length)return;
+  history.push(JSON.stringify(state));
+  state=JSON.parse(redo.pop());
+  render();saveState();syncEntireBoard();
+}
+function locationKey(type,id,split){return type+':'+id+(split?':'+split:'');}
+function removeFromLocations(jobId){
+  Object.keys(state.locations).forEach(k=>{
+    state.locations[k]=state.locations[k].filter(id=>id!==jobId);
+    if(!state.locations[k].length)delete state.locations[k];
+  });
+}
+function addToLocation(key,jobId){
+  removeFromLocations(jobId);
+  if(!state.locations[key])state.locations[key]=[];
+  state.locations[key].push(jobId);
+}
+function jobsFor(key){return state.locations[key]||[];}
+function setupDrop(el,key){
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drop-active')});
+  el.addEventListener('dragleave',()=>el.classList.remove('drop-active'));
+  el.addEventListener('drop',e=>{
+    e.preventDefault();el.classList.remove('drop-active');
+    const id=e.dataTransfer.getData('text/plain')||dragId;
+    if(!id||!state.jobs[id])return;
+    snapshot();addToLocation(key,id);render();saveState();upsertRemoteJob(id);
+  });
+}
+function makeJob(jobId){
+  const job=state.jobs[jobId];
+  const c=COLORS[job.color||0];
+  const el=document.createElement('div');
+  el.className='job';el.draggable=true;
+  el.title=job.text;
+  el.setAttribute('aria-label','Job '+job.text);
+  el.style.background=c.bg;el.style.color=c.tx;el.style.borderColor='rgba(0,0,0,.3)';
+
+  const label=document.createElement('span');
+  label.className='job-label';
+  label.textContent=job.text;
+  el.appendChild(label);
+
+  if((job.note||'').trim()){
+    const corner=document.createElement('span');
+    corner.className='job-note-corner';
+    corner.title=job.note.trim();
+    corner.setAttribute('aria-label','Job note: '+job.note.trim());
+    el.appendChild(corner);
+  }
+
+  const x=document.createElement('span');
+  x.className='job-x';x.textContent='×';x.title='Delete job';
+  x.addEventListener('mousedown',e=>e.stopPropagation());
+  x.addEventListener('click',e=>{e.stopPropagation();snapshot();delete state.jobs[jobId];removeFromLocations(jobId);render();saveState();deleteRemoteJob(jobId);});
+  el.appendChild(x);
+
+  el.addEventListener('dblclick',()=>openModal(jobId));
+  el.addEventListener('dragstart',e=>{dragId=jobId;el.classList.add('dragging');e.dataTransfer.setData('text/plain',jobId);e.dataTransfer.effectAllowed='move'});
+  el.addEventListener('dragend',()=>{dragId=null;el.classList.remove('dragging')});
+  return el;
+}
+function renderJobs(container,key){
+  container.innerHTML='';
+  const arr=jobsFor(key);
+  arr.forEach(id=>{if(state.jobs[id])container.appendChild(makeJob(id))});
+}
+function makeDept(def){
+  const card=document.createElement('section');
+  card.className='stage department'+(def.special?' special':'')+(def.completed?' completed-stage':'');
+  card.style.gridColumn=def.col;card.style.gridRow=def.row;
+
+  const title=document.createElement('div');
+  title.className='stage-title';
+  title.textContent=def.label;
+  if(def.completed){
+    const pill=document.createElement('span');
+    pill.className='completed-count-pill';
+    pill.id='completedBoxCounter';
+    pill.textContent=completedCount();
+    title.appendChild(pill);
+  }
+  card.appendChild(title);
+
+  if(def.split){
+    const wrap=document.createElement('div');wrap.className='split-wrap';wrap.style.setProperty('--cols',def.split.length);
+    def.split.forEach(s=>{
+      const col=document.createElement('div');col.className='split-col';
+      const sn=document.createElement('div');sn.className='split-name';sn.textContent=s;col.appendChild(sn);
+      const slots=document.createElement('div');slots.className='slots';
+      const key=locationKey('dept',def.id,s);
+      renderJobs(slots,key);col.appendChild(slots);setupDrop(col,key);wrap.appendChild(col);
+    });
+    card.appendChild(wrap);
+  }else{
+    const slots=document.createElement('div');slots.className='slots';
+    const key=locationKey('dept',def.id);
+    renderJobs(slots,key);card.appendChild(slots);setupDrop(card,key);
+  }
+  return card;
+}
+function makeArrow(def){
+  const zone=document.createElement('section');
+  zone.className='stage arrow-stage '+(def.dir==='left'?'left ':def.dir==='up'?'up ':'')+(def.dir==='down'?'down':'');
+  zone.style.gridColumn=def.col;zone.style.gridRow=def.row;
+  const visual=document.createElement('div');visual.className=(def.dir==='down'||def.dir==='up')?'arrow-line-v':'arrow-line';zone.appendChild(visual);
+  const slots=document.createElement('div');slots.className='arrow-slots';
+  const key=locationKey('arrow',def.id);
+  renderJobs(slots,key);zone.appendChild(slots);setupDrop(zone,key);
+  return zone;
+}
+function render(){
+  const board=document.getElementById('board');
+  board.innerHTML='';
+  DEPTS.forEach(d=>board.appendChild(makeDept(d)));
+  ARROWS.forEach(a=>board.appendChild(makeArrow(a)));
+  document.getElementById('notesText').value=state.notes||'';
+  document.getElementById('goalInput').value=state.goal||'';
+  renderWeekPanel();
+  saveState();
+}
+function buildSwatches(){
+  const wrap=document.getElementById('swatches');
+  if(!wrap)return;
+  wrap.innerHTML='';
+  COLORS.forEach((c,i)=>{
+    const s=document.createElement('button');s.className='swatch'+(i===selectedColor?' selected':'');s.title=c.name;s.style.background=c.bg;s.setAttribute('aria-label',c.name);
+    s.addEventListener('click',()=>{selectedColor=i;buildSwatches();buildModalColors()});wrap.appendChild(s);
+  });
+}
+function buildModalColors(){
+  const wrap=document.getElementById('modalColors');wrap.innerHTML='';
+  COLORS.forEach((c,i)=>{
+    const s=document.createElement('button');s.className='swatch'+(i===selectedColor?' selected':'');s.title=c.name;s.style.background=c.bg;s.setAttribute('aria-label',c.name);
+    s.addEventListener('click',()=>{selectedColor=i;buildSwatches();buildModalColors()});wrap.appendChild(s);
+  });
+}
+function buildStageSelect(){
+  const sel=document.getElementById('stageSelect');sel.innerHTML='';
+  const groupDept=document.createElement('optgroup');groupDept.label='Departments';
+  DEPTS.forEach(d=>{
+    if(d.split){
+      d.split.forEach(s=>{
+        const o=document.createElement('option');o.value=locationKey('dept',d.id,s);o.textContent=d.label+' '+s;groupDept.appendChild(o);
+      });
+    }else{
+      const o=document.createElement('option');o.value=locationKey('dept',d.id);o.textContent=d.label;groupDept.appendChild(o);
+    }
+  });
+  const groupArrow=document.createElement('optgroup');groupArrow.label='Arrow drop spots';
+  ARROWS.forEach(a=>{
+    const o=document.createElement('option');o.value=locationKey('arrow',a.id);o.textContent=a.label;groupArrow.appendChild(o);
+  });
+  sel.appendChild(groupDept);sel.appendChild(groupArrow);
+}
+function openModal(jobId){
+  editingJobId=jobId||null;
+  const modal=document.getElementById('modalBackdrop');
+  const input=document.getElementById('jobText');
+  const note=document.getElementById('jobNote');
+  const stageRow=document.getElementById('stageRow');
+  document.getElementById('modalTitle').textContent=editingJobId?'Edit job':'Add job';
+  document.getElementById('btnSubmit').textContent=editingJobId?'Save':'Add';
+  if(editingJobId){
+    const job=state.jobs[editingJobId];
+    input.value=job.text;
+    note.value=job.note||'';
+    selectedColor=job.color||0;
+    stageRow.style.display='none';
+  }else{
+    input.value='';note.value='';stageRow.style.display='block';
+  }
+  buildStageSelect();buildSwatches();buildModalColors();
+  modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+  setTimeout(()=>input.focus(),50);
+}
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.getElementById('modalBackdrop').setAttribute('aria-hidden','true');
+  editingJobId=null;
+}
+function submitModal(){
+  const text=document.getElementById('jobText').value.trim();
+  const note=document.getElementById('jobNote').value.trim();
+  if(!text)return;
+  snapshot();
+  let changedJobId=editingJobId;
+  if(editingJobId){
+    state.jobs[editingJobId].text=text;state.jobs[editingJobId].color=selectedColor;state.jobs[editingJobId].note=note;
+  }else{
+    const id='job_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
+    state.jobs[id]={text,color:selectedColor,note,created:new Date().toISOString()};
+    addToLocation(document.getElementById('stageSelect').value,id);
+    changedJobId=id;
+  }
+  closeModal();render();saveState();upsertRemoteJob(changedJobId);
+}
+function validWeekDate(value){
+  return /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])$/.test(value);
+}
+function cleanWeekInput(value){
+  let v=value.replace(/[^0-9/]/g,'');
+  const parts=v.split('/');
+  if(parts.length>2)v=parts[0]+'/'+parts.slice(1).join('');
+  if(v.length>5)v=v.slice(0,5);
+  return v;
+}
+function renderWeekPanel(){
+  const panel=document.getElementById('weekPanel');
+  panel.innerHTML='<div class="week-title">W/E Color Key</div>';
+  state.weeks.forEach((w,i)=>{
+    const row=document.createElement('div');row.className='week-row';
+
+    const label=document.createElement('label');label.textContent='W/E';row.appendChild(label);
+
+    const input=document.createElement('input');
+    input.value=w.date||'';
+    input.placeholder='M/D';
+    input.maxLength=5;
+    input.inputMode='numeric';
+    input.title='Use M/D format only, like 6/28';
+    input.className=input.value&&!validWeekDate(input.value)?'invalid':'';
+    input.addEventListener('input',()=>{
+      const next=cleanWeekInput(input.value);
+      if(input.value!==next)input.value=next;
+      state.weeks[i].date=input.value;
+      input.classList.toggle('invalid',input.value!==''&&!validWeekDate(input.value));
+      saveState();queueRemoteSettings();
+    });
+    input.addEventListener('blur',()=>{
+      if(input.value!==''&&!validWeekDate(input.value)){
+        input.value='';state.weeks[i].date='';input.classList.remove('invalid');saveState();queueRemoteSettings();
+      }
+    });
+    row.appendChild(input);
+
+    const colorButton=document.createElement('button');
+    colorButton.className='week-color-button';
+    colorButton.style.background=COLORS[w.color||0].bg;
+    colorButton.title='Click to use this color for new jobs';
+    colorButton.addEventListener('click',()=>{selectedColor=w.color||0;buildSwatches();buildModalColors();});
+    row.appendChild(colorButton);
+
+    const select=document.createElement('select');
+    select.className='week-color-select';
+    COLORS.forEach((c,idx)=>{
+      const opt=document.createElement('option');opt.value=idx;opt.textContent=c.name;select.appendChild(opt);
+    });
+    select.value=w.color||0;
+    select.addEventListener('change',()=>{
+      snapshot();
+      state.weeks[i].color=parseInt(select.value,10);
+      renderWeekPanel();saveState();queueRemoteSettings();
+    });
+    row.appendChild(select);
+
+    panel.appendChild(row);
+  });
+}
+
+function safeStateJson(){
+  return JSON.stringify(state).replace(/</g,'\\u003c');
+}
+async function saveBoardFile(){
+  saveState();
+  state.exportedAt=new Date().toISOString();
+  const json=safeStateJson();
+  let html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+  const re=/(<script id="initialBoardState" type="application\/json">)([\s\S]*?)(<\/script>)/;
+  if(re.test(html)){
+    html=html.replace(re,(_,openTag,oldJson,closeTag)=>openTag+json+closeTag);
+  }
+  const stamp=new Date().toISOString().slice(0,10);
+  const filename='Production_Coordination_Board_'+stamp+'.html';
+  const blob=new Blob([html],{type:'text/html'});
+  if(window.showSaveFilePicker){
+    try{
+      const handle=await window.showSaveFilePicker({
+        suggestedName:filename,
+        types:[{description:'HTML file',accept:{'text/html':['.html']}}]
+      });
+      const writable=await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return;
+    }catch(e){
+      if(e&&e.name==='AbortError')return;
+    }
+  }
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function clearBoard(){
+  if(!confirm('Clear all jobs from this board? This keeps the goal and W/E color key.'))return;
+  snapshot();
+  state.jobs={};
+  state.locations={};
+  render();
+  saveState();
+  if(liveReady&&db){
+    db.from('jobs').delete().eq('board_id',BOARD_ID).then(({error})=>{if(error)reportRemoteError(error,'Clearing jobs')});
+  }
+}
+
+document.getElementById('btnAdd').addEventListener('click',()=>openModal());
+document.getElementById('btnUndo').addEventListener('click',undo);
+document.getElementById('btnRedo').addEventListener('click',redoChange);
+document.getElementById('btnNotes').addEventListener('click',()=>document.getElementById('notesPanel').classList.toggle('open'));
+document.getElementById('btnSaveBoard').addEventListener('click',saveBoardFile);
+document.getElementById('btnClear').addEventListener('click',clearBoard);
+document.getElementById('btnCancel').addEventListener('click',closeModal);
+document.getElementById('btnSubmit').addEventListener('click',submitModal);
+document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal()});
+document.getElementById('jobText').addEventListener('keydown',e=>{if(e.key==='Enter')submitModal();if(e.key==='Escape')closeModal()});
+document.getElementById('jobNote').addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.getElementById('notesText').addEventListener('input',e=>{state.notes=e.target.value;saveState();queueRemoteSettings()});
+document.getElementById('goalInput').addEventListener('input',e=>{
+  state.goal=e.target.value.replace(/[^0-9]/g,'');
+  if(e.target.value!==state.goal)e.target.value=state.goal;
+  saveState();queueRemoteSettings();
+});
+document.addEventListener('keydown',e=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='textarea'||tag==='select')return;
+  if(e.key==='1')openModal();
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redoChange()}
+});
+
+loadState();buildSwatches();render();initializeLiveBoard();
+</script>
+
+</body></html>
