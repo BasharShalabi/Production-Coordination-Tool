@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SECURED REVIEW BUILD: Forgent branded review v6 with connected Box Zoom 2026-07-21 -->
+<!-- SECURED REVIEW BUILD: Forgent branded review v12 with Excel summary export 2026-07-21 -->
 <!-- saved from url=(0060)file:///C:/Users/bashar.shalabi/Downloads/preview%20(2).html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -109,10 +109,10 @@ body.authenticated .app{display:flex}
 .board-shell{flex:1;overflow:auto;padding:18px 18px 28px}
 .board{
   display:grid;
-  grid-template-columns:repeat(7,260px 78px) 260px;
+  grid-template-columns:repeat(7,260px 95px) 260px;
   grid-template-rows:310px 90px 310px 90px 310px 180px;
   gap:10px;
-  min-width:2946px;
+  min-width:3065px;
   align-items:stretch;
 }
 .stage{position:relative;min-height:0;overflow:hidden}
@@ -134,10 +134,8 @@ body.authenticated .app{display:flex}
   background:#fff4bf;
 }
 .completed-stage{background:#f0fdf4;border-color:#166534}
-.board-shell:not(.zoomed) .department[data-dept-id="rma"]{
-  transform:translateX(94px);
-}
-.board-shell:not(.zoomed) .department[data-dept-id="wt"]{
+.board-shell:not(.zoomed) .department[data-dept-id="wt"],
+.board-shell:not(.zoomed) .department[data-dept-id="corrective_action_needed"]{
   transform:translateY(-76px);
 }
 .stage-title{
@@ -160,6 +158,11 @@ body.authenticated .app{display:flex}
   text-shadow:0 0 .01px currentColor;
 }
 .special .stage-title{background:#ffe58a;color:#5f4500;border-color:#d7aa18}
+.corrective{
+  border-style:dashed;border-width:3px;border-color:#b91c1c;
+  background:linear-gradient(145deg,#fff1f2,#fecaca);
+}
+.corrective .stage-title{background:#fca5a5;color:#7f1d1d;border-color:#b91c1c;border-left-color:#7f1d1d}
 .completed-stage .stage-title{background:#dcfce7;color:#14532d;border-color:#86efac}
 .completed-count-pill{
   display:inline-flex;align-items:center;justify-content:center;
@@ -191,7 +194,15 @@ body.authenticated .app{display:flex}
 .department[data-dept-id="tanking"] .job{
   height:auto;min-height:42px;padding:6px 3px;
 }
-.department[data-dept-id="oven"] .job-label,
+.department[data-dept-id="oven"] .job-label{
+  width:auto;flex:1 1 auto;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:clip;
+  overflow-wrap:normal;
+  word-break:keep-all;
+  line-height:1.15;
+}
 .department[data-dept-id="tanking"] .job-label{
   white-space:normal;
   overflow:visible;
@@ -244,6 +255,15 @@ body.authenticated .app{display:flex}
   overflow-y:auto;
   overflow-x:hidden;
 }
+.plain-connector{
+  position:relative;z-index:1;overflow:visible;pointer-events:none;
+}
+.plain-connector svg{display:block;width:100%;height:100%;overflow:visible}
+.plain-connector path{
+  fill:none;stroke:var(--line);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
+}
+.plain-connector .zoom-plain-line{display:none}
 .job{
   position:relative;display:flex;align-items:center;justify-content:center;
   min-width:0;max-width:100%;min-height:34px;padding:6px 5px;border-radius:4px;
@@ -257,6 +277,13 @@ body.authenticated .app{display:flex}
   display:block;width:100%;min-width:0;max-width:100%;pointer-events:none;
   white-space:nowrap;overflow:hidden;text-overflow:clip;word-break:keep-all;
 }
+.oven-clock{
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  width:22px;height:22px;margin-left:3px;border:1px solid currentColor;border-radius:50%;
+  background:rgba(255,255,255,.82);color:#1E393B;font-size:14px;line-height:1;
+  cursor:pointer;box-shadow:0 1px 3px rgba(15,23,42,.18);z-index:2;
+}
+.oven-clock:hover,.oven-clock:focus{transform:scale(1.08);outline:2px solid rgba(115,243,255,.9);outline-offset:1px}
 .job-x{
   display:none;position:absolute;left:2px;top:2px;width:15px;height:15px;border-radius:50%;
   background:rgba(15,23,42,.88);color:#fff;font-size:11px;line-height:15px;text-align:center;cursor:pointer;z-index:3
@@ -302,16 +329,75 @@ body.authenticated .app{display:flex}
 .week-row input.invalid{border-color:#dc2626;background:#fff1f2}
 .week-color-button{width:27px;height:27px;border-radius:5px;border:2px solid rgba(15,23,42,.18);cursor:pointer;flex:0 0 auto}
 .week-color-select{border:1px solid var(--soft-border);border-radius:7px;padding:6px 7px;background:#fff;font-size:13px;font-weight:700;max-width:98px}
-.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(3,18,20,.68);z-index:100;display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(2px)}
 .modal-backdrop.open{display:flex}
-.modal{width:440px;max-width:100%;background:#fff;border-radius:14px;box-shadow:0 30px 90px rgba(15,23,42,.28);padding:20px;border:1px solid var(--soft-border)}
-.modal h2{margin:0 0 14px;font-size:20px}
-.form-row{margin-bottom:12px}
-.form-row label{display:block;font-size:13px;font-weight:900;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
-.form-row input,.form-row select,.form-row textarea{width:100%;border:1px solid var(--soft-border);border-radius:8px;padding:10px 11px;font-size:15px;background:#fff}
-.form-row textarea{height:82px;resize:vertical}
-.modal-colors{display:flex;flex-wrap:wrap;gap:7px}
-.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.modal{width:620px;max-width:100%;max-height:calc(100vh - 36px);background:#f7fbfb;border-radius:18px;box-shadow:0 34px 100px rgba(0,0,0,.42);padding:0;border:2px solid var(--teal-dark);overflow-y:auto}
+.modal-brand{display:flex;flex-direction:column;align-items:center;padding:25px 30px 20px;background:#000;border-bottom:5px solid var(--electric)}
+.modal-logo{display:block;width:min(460px,94%);height:auto;max-height:62px;object-fit:contain;object-position:center}
+.modal h2{margin:15px 0 0;color:#fff;font-size:27px;line-height:1.1;font-weight:950;letter-spacing:.055em;text-align:center;text-transform:uppercase}
+.modal-kicker{margin-top:6px;color:var(--electric);font-size:11px;font-weight:900;letter-spacing:.18em;text-align:center;text-transform:uppercase}
+.modal-body{padding:24px 30px 28px;background:linear-gradient(180deg,#f9fdfd,#e9f5f5)}
+.form-row{margin-bottom:15px}
+.form-row label{display:block;font-size:14px;font-weight:950;color:var(--teal-dark);margin-bottom:7px;text-transform:uppercase;letter-spacing:.045em}
+.form-row input,.form-row select,.form-row textarea{width:100%;min-height:49px;border:2px solid var(--soft-border);border-radius:10px;padding:11px 13px;font-size:16px;font-weight:700;color:var(--teal-dark);background:#fff;outline:none}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(0,158,172,.14)}
+.form-row textarea{height:104px;resize:vertical;font-weight:600;line-height:1.35}
+.modal-colors{display:flex;flex-wrap:wrap;gap:10px;padding:4px 0 2px}
+.modal-colors .swatch{width:36px;height:36px;border-radius:8px}
+.modal-colors .swatch.selected{border-color:var(--teal-dark);box-shadow:0 0 0 3px rgba(115,243,255,.95)}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:18px;border-top:2px solid rgba(0,94,102,.18)}
+.modal-actions .tb-btn{min-width:112px;min-height:46px;padding:10px 22px;font-size:15px}
+.job-modal.has-workflow{width:980px}
+.job-modal.has-workflow .modal-body{
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:26px;align-items:start;
+}
+.workflow-panel{
+  display:none;min-width:0;max-height:520px;overflow-y:auto;padding:20px 20px 18px;
+  border:2px solid rgba(0,94,102,.32);border-radius:14px;background:rgba(255,255,255,.88);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+}
+.job-modal.has-workflow .workflow-panel{display:block}
+.workflow-heading{margin:0;color:var(--teal-dark);font-size:18px;font-weight:950;text-transform:uppercase;letter-spacing:.055em}
+.workflow-subtitle{margin:5px 0 18px;color:#526b6d;font-size:12px;font-weight:750;line-height:1.4}
+.workflow-empty{
+  padding:22px 16px;border:2px dashed rgba(0,158,172,.42);border-radius:11px;
+  color:#526b6d;background:var(--electric-soft);font-size:13px;font-weight:800;line-height:1.45;text-align:center;
+}
+.workflow-list{display:flex;flex-direction:column;margin:0;padding:0;list-style:none}
+.workflow-step{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr);column-gap:11px;padding-bottom:18px}
+.workflow-step:last-child{padding-bottom:0}
+.workflow-step:not(:last-child):before{
+  content:"";position:absolute;left:15px;top:29px;bottom:0;width:4px;border-radius:4px;background:linear-gradient(var(--electric),var(--teal));
+}
+.workflow-node{
+  position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:34px;height:34px;
+  border:3px solid var(--teal);border-radius:50%;background:#fff;color:var(--teal-dark);font-size:13px;font-weight:950;
+  box-shadow:0 0 0 4px rgba(115,243,255,.27);
+}
+.workflow-step.current .workflow-node{border-color:var(--teal-dark);background:var(--electric);box-shadow:0 0 0 4px rgba(0,158,172,.19)}
+.workflow-step.completed .workflow-node{border-color:#166534;background:#bbf7d0;color:#14532d;box-shadow:0 0 0 4px rgba(34,197,94,.16)}
+.workflow-step.transition .workflow-node{border-style:dashed;background:#f0fdfa}
+.workflow-card{min-width:0;padding:10px 12px;border:1px solid #bfd5d7;border-radius:10px;background:#f8fcfc}
+.workflow-step.current .workflow-card{border-color:var(--teal);background:var(--electric-soft)}
+.workflow-step.completed .workflow-card{border-color:#86efac;background:#f0fdf4}
+.workflow-name{color:var(--teal-dark);font-size:14px;font-weight:950;line-height:1.25}
+.workflow-time{margin-top:4px;color:#425e60;font-size:12px;font-weight:750;line-height:1.4}
+.workflow-duration{margin-top:4px;color:var(--teal-medium);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+@media (max-width:820px){
+  .job-modal.has-workflow .modal-body{grid-template-columns:1fr}
+  .workflow-panel{max-height:390px}
+}
+.oven-time-backdrop{z-index:140}
+.oven-time-modal{width:480px}
+.oven-time-modal .modal-brand{padding:22px 28px 18px}
+.oven-time-modal .modal-body{padding:24px 28px 27px}
+.oven-time-icon{
+  display:flex;align-items:center;justify-content:center;width:52px;height:52px;
+  border:3px solid var(--electric);border-radius:50%;color:var(--electric);
+  font-size:34px;font-weight:900;line-height:1;
+}
+.oven-time-help{margin-top:8px;color:#526b6d;font-size:13px;font-weight:700;line-height:1.35}
+.oven-time-error{min-height:18px;margin-top:8px;color:#b91c1c;font-size:13px;font-weight:900}
 .primary{background:#0f62fe;color:#fff;border-color:#0f62fe}
 .primary:hover{background:#0353e9}
 @media print{
@@ -356,6 +442,8 @@ body.authenticated .app{display:flex}
 .department.header-emphasis .stage-title{background:var(--teal-dark);color:#fff;border-left-width:6px;font-weight:1000;text-shadow:0 0 .35px currentColor,0 0 .35px currentColor}
 .special{border-color:#c99700;background:linear-gradient(145deg,#fff8cf,#ffe89a)}
 .special .stage-title{background:#f3c846;color:#4f3a00;border-color:#c99700;border-left-color:#8b6900}
+.corrective{border-color:#b91c1c;background:linear-gradient(145deg,#fff1f2,#fecaca)}
+.corrective .stage-title{background:#fca5a5;color:#7f1d1d;border-color:#b91c1c;border-left-color:#7f1d1d}
 .completed-stage{background:linear-gradient(145deg,#c9f7f8,#9edee1);border-color:var(--teal)}
 .completed-stage .stage-title{background:var(--teal);color:#062f33;border-color:var(--teal);border-left-color:var(--teal-dark)}
 .completed-count-pill{background:var(--teal-dark);color:var(--electric)}
@@ -384,6 +472,10 @@ body.authenticated .app{display:flex}
 .board-shell.zoomed .department.box-zoom-selected{display:flex}
 .board-shell.zoomed .arrow-stage{display:none;flex:0 0 100px;min-height:clamp(390px,65vh,720px);padding-top:74px}
 .board-shell.zoomed .arrow-stage.box-zoom-arrow{display:flex}
+.board-shell.zoomed .plain-connector{display:none;flex:0 0 100px;min-height:clamp(390px,65vh,720px);align-items:center;justify-content:center}
+.board-shell.zoomed .plain-connector.box-zoom-connector{display:flex}
+.board-shell.zoomed .plain-connector.box-zoom-connector svg{display:none}
+.board-shell.zoomed .plain-connector.box-zoom-connector .zoom-plain-line{display:block;width:100%;height:4px;border-radius:10px;background:var(--line)}
 .board-shell.zoomed .arrow-stage.box-zoom-arrow .arrow-line{margin-top:42px}
 .board-shell.zoomed .arrow-stage.box-zoom-arrow .arrow-line-v{margin-top:34px}
 .board-shell.zoomed .arrow-stage.box-zoom-arrow .arrow-slots{margin-top:10px}
@@ -406,7 +498,7 @@ body.authenticated .app{display:flex}
 .week-row input{width:68px;min-height:36px;padding:6px 7px;border:2px solid var(--teal-medium);font-size:16px;color:var(--teal-dark)}
 .week-color-button{width:34px;height:34px;border:2px solid var(--teal-dark);border-radius:7px}
 .week-color-select{min-width:105px;min-height:36px;max-width:none;padding:6px 7px;border:2px solid var(--teal-medium);font-size:14px;color:var(--teal-dark);flex:1 1 105px}
-@media(max-width:700px){.zoom-menu{position:fixed;top:132px;left:10px;right:10px;width:auto;transform:none}.zoom-options{grid-template-columns:1fr}.board-shell.zoomed .board{display:grid;grid-template-columns:1fr}.board-shell.zoomed .arrow-stage.box-zoom-arrow{min-height:100px;padding:0}.board-shell.zoomed .arrow-stage.box-zoom-arrow .arrow-line{margin-top:20px}}
+@media(max-width:700px){.zoom-menu{position:fixed;top:132px;left:10px;right:10px;width:auto;transform:none}.zoom-options{grid-template-columns:1fr}.board-shell.zoomed .board{display:grid;grid-template-columns:1fr}.board-shell.zoomed .arrow-stage.box-zoom-arrow{min-height:100px;padding:0}.board-shell.zoomed .plain-connector.box-zoom-connector{min-height:100px}.board-shell.zoomed .arrow-stage.box-zoom-arrow .arrow-line{margin-top:20px}.modal-brand{padding:21px 20px 17px}.modal-logo{width:min(390px,96%)}.modal h2{font-size:23px}.modal-body{padding:21px 20px 23px}}
 </style>
 </head>
 <body>
@@ -452,6 +544,7 @@ body.authenticated .app{display:flex}
       </div>
     </div>
     <button class="tb-btn save" id="btnSaveBoard">Save board</button>
+    <button class="tb-btn save" id="btnExportSummary" type="button">Export Summary</button>
     <button class="tb-btn danger" id="btnClear">Clear board</button>
     <div class="sep"></div>
     <span class="counter" id="counter">0 jobs</span>
@@ -481,32 +574,68 @@ body.authenticated .app{display:flex}
 </div>
 
 <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <h2 id="modalTitle">Add job</h2>
-    <div class="form-row">
-      <label for="jobText">Job number / text inside box</label>
-      <input id="jobText" maxlength="40" placeholder="Example: 25328-1">
+  <div class="modal job-modal" id="jobModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-brand">
+      <img class="modal-logo" src="Forgent_Logo_FullColour_OnDark_RGB.png" alt="Forgent">
+      <h2 id="modalTitle">Add job</h2>
+      <div class="modal-kicker">Waco 1 production coordination</div>
     </div>
-    <div class="form-row" id="stageRow" style="display: block;">
-      <label for="stageSelect">Place job in</label>
-      <select id="stageSelect"><optgroup label="Departments"><option value="dept:winding">Winding</option><option value="dept:lacing">Lacing</option><option value="dept:core_coil">Core &amp; Coil</option><option value="dept:oven:A">Oven A</option><option value="dept:oven:B">Oven B</option><option value="dept:oven:C">Oven C</option><option value="dept:tanking:1st">Tanking 1st</option><option value="dept:tanking:2nd">Tanking 2nd</option><option value="dept:testing">Testing</option><option value="dept:final_weld">Final Weld</option><option value="dept:final_buffing">Final Buffing</option><option value="dept:welding_buffing">Welding / Buffing</option><option value="dept:m_blast">M-Blast</option><option value="dept:prime_paint">Prime / Paint</option><option value="dept:radiator">Radiator</option><option value="dept:t_complete">T-Complete</option><option value="dept:final_paint">Final Paint</option><option value="dept:completed">Completed</option><option value="dept:qc">QC</option><option value="dept:engineering">Engineering</option><option value="dept:final_finish">Final Finish</option><option value="dept:rma">RMA</option><option value="dept:wt">WT</option></optgroup><optgroup label="Arrow drop spots"><option value="arrow:winding_to_lacing">Winding to Lacing</option><option value="arrow:lacing_to_core_coil">Lacing to Core &amp; Coil</option><option value="arrow:core_coil_to_oven">Core &amp; Coil to Oven</option><option value="arrow:oven_to_tanking">Oven to Tanking</option><option value="arrow:tanking_to_testing">Tanking to Testing</option><option value="arrow:testing_to_final_weld">Testing to Final Weld</option><option value="arrow:final_weld_to_final_buffing">Final Weld to Final Buffing</option><option value="arrow:final_buffing_to_final_paint">Buffing to Paint</option><option value="arrow:final_paint_to_final_finish">Paint to Finish</option><option value="arrow:final_finish_to_engineering">Finish to Engineering</option><option value="arrow:engineering_to_qc">Engineering to QC</option><option value="arrow:qc_to_completed">QC to Completed</option><option value="arrow:welding_buffing_to_m_blast">Weld to Blast</option><option value="arrow:m_blast_to_prime_paint">Blast to Paint</option><option value="arrow:prime_paint_to_radiator">Prime to Radiator</option><option value="arrow:radiator_to_t_complete">Radiator to T-Complete</option><option value="arrow:t_complete_to_tanking">T-Complete to Tanking</option></optgroup></select>
+    <div class="modal-body">
+      <div class="job-form-fields">
+        <div class="form-row">
+        <label for="jobText">Job number / text inside box</label>
+        <input id="jobText" maxlength="40" placeholder="Example: 25328-1">
+        </div>
+        <div class="form-row" id="stageRow" style="display: block;">
+        <label for="stageSelect">Place job in</label>
+        <select id="stageSelect"><optgroup label="Departments"><option value="dept:winding">Winding</option><option value="dept:lacing">Lacing</option><option value="dept:core_coil">Core &amp; Coil</option><option value="dept:oven:A">Oven A</option><option value="dept:oven:B">Oven B</option><option value="dept:oven:C">Oven C</option><option value="dept:tanking:1st">Tanking 1st</option><option value="dept:tanking:2nd">Tanking 2nd</option><option value="dept:testing">Testing</option><option value="dept:final_weld">Final Weld</option><option value="dept:final_buffing">Final Buffing</option><option value="dept:welding_buffing">Welding / Buffing</option><option value="dept:m_blast">M-Blast</option><option value="dept:prime_paint">Prime / Paint</option><option value="dept:radiator">Radiator</option><option value="dept:t_complete">T-Complete</option><option value="dept:final_paint">Final Paint</option><option value="dept:completed">Completed</option><option value="dept:qc">QC</option><option value="dept:engineering">Engineering</option><option value="dept:final_finish">Final Finish</option><option value="dept:rma">RMA</option><option value="dept:wt">WT</option><option value="dept:corrective_action_needed">Corrective Action Needed</option></optgroup><optgroup label="Arrow drop spots"><option value="arrow:winding_to_lacing">Winding to Lacing</option><option value="arrow:lacing_to_core_coil">Lacing to Core &amp; Coil</option><option value="arrow:core_coil_to_oven">Core &amp; Coil to Oven</option><option value="arrow:oven_to_tanking">Oven to Tanking</option><option value="arrow:tanking_to_testing">Tanking to Testing</option><option value="arrow:testing_to_final_weld">Testing to Final Weld</option><option value="arrow:final_weld_to_final_buffing">Final Weld to Final Buffing</option><option value="arrow:final_buffing_to_final_paint">Buffing to Paint</option><option value="arrow:final_paint_to_final_finish">Paint to Finish</option><option value="arrow:final_finish_to_engineering">Finish to Engineering</option><option value="arrow:engineering_to_qc">Engineering to QC</option><option value="arrow:qc_to_completed">QC to Completed</option><option value="arrow:welding_buffing_to_m_blast">Weld to Blast</option><option value="arrow:m_blast_to_prime_paint">Blast to Paint</option><option value="arrow:prime_paint_to_radiator">Prime to Radiator</option><option value="arrow:radiator_to_t_complete">Radiator to T-Complete</option><option value="arrow:t_complete_to_tanking">T-Complete to Tanking</option></optgroup></select>
+        </div>
+        <div class="form-row">
+        <label>Box color</label>
+        <div class="modal-colors" id="modalColors"><button class="swatch" title="Maroon" aria-label="Maroon" style="background: rgb(139, 47, 63);"></button><button class="swatch" title="Blue" aria-label="Blue" style="background: rgb(47, 95, 158);"></button><button class="swatch" title="Green" aria-label="Green" style="background: rgb(39, 133, 106);"></button><button class="swatch" title="Yellow" aria-label="Yellow" style="background: rgb(245, 200, 75);"></button><button class="swatch selected" title="Orange" aria-label="Orange" style="background: rgb(245, 158, 11);"></button><button class="swatch" title="Purple" aria-label="Purple" style="background: rgb(124, 58, 237);"></button><button class="swatch" title="Gray" aria-label="Gray" style="background: rgb(107, 114, 128);"></button><button class="swatch" title="Black" aria-label="Black" style="background: rgb(17, 24, 39);"></button><button class="swatch" title="Red" aria-label="Red" style="background: rgb(220, 38, 38);"></button><button class="swatch" title="Teal" aria-label="Teal" style="background: rgb(20, 184, 166);"></button></div>
+        </div>
+        <div class="form-row">
+        <label for="jobNote">Job notes</label>
+        <textarea id="jobNote" maxlength="400" placeholder="Optional note for this job. The folded corner will show this note on hover."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="tb-btn" id="btnCancel">Cancel</button>
+          <button class="tb-btn primary" id="btnSubmit">Add</button>
+        </div>
+      </div>
+      <section class="workflow-panel" id="workflowPanel" aria-labelledby="workflowHeading">
+        <h3 class="workflow-heading" id="workflowHeading">Job workflow</h3>
+        <p class="workflow-subtitle">Complete movement history from the first placement through the current location.</p>
+        <div id="workflowContent"></div>
+      </section>
     </div>
-    <div class="form-row">
-      <label>Box color</label>
-      <div class="modal-colors" id="modalColors"><button class="swatch" title="Maroon" aria-label="Maroon" style="background: rgb(139, 47, 63);"></button><button class="swatch" title="Blue" aria-label="Blue" style="background: rgb(47, 95, 158);"></button><button class="swatch" title="Green" aria-label="Green" style="background: rgb(39, 133, 106);"></button><button class="swatch" title="Yellow" aria-label="Yellow" style="background: rgb(245, 200, 75);"></button><button class="swatch selected" title="Orange" aria-label="Orange" style="background: rgb(245, 158, 11);"></button><button class="swatch" title="Purple" aria-label="Purple" style="background: rgb(124, 58, 237);"></button><button class="swatch" title="Gray" aria-label="Gray" style="background: rgb(107, 114, 128);"></button><button class="swatch" title="Black" aria-label="Black" style="background: rgb(17, 24, 39);"></button><button class="swatch" title="Red" aria-label="Red" style="background: rgb(220, 38, 38);"></button><button class="swatch" title="Teal" aria-label="Teal" style="background: rgb(20, 184, 166);"></button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop oven-time-backdrop" id="ovenTimeBackdrop" aria-hidden="true">
+  <div class="modal oven-time-modal" role="dialog" aria-modal="true" aria-labelledby="ovenTimeTitle">
+    <div class="modal-brand">
+      <div class="oven-time-icon" aria-hidden="true">◷</div>
+      <h2 id="ovenTimeTitle">Oven Timer</h2>
+      <div class="modal-kicker">Waco 1 production coordination</div>
     </div>
-    <div class="form-row">
-      <label for="jobNote">Job notes</label>
-      <textarea id="jobNote" maxlength="400" placeholder="Optional note for this job. The folded corner will show this note on hover."></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="tb-btn" id="btnCancel">Cancel</button>
-      <button class="tb-btn primary" id="btnSubmit">Add</button>
+    <div class="modal-body">
+      <div class="form-row">
+        <label for="ovenTimeInput">What time was the job placed in the oven?</label>
+        <input id="ovenTimeInput" type="time" step="60">
+        <div class="oven-time-help">The current time is selected automatically. Change it if the job was placed in the oven earlier.</div>
+        <div class="oven-time-error" id="ovenTimeError" role="alert"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="tb-btn" id="btnOvenTimeCancel" type="button">Cancel</button>
+        <button class="tb-btn primary" id="btnOvenTimeConfirm" type="button">Start Timer</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script id="initialBoardState" type="application/json">null</script>
 <script>
 const COLORS=[
@@ -540,13 +669,14 @@ const DEPTS=[
   {id:'final_paint',label:'Final Paint',col:'15',row:'3'},
 
   {id:'final_finish_prime_paint',label:'Final Finish',selectLabel:'Final Finish (under Prime / Paint)',col:'5',row:'5'},
-  {id:'rma',label:'RMA',col:'7',row:'5',special:true},
+  {id:'rma',label:'RMA',col:'1',row:'5',special:true},
   {id:'completed',label:'Completed',col:'9',row:'5',completed:true},
   {id:'qc',label:'QC',col:'11',row:'5'},
   {id:'engineering',label:'Engineering',col:'13',row:'5'},
   {id:'final_finish',label:'Final Finish',col:'15',row:'5'},
 
-  {id:'wt',label:'WT',col:'11',row:'3',special:true}
+  {id:'wt',label:'WT',col:'11',row:'3',special:true},
+  {id:'corrective_action_needed',label:'Corrective Action Needed',col:'13',row:'3',corrective:true}
 ];
 
 const ARROWS=[
@@ -570,6 +700,17 @@ const ARROWS=[
   {id:'t_complete_to_tanking',label:'T-Complete to Tanking',col:'9',row:'2',dir:'up'}
 ];
 
+const PLAIN_CONNECTORS=[
+  {
+    id:'testing_to_support_boxes',
+    from:'testing',
+    targets:['wt','corrective_action_needed'],
+    col:'11 / 14',
+    row:'2',
+    order:211
+  }
+];
+
 const SUPABASE_URL='https://fithcsswvfczgpspywtw.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_0y7-2mefbQs77HN-wACHBw_c7DFK3cq';
 const BOARD_ID='main';
@@ -591,6 +732,7 @@ function showLogin(message){
 function showBoard(){
   document.getElementById('authGate').hidden=true;
   document.body.classList.add('authenticated');
+  fitCompactJobLabels();
 }
 async function handleLogin(event){
   event.preventDefault();
@@ -639,6 +781,46 @@ function showToast(message,isError){
 function findJobLocation(jobId){
   return Object.keys(state.locations).find(key=>(state.locations[key]||[]).includes(jobId))||'';
 }
+const OVEN_META_PREFIX='__PCP_OVEN_TIMER_V1__:';
+const JOB_META_PREFIX='__PCP_JOB_META_V2__:';
+function isOvenLocation(key){return /^dept:oven(?::|$)/.test(key||'');}
+function validIsoTime(value){return typeof value==='string'&&Number.isFinite(Date.parse(value));}
+function sanitizeWorkflow(value){
+  if(!Array.isArray(value))return [];
+  return value.slice(0,250).map(step=>({
+    locationKey:typeof step.locationKey==='string'?step.locationKey:'',
+    enteredAt:validIsoTime(step.enteredAt)?step.enteredAt:'',
+    exitedAt:validIsoTime(step.exitedAt)?step.exitedAt:''
+  })).filter(step=>step.locationKey&&step.enteredAt);
+}
+function packRemoteNote(job){
+  const note=job.note||'';
+  const workflow=sanitizeWorkflow(job.workflow);
+  if(!job.ovenEnteredAt&&!workflow.length)return note;
+  return OVEN_META_PREFIX+JSON.stringify({note,ovenEnteredAt:job.ovenEnteredAt||'',workflow});
+}
+function unpackRemoteNote(value){
+  const raw=typeof value==='string'?value:'';
+  if(raw.startsWith(JOB_META_PREFIX)){
+    try{
+      const data=JSON.parse(raw.slice(JOB_META_PREFIX.length));
+      return {
+        note:typeof data.note==='string'?data.note:'',
+        ovenEnteredAt:validIsoTime(data.ovenEnteredAt)?data.ovenEnteredAt:'',
+        workflow:sanitizeWorkflow(data.workflow)
+      };
+    }catch(e){
+      return {note:'',ovenEnteredAt:'',workflow:[]};
+    }
+  }
+  if(!raw.startsWith(OVEN_META_PREFIX))return {note:raw,ovenEnteredAt:'',workflow:[]};
+  try{
+    const data=JSON.parse(raw.slice(OVEN_META_PREFIX.length));
+    return {note:typeof data.note==='string'?data.note:'',ovenEnteredAt:validIsoTime(data.ovenEnteredAt)?data.ovenEnteredAt:'',workflow:sanitizeWorkflow(data.workflow)};
+  }catch(e){
+    return {note:raw,ovenEnteredAt:'',workflow:[]};
+  }
+}
 function remoteJobRow(jobId){
   const job=state.jobs[jobId];
   if(!job)return null;
@@ -648,7 +830,7 @@ function remoteJobRow(jobId){
     board_id:BOARD_ID,
     job_text:job.text,
     color:Number(job.color)||0,
-    note:job.note||'',
+    note:packRemoteNote(job),
     location_key:location,
     position:Math.max((state.locations[location]||[]).indexOf(jobId),0),
     created_at:job.created||new Date().toISOString()
@@ -714,10 +896,13 @@ function applyRemoteJob(payload){
   }else{
     const row=payload.new;
     if(!row||row.board_id!==BOARD_ID)return;
+    const remoteNote=unpackRemoteNote(row.note);
     state.jobs[row.id]={
       text:row.job_text,
       color:Number(row.color)||0,
-      note:row.note||'',
+      note:remoteNote.note,
+      ovenEnteredAt:remoteNote.ovenEnteredAt,
+      workflow:remoteNote.workflow,
       created:row.created_at||new Date().toISOString()
     };
     remotePositions[row.id]=Number(row.position)||0;
@@ -729,6 +914,10 @@ function applyRemoteJob(payload){
     }
   }
   render();
+  if(editingJobId){
+    if(state.jobs[editingJobId])renderJobWorkflow(editingJobId);
+    else closeModal();
+  }
 }
 function applyRemoteSettings(payload){
   const row=payload.new;
@@ -764,7 +953,8 @@ async function loadSharedBoard(){
   state=normalizeState({locations:{},jobs:{},notes:'',goal:'',weeks:defaultWeeks()});
   remotePositions={};
   (jobsResult.data||[]).forEach(row=>{
-    state.jobs[row.id]={text:row.job_text,color:Number(row.color)||0,note:row.note||'',created:row.created_at};
+    const remoteNote=unpackRemoteNote(row.note);
+    state.jobs[row.id]={text:row.job_text,color:Number(row.color)||0,note:remoteNote.note,ovenEnteredAt:remoteNote.ovenEnteredAt,workflow:remoteNote.workflow,created:row.created_at};
     remotePositions[row.id]=Number(row.position)||0;
     if(row.location_key){
       if(!state.locations[row.location_key])state.locations[row.location_key]=[];
@@ -830,6 +1020,11 @@ function normalizeState(obj){
   const next=Object.assign(base,obj&&typeof obj==='object'?obj:{});
   if(!next.locations||typeof next.locations!=='object')next.locations={};
   if(!next.jobs||typeof next.jobs!=='object')next.jobs={};
+  Object.values(next.jobs).forEach(job=>{
+    if(!job||typeof job!=='object')return;
+    job.workflow=sanitizeWorkflow(job.workflow);
+    if(!validIsoTime(job.ovenEnteredAt))job.ovenEnteredAt='';
+  });
   if(typeof next.notes!=='string')next.notes='';
   if(typeof next.goal==='undefined'||next.goal===null)next.goal='';
   next.goal=String(next.goal).replace(/[^0-9]/g,'');
@@ -911,18 +1106,260 @@ function addToLocation(key,jobId){
   state.locations[key].push(jobId);
 }
 function jobsFor(key){return state.locations[key]||[];}
+function workflowLocationInfo(key){
+  const parts=String(key||'').split(':');
+  if(parts[0]==='dept'){
+    const def=DEPTS.find(item=>item.id===parts[1]);
+    const base=def?(def.selectLabel||def.label):parts[1].replace(/_/g,' ');
+    return {label:base+(parts[2]?' '+parts.slice(2).join(' '):''),transition:false,completed:parts[1]==='completed'};
+  }
+  if(parts[0]==='arrow'){
+    const def=ARROWS.find(item=>item.id===parts[1]);
+    return {label:'Transition: '+(def?def.label:parts.slice(1).join(' ').replace(/_/g,' ')),transition:true,completed:false};
+  }
+  return {label:key||'Unknown location',transition:false,completed:false};
+}
+function recordJobMove(job,previousLocation,destination,movedAt){
+  if(!job||!previousLocation||!destination||previousLocation===destination)return;
+  const moveTime=validIsoTime(movedAt)?movedAt:new Date().toISOString();
+  const workflow=sanitizeWorkflow(job.workflow);
+  if(!workflow.length){
+    let enteredAt=validIsoTime(job.created)?job.created:moveTime;
+    if(Date.parse(enteredAt)>Date.parse(moveTime))enteredAt=moveTime;
+    workflow.push({locationKey:previousLocation,enteredAt,exitedAt:''});
+  }
+  let current=workflow[workflow.length-1];
+  if(current.locationKey!==previousLocation||current.exitedAt){
+    const enteredAt=current.exitedAt||moveTime;
+    workflow.push({locationKey:previousLocation,enteredAt,exitedAt:''});
+    current=workflow[workflow.length-1];
+  }
+  current.exitedAt=moveTime;
+  workflow.push({locationKey:destination,enteredAt:moveTime,exitedAt:''});
+  job.workflow=workflow;
+}
+function formatWorkflowDate(value){
+  const date=new Date(value);
+  if(!Number.isFinite(date.getTime()))return 'Time unavailable';
+  return date.toLocaleString([],{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+}
+function formatWorkflowRange(step,isCurrent,isCompleted){
+  if(isCompleted&&!step.exitedAt)return 'Completed '+formatWorkflowDate(step.enteredAt);
+  const start=new Date(step.enteredAt);
+  const end=step.exitedAt?new Date(step.exitedAt):null;
+  if(!Number.isFinite(start.getTime()))return 'Time unavailable';
+  if(!end&&isCurrent)return formatWorkflowDate(step.enteredAt)+' to Present';
+  if(!end||!Number.isFinite(end.getTime()))return formatWorkflowDate(step.enteredAt);
+  const sameDay=start.getFullYear()===end.getFullYear()&&start.getMonth()===end.getMonth()&&start.getDate()===end.getDate();
+  if(sameDay){
+    const day=start.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'});
+    const from=start.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+    const to=end.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+    return day+' • '+from+' to '+to;
+  }
+  return formatWorkflowDate(step.enteredAt)+' to '+formatWorkflowDate(step.exitedAt);
+}
+function formatWorkflowDuration(step,isCurrent,isCompleted){
+  if(isCompleted&&isCurrent&&!step.exitedAt)return 'Completion recorded';
+  const start=Date.parse(step.enteredAt||'');
+  const end=step.exitedAt?Date.parse(step.exitedAt):Date.now();
+  if(!Number.isFinite(start)||!Number.isFinite(end))return '';
+  const totalMinutes=Math.max(0,Math.floor((end-start)/60000));
+  const days=Math.floor(totalMinutes/1440);
+  const hours=Math.floor((totalMinutes%1440)/60);
+  const minutes=totalMinutes%60;
+  const parts=[];
+  if(days)parts.push(days+'d');
+  if(hours||days)parts.push(hours+'h');
+  parts.push(minutes+'m');
+  return 'Duration '+parts.join(' ');
+}
+function renderJobWorkflow(jobId){
+  const content=document.getElementById('workflowContent');
+  if(!content)return;
+  content.innerHTML='';
+  const job=state.jobs[jobId];
+  const workflow=job?sanitizeWorkflow(job.workflow):[];
+  if(workflow.length<2){
+    const empty=document.createElement('div');
+    empty.className='workflow-empty';
+    empty.textContent='No movement history yet. The workflow will begin after this job moves from its starting location.';
+    content.appendChild(empty);
+    return;
+  }
+  const currentLocation=findJobLocation(jobId);
+  const list=document.createElement('ol');
+  list.className='workflow-list';
+  workflow.forEach((step,index)=>{
+    const info=workflowLocationInfo(step.locationKey);
+    const isCurrent=index===workflow.length-1&&!step.exitedAt&&step.locationKey===currentLocation;
+    const item=document.createElement('li');
+    item.className='workflow-step'+(isCurrent?' current':'')+(info.completed?' completed':'')+(info.transition?' transition':'');
+    const node=document.createElement('span');
+    node.className='workflow-node';
+    node.textContent=info.completed?'✓':info.transition?'↔':String(index+1);
+    const card=document.createElement('div');
+    card.className='workflow-card';
+    const name=document.createElement('div');
+    name.className='workflow-name';
+    name.textContent=info.label;
+    const time=document.createElement('div');
+    time.className='workflow-time';
+    time.textContent=formatWorkflowRange(step,isCurrent,info.completed&&isCurrent);
+    const duration=document.createElement('div');
+    duration.className='workflow-duration';
+    duration.textContent=formatWorkflowDuration(step,isCurrent,info.completed&&isCurrent);
+    card.appendChild(name);card.appendChild(time);
+    if(duration.textContent)card.appendChild(duration);
+    item.appendChild(node);item.appendChild(card);list.appendChild(item);
+  });
+  content.appendChild(list);
+}
+function ovenPromptDefault(){
+  const now=new Date();
+  return String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+}
+function parseOvenEntryTime(value){
+  const raw=(value||'').trim();
+  if(!raw)return null;
+  const now=new Date();
+  const timeOnly=raw.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
+  let parsed;
+  if(timeOnly){
+    let hour=Number(timeOnly[1]);
+    const minute=Number(timeOnly[2]||0);
+    const period=(timeOnly[3]||'').toLowerCase();
+    if(minute>59)return null;
+    if(period){
+      if(hour<1||hour>12)return null;
+      if(period==='am'&&hour===12)hour=0;
+      if(period==='pm'&&hour!==12)hour+=12;
+    }else if(hour>23){
+      return null;
+    }
+    parsed=new Date(now);
+    parsed.setHours(hour,minute,0,0);
+    const futureBy=parsed.getTime()-now.getTime();
+    if(futureBy>6*60*60*1000)parsed.setDate(parsed.getDate()-1);
+    else if(futureBy>5*60*1000)return null;
+  }else{
+    parsed=new Date(raw);
+    if(!Number.isFinite(parsed.getTime())||parsed.getTime()>now.getTime()+5*60*1000)return null;
+  }
+  return parsed.toISOString();
+}
+let ovenTimeResolver=null;
+function settleOvenEntryTime(value){
+  const resolve=ovenTimeResolver;
+  if(!resolve)return;
+  ovenTimeResolver=null;
+  const backdrop=document.getElementById('ovenTimeBackdrop');
+  backdrop.classList.remove('open');
+  backdrop.setAttribute('aria-hidden','true');
+  resolve(value);
+}
+function cancelOvenEntryTime(){settleOvenEntryTime(null);}
+function confirmOvenEntryTime(){
+  const input=document.getElementById('ovenTimeInput');
+  const enteredAt=parseOvenEntryTime(input.value);
+  if(!enteredAt){
+    document.getElementById('ovenTimeError').textContent='Choose a valid time that is not in the future.';
+    input.focus();
+    return;
+  }
+  settleOvenEntryTime(enteredAt);
+}
+function askOvenEntryTime(){
+  if(ovenTimeResolver)cancelOvenEntryTime();
+  const backdrop=document.getElementById('ovenTimeBackdrop');
+  const input=document.getElementById('ovenTimeInput');
+  input.value=ovenPromptDefault();
+  document.getElementById('ovenTimeError').textContent='';
+  backdrop.classList.add('open');
+  backdrop.setAttribute('aria-hidden','false');
+  return new Promise(resolve=>{
+    ovenTimeResolver=resolve;
+    setTimeout(()=>input.focus(),50);
+  });
+}
+function formatElapsedTime(startValue){
+  const start=Date.parse(startValue||'');
+  if(!Number.isFinite(start))return 'Timer unavailable';
+  const totalMinutes=Math.max(0,Math.floor((Date.now()-start)/60000));
+  const days=Math.floor(totalMinutes/1440);
+  const hours=Math.floor((totalMinutes%1440)/60);
+  const minutes=totalMinutes%60;
+  const parts=[];
+  if(days)parts.push(days+'d');
+  if(hours||days)parts.push(hours+'h');
+  parts.push(minutes+'m');
+  return parts.join(' ');
+}
+function ovenTimerDetails(job){
+  const start=new Date(job.ovenEnteredAt);
+  if(!Number.isFinite(start.getTime()))return 'Oven timer unavailable';
+  const placed=start.toLocaleString([],{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+  return 'Placed in oven: '+placed+' | Elapsed: '+formatElapsedTime(job.ovenEnteredAt);
+}
+function refreshOvenTimerTitles(){
+  document.querySelectorAll('.oven-clock[data-job-id]').forEach(clock=>{
+    const job=state.jobs[clock.dataset.jobId];
+    if(!job)return;
+    const details=ovenTimerDetails(job);
+    clock.title=details;
+    clock.setAttribute('aria-label',details);
+    const card=clock.closest('.job');
+    if(card)card.title=job.text+' | '+details;
+  });
+}
 function setupDrop(el,key){
   el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drop-active')});
   el.addEventListener('dragleave',()=>el.classList.remove('drop-active'));
-  el.addEventListener('drop',e=>{
+  el.addEventListener('drop',async e=>{
     e.preventDefault();el.classList.remove('drop-active');
     const id=e.dataTransfer.getData('text/plain')||dragId;
     if(!id||!state.jobs[id])return;
-    snapshot();addToLocation(key,id);render();saveState();upsertRemoteJob(id);
+    const job=state.jobs[id];
+    const previousLocation=findJobLocation(id);
+    let ovenEnteredAt=job.ovenEnteredAt||'';
+    if(isOvenLocation(key)&&(!isOvenLocation(previousLocation)||!ovenEnteredAt)){
+      ovenEnteredAt=await askOvenEntryTime();
+      if(!ovenEnteredAt)return;
+    }
+    if(!state.jobs[id])return;
+    snapshot();
+    const movedAt=isOvenLocation(key)&&!isOvenLocation(previousLocation)?ovenEnteredAt:new Date().toISOString();
+    recordJobMove(job,previousLocation,key,movedAt);
+    job.ovenEnteredAt=isOvenLocation(key)?ovenEnteredAt:'';
+    addToLocation(key,id);render();saveState();upsertRemoteJob(id);
+  });
+}
+function setupDepartmentAdd(el,key){
+  el.addEventListener('dblclick',e=>{
+    if(e.target.closest('.job,.stage-title,.split-name'))return;
+    e.preventDefault();
+    e.stopPropagation();
+    openModal(null,key);
+  });
+}
+function fitCompactJobLabels(){
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('#board .arrow-stage .job-label, #board .department[data-dept-id="oven"] .job-label').forEach(label=>{
+      label.style.fontSize='';
+      const available=label.clientWidth;
+      const required=label.scrollWidth;
+      if(!available||required<=available)return;
+      const normalSize=parseFloat(getComputedStyle(label).fontSize)||15;
+      const fittedSize=Math.max(6,Math.floor((normalSize*(available-1)/required)*10)/10);
+      label.style.fontSize=fittedSize+'px';
+    });
+    refreshOvenTimerTitles();
   });
 }
 function makeJob(jobId){
   const job=state.jobs[jobId];
+  const location=findJobLocation(jobId);
+  const ovenTimerActive=isOvenLocation(location)&&!!job.ovenEnteredAt;
   const c=COLORS[job.color||0];
   const el=document.createElement('div');
   el.className='job';el.draggable=true;
@@ -934,6 +1371,22 @@ function makeJob(jobId){
   label.className='job-label';
   label.textContent=job.text;
   el.appendChild(label);
+
+  if(ovenTimerActive){
+    const clock=document.createElement('span');
+    clock.className='oven-clock';
+    clock.dataset.jobId=jobId;
+    clock.textContent='◷';
+    clock.tabIndex=0;
+    const showTimer=e=>{
+      e.stopPropagation();
+      const currentJob=state.jobs[jobId];
+      if(currentJob)showToast(ovenTimerDetails(currentJob));
+    };
+    clock.addEventListener('click',showTimer);
+    clock.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showTimer(e);}});
+    el.appendChild(clock);
+  }
 
   if((job.note||'').trim()){
     const corner=document.createElement('span');
@@ -949,6 +1402,10 @@ function makeJob(jobId){
   x.addEventListener('click',e=>{e.stopPropagation();snapshot();delete state.jobs[jobId];removeFromLocations(jobId);render();saveState();deleteRemoteJob(jobId);});
   el.appendChild(x);
 
+  el.addEventListener('click',e=>{
+    if(!ovenTimerActive||e.target.closest('.job-x,.oven-clock'))return;
+    showToast(ovenTimerDetails(state.jobs[jobId]));
+  });
   el.addEventListener('dblclick',()=>openModal(jobId));
   el.addEventListener('dragstart',e=>{dragId=jobId;el.classList.add('dragging');e.dataTransfer.setData('text/plain',jobId);e.dataTransfer.effectAllowed='move'});
   el.addEventListener('dragend',()=>{dragId=null;el.classList.remove('dragging')});
@@ -961,7 +1418,7 @@ function renderJobs(container,key){
 }
 function makeDept(def){
   const card=document.createElement('section');
-  card.className='stage department'+(def.special?' special':'')+(def.completed?' completed-stage':'');
+  card.className='stage department'+(def.special?' special':'')+(def.corrective?' corrective':'')+(def.completed?' completed-stage':'');
   card.dataset.deptId=def.id;
   if(def.id==='winding'||def.id==='welding_buffing')card.classList.add('header-emphasis');
   card.style.gridColumn=def.col;card.style.gridRow=def.row;
@@ -985,13 +1442,13 @@ function makeDept(def){
       const sn=document.createElement('div');sn.className='split-name';sn.textContent=s;col.appendChild(sn);
       const slots=document.createElement('div');slots.className='slots';
       const key=locationKey('dept',def.id,s);
-      renderJobs(slots,key);col.appendChild(slots);setupDrop(col,key);wrap.appendChild(col);
+      renderJobs(slots,key);col.appendChild(slots);setupDrop(col,key);setupDepartmentAdd(col,key);wrap.appendChild(col);
     });
     card.appendChild(wrap);
   }else{
     const slots=document.createElement('div');slots.className='slots';
     const key=locationKey('dept',def.id);
-    renderJobs(slots,key);card.appendChild(slots);setupDrop(card,key);
+    renderJobs(slots,key);card.appendChild(slots);setupDrop(card,key);setupDepartmentAdd(slots,key);
   }
   return card;
 }
@@ -1006,11 +1463,33 @@ function makeArrow(def){
   renderJobs(slots,key);zone.appendChild(slots);setupDrop(zone,key);
   return zone;
 }
+function makePlainConnector(def){
+  const zone=document.createElement('section');
+  zone.className='stage plain-connector';
+  zone.dataset.connectorId=def.id;
+  zone.style.gridColumn=def.col;
+  zone.style.gridRow=def.row;
+  zone.setAttribute('aria-hidden','true');
+
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 635 90');
+  svg.setAttribute('preserveAspectRatio','none');
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d','M130 -10 V24 M130 12 H505 V24');
+  svg.appendChild(path);
+  zone.appendChild(svg);
+
+  const zoomLine=document.createElement('div');
+  zoomLine.className='zoom-plain-line';
+  zone.appendChild(zoomLine);
+  return zone;
+}
 function render(){
   const board=document.getElementById('board');
   board.innerHTML='';
   DEPTS.forEach(d=>board.appendChild(makeDept(d)));
   ARROWS.forEach(a=>board.appendChild(makeArrow(a)));
+  PLAIN_CONNECTORS.forEach(c=>board.appendChild(makePlainConnector(c)));
   updateBoxZoomView();
   document.getElementById('notesText').value=state.notes||'';
   document.getElementById('goalInput').value=state.goal||'';
@@ -1060,9 +1539,16 @@ function updateBoxZoomView(){
     }
     zone.classList.toggle('box-zoom-arrow',active&&connected);
   });
+  document.querySelectorAll('#board .plain-connector').forEach(zone=>{
+    const def=PLAIN_CONNECTORS.find(item=>item.id===zone.dataset.connectorId);
+    const connected=!!def&&boxZoomSelection.has(def.from)&&def.targets.some(target=>boxZoomSelection.has(target));
+    zone.style.order=def?String(def.order):'';
+    zone.classList.toggle('box-zoom-connector',active&&connected);
+  });
   const labels=DEPTS.filter(d=>boxZoomSelection.has(d.id)).map(d=>d.selectLabel||d.label);
   document.getElementById('boxZoomSummary').textContent=active?'Focused departments: '+labels.join(', '):'Box Zoom active';
   document.getElementById('btnBoxZoom').classList.toggle('active',active||!document.getElementById('boxZoomMenu').hidden);
+  fitCompactJobLabels();
 }
 function applyBoxZoom(){
   const checked=[...document.querySelectorAll('#boxZoomOptions input:checked')].map(input=>input.value);
@@ -1112,44 +1598,60 @@ function buildStageSelect(){
   });
   sel.appendChild(groupDept);sel.appendChild(groupArrow);
 }
-function openModal(jobId){
+function openModal(jobId,preferredLocationKey){
   editingJobId=jobId||null;
   const modal=document.getElementById('modalBackdrop');
+  const jobModal=document.getElementById('jobModal');
   const input=document.getElementById('jobText');
   const note=document.getElementById('jobNote');
   const stageRow=document.getElementById('stageRow');
   document.getElementById('modalTitle').textContent=editingJobId?'Edit job':'Add job';
   document.getElementById('btnSubmit').textContent=editingJobId?'Save':'Add';
+  buildStageSelect();
+  jobModal.classList.toggle('has-workflow',!!editingJobId);
   if(editingJobId){
     const job=state.jobs[editingJobId];
     input.value=job.text;
     note.value=job.note||'';
     selectedColor=job.color||0;
     stageRow.style.display='none';
+    renderJobWorkflow(editingJobId);
   }else{
     input.value='';note.value='';stageRow.style.display='block';
+    document.getElementById('workflowContent').innerHTML='';
+    const stageSelect=document.getElementById('stageSelect');
+    if(preferredLocationKey&&[...stageSelect.options].some(option=>option.value===preferredLocationKey))stageSelect.value=preferredLocationKey;
   }
-  buildStageSelect();buildSwatches();buildModalColors();
+  buildSwatches();buildModalColors();
   modal.classList.add('open');modal.setAttribute('aria-hidden','false');
   setTimeout(()=>input.focus(),50);
 }
 function closeModal(){
   document.getElementById('modalBackdrop').classList.remove('open');
   document.getElementById('modalBackdrop').setAttribute('aria-hidden','true');
+  document.getElementById('jobModal').classList.remove('has-workflow');
   editingJobId=null;
 }
-function submitModal(){
+async function submitModal(){
   const text=document.getElementById('jobText').value.trim();
   const note=document.getElementById('jobNote').value.trim();
   if(!text)return;
+  const destination=editingJobId?'':document.getElementById('stageSelect').value;
+  let ovenEnteredAt='';
+  if(!editingJobId&&isOvenLocation(destination)){
+    ovenEnteredAt=await askOvenEntryTime();
+    if(!ovenEnteredAt)return;
+  }
   snapshot();
   let changedJobId=editingJobId;
   if(editingJobId){
     state.jobs[editingJobId].text=text;state.jobs[editingJobId].color=selectedColor;state.jobs[editingJobId].note=note;
   }else{
     const id='job_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
-    state.jobs[id]={text,color:selectedColor,note,created:new Date().toISOString()};
-    addToLocation(document.getElementById('stageSelect').value,id);
+    const createdAt=new Date().toISOString();
+    const enteredAt=isOvenLocation(destination)&&ovenEnteredAt?ovenEnteredAt:createdAt;
+    state.jobs[id]={text,color:selectedColor,note,ovenEnteredAt,workflow:[{locationKey:destination,enteredAt,exitedAt:''}],created:createdAt};
+    addToLocation(destination,id);
     changedJobId=id;
   }
   closeModal();render();saveState();upsertRemoteJob(changedJobId);
@@ -1217,6 +1719,229 @@ function renderWeekPanel(){
   });
 }
 
+function exportDate(value){
+  const timestamp=Date.parse(value||'');
+  return Number.isFinite(timestamp)?new Date(timestamp):null;
+}
+function exportDuration(startValue,endValue){
+  const start=Date.parse(startValue||'');
+  const end=Date.parse(endValue||'');
+  if(!Number.isFinite(start)||!Number.isFinite(end))return null;
+  return Math.max(0,end-start)/86400000;
+}
+function exportWorkflow(job,currentLocation){
+  const workflow=sanitizeWorkflow(job&&job.workflow);
+  if(workflow.length)return workflow;
+  if(!currentLocation)return [];
+  const enteredAt=validIsoTime(job&&job.created)?job.created:new Date().toISOString();
+  return [{locationKey:currentLocation,enteredAt,exitedAt:''}];
+}
+function exportCurrentStep(workflow,currentLocation){
+  for(let i=workflow.length-1;i>=0;i--){
+    if(workflow[i].locationKey===currentLocation&&!workflow[i].exitedAt)return workflow[i];
+  }
+  for(let i=workflow.length-1;i>=0;i--){
+    if(workflow[i].locationKey===currentLocation)return workflow[i];
+  }
+  return null;
+}
+function exportJobStatus(locationInfo){
+  if(locationInfo.completed)return 'Completed';
+  if(locationInfo.transition)return 'In Transition';
+  return 'Active';
+}
+function exportTimeStamp(date){
+  return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0')+'_'+String(date.getHours()).padStart(2,'0')+String(date.getMinutes()).padStart(2,'0');
+}
+function styleExportSheet(sheet,dateColumns,durationColumns,statusColumn){
+  sheet.views=[{state:'frozen',ySplit:1}];
+  sheet.autoFilter={from:{row:1,column:1},to:{row:1,column:sheet.columnCount}};
+  sheet.properties.defaultRowHeight=20;
+  sheet.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.25,right:.25,top:.5,bottom:.5,header:.2,footer:.2}};
+  const header=sheet.getRow(1);
+  header.height=30;
+  header.eachCell(cell=>{
+    cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF000000'}};
+    cell.font={name:'Arial',size:11,bold:true,color:{argb:'FFFFFFFF'}};
+    cell.alignment={vertical:'middle',horizontal:'center',wrapText:true};
+    cell.border={bottom:{style:'medium',color:{argb:'FF6FE7F2'}}};
+  });
+  sheet.eachRow((row,rowNumber)=>{
+    if(rowNumber===1)return;
+    row.height=22;
+    row.eachCell({includeEmpty:true},cell=>{
+      cell.font={name:'Arial',size:10,color:{argb:'FF1F2937'}};
+      cell.alignment={vertical:'middle'};
+      cell.border={bottom:{style:'hair',color:{argb:'FFD9E2EA'}}};
+      if(rowNumber%2===0)cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2F8FA'}};
+    });
+  });
+  dateColumns.forEach(columnNumber=>{
+    sheet.getColumn(columnNumber).numFmt='m/d/yyyy h:mm AM/PM';
+  });
+  durationColumns.forEach(columnNumber=>{
+    sheet.getColumn(columnNumber).numFmt='[h]:mm';
+  });
+  if(statusColumn){
+    sheet.getColumn(statusColumn).eachCell((cell,rowNumber)=>{
+      if(rowNumber===1)return;
+      const value=String(cell.value||'');
+      if(value==='Completed'){
+        cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFDCFCE7'}};
+        cell.font={name:'Arial',size:10,bold:true,color:{argb:'FF14532D'}};
+      }else if(value==='Present'||value==='In Transition'){
+        cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFEF3C7'}};
+        cell.font={name:'Arial',size:10,bold:true,color:{argb:'FF854D0E'}};
+      }else if(value==='Active'){
+        cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFDFF7FA'}};
+        cell.font={name:'Arial',size:10,bold:true,color:{argb:'FF0F5963'}};
+      }
+    });
+  }
+}
+async function saveExcelFile(blob,filename){
+  if(window.showSaveFilePicker){
+    try{
+      const handle=await window.showSaveFilePicker({
+        suggestedName:filename,
+        types:[{description:'Excel workbook',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}]
+      });
+      const writable=await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return true;
+    }catch(error){
+      if(error&&error.name==='AbortError')return false;
+    }
+  }
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url;
+  link.download=filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  return true;
+}
+async function exportExcelSummary(){
+  const button=document.getElementById('btnExportSummary');
+  if(!window.ExcelJS){
+    showToast('Excel export could not start. Check the internet connection and refresh.',true);
+    return;
+  }
+  const originalText=button.textContent;
+  button.disabled=true;
+  button.textContent='Preparing Excel';
+  try{
+    const reportTime=new Date();
+    const reportIso=reportTime.toISOString();
+    const workbook=new window.ExcelJS.Workbook();
+    workbook.creator='Forgent Power Solutions';
+    workbook.lastModifiedBy='Waco 1 Production Coordination Board';
+    workbook.created=reportTime;
+    workbook.modified=reportTime;
+    workbook.title='Waco 1 Production Coordination Summary';
+    workbook.subject='Job status and movement history as of '+reportTime.toLocaleString();
+
+    const summary=workbook.addWorksheet('Job Summary');
+    summary.columns=[
+      {header:'Job Number',key:'jobNumber',width:18},
+      {header:'Status',key:'status',width:16},
+      {header:'Current Location',key:'currentLocation',width:30},
+      {header:'Entered Current Location',key:'enteredCurrent',width:23},
+      {header:'Time in Current Location',key:'timeCurrent',width:22},
+      {header:'Created',key:'created',width:23},
+      {header:'Completed',key:'completed',width:23},
+      {header:'Total Elapsed Time',key:'totalElapsed',width:20},
+      {header:'Color',key:'color',width:14},
+      {header:'Notes',key:'notes',width:45},
+      {header:'Workflow',key:'workflow',width:62}
+    ];
+
+    const movement=workbook.addWorksheet('Movement History');
+    movement.columns=[
+      {header:'Job Number',key:'jobNumber',width:18},
+      {header:'Step',key:'step',width:9},
+      {header:'Location',key:'location',width:34},
+      {header:'Location Type',key:'locationType',width:17},
+      {header:'Time Entered',key:'entered',width:23},
+      {header:'Time Removed',key:'removed',width:23},
+      {header:'Time Spent',key:'timeSpent',width:18},
+      {header:'Status',key:'status',width:15}
+    ];
+
+    const jobIds=Object.keys(state.jobs).sort((leftId,rightId)=>{
+      const left=String((state.jobs[leftId]&&state.jobs[leftId].text)||'');
+      const right=String((state.jobs[rightId]&&state.jobs[rightId].text)||'');
+      return left.localeCompare(right,undefined,{numeric:true,sensitivity:'base'});
+    });
+
+    jobIds.forEach(jobId=>{
+      const job=state.jobs[jobId];
+      const currentLocation=findJobLocation(jobId);
+      const currentInfo=workflowLocationInfo(currentLocation);
+      const workflow=exportWorkflow(job,currentLocation);
+      const currentStep=exportCurrentStep(workflow,currentLocation);
+      const isCompleted=currentInfo.completed;
+      const createdAt=validIsoTime(job.created)?job.created:(workflow[0]&&workflow[0].enteredAt)||'';
+      const completedAt=isCompleted&&currentStep?currentStep.enteredAt:'';
+      const elapsedEnd=completedAt||reportIso;
+      const workflowText=workflow.map(step=>workflowLocationInfo(step.locationKey).label).join(' → ');
+      summary.addRow({
+        jobNumber:String(job.text||''),
+        status:exportJobStatus(currentInfo),
+        currentLocation:currentInfo.label,
+        enteredCurrent:currentStep?exportDate(currentStep.enteredAt):null,
+        timeCurrent:isCompleted||!currentStep?null:exportDuration(currentStep.enteredAt,reportIso),
+        created:exportDate(createdAt),
+        completed:exportDate(completedAt),
+        totalElapsed:exportDuration(createdAt,elapsedEnd),
+        color:(COLORS[Number(job.color)||0]||COLORS[0]).name,
+        notes:job.note||'',
+        workflow:workflowText
+      });
+
+      workflow.forEach((step,index)=>{
+        const info=workflowLocationInfo(step.locationKey);
+        const isCurrent=index===workflow.length-1&&!step.exitedAt&&step.locationKey===currentLocation;
+        const status=isCurrent?(info.completed?'Completed':'Present'):(step.exitedAt?'Finished':'Open');
+        const durationEnd=step.exitedAt||(isCurrent&&!info.completed?reportIso:'');
+        movement.addRow({
+          jobNumber:String(job.text||''),
+          step:index+1,
+          location:info.label,
+          locationType:info.completed?'Completion':info.transition?'Transition':'Department',
+          entered:exportDate(step.enteredAt),
+          removed:exportDate(step.exitedAt),
+          timeSpent:durationEnd?exportDuration(step.enteredAt,durationEnd):null,
+          status
+        });
+      });
+    });
+
+    styleExportSheet(summary,[4,6,7],[5,8],2);
+    styleExportSheet(movement,[5,6],[7],8);
+    summary.getColumn(10).alignment={vertical:'top',wrapText:true};
+    summary.getColumn(11).alignment={vertical:'top',wrapText:true};
+    summary.getColumn(1).alignment={vertical:'middle',horizontal:'left'};
+    movement.getColumn(1).alignment={vertical:'middle',horizontal:'left'};
+    movement.getColumn(2).alignment={vertical:'middle',horizontal:'center'};
+
+    const buffer=await workbook.xlsx.writeBuffer();
+    const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const filename='Waco1_Production_Summary_'+exportTimeStamp(reportTime)+'.xlsx';
+    const saved=await saveExcelFile(blob,filename);
+    if(saved)showToast('Excel summary saved with Job Summary and Movement History.');
+  }catch(error){
+    console.error('Exporting Excel summary',error);
+    showToast('Excel export failed. No board data was changed.',true);
+  }finally{
+    button.disabled=false;
+    button.textContent=originalText;
+  }
+}
+
 function safeStateJson(){
   return JSON.stringify(state).replace(/</g,'\\u003c');
 }
@@ -1279,6 +2004,7 @@ document.getElementById('btnExitZoom').addEventListener('click',clearBoxZoom);
 document.getElementById('boxZoomMenu').addEventListener('click',e=>e.stopPropagation());
 document.addEventListener('click',()=>setBoxZoomMenu(false));
 document.getElementById('btnSaveBoard').addEventListener('click',saveBoardFile);
+document.getElementById('btnExportSummary').addEventListener('click',exportExcelSummary);
 document.getElementById('btnClear').addEventListener('click',clearBoard);
 document.getElementById('btnSignOut').addEventListener('click',handleSignOut);
 document.getElementById('loginForm').addEventListener('submit',handleLogin);
@@ -1287,6 +2013,13 @@ document.getElementById('btnSubmit').addEventListener('click',submitModal);
 document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal()});
 document.getElementById('jobText').addEventListener('keydown',e=>{if(e.key==='Enter')submitModal();if(e.key==='Escape')closeModal()});
 document.getElementById('jobNote').addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.getElementById('btnOvenTimeCancel').addEventListener('click',cancelOvenEntryTime);
+document.getElementById('btnOvenTimeConfirm').addEventListener('click',confirmOvenEntryTime);
+document.getElementById('ovenTimeBackdrop').addEventListener('click',e=>{if(e.target.id==='ovenTimeBackdrop')cancelOvenEntryTime()});
+document.getElementById('ovenTimeInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();confirmOvenEntryTime();}
+  if(e.key==='Escape'){e.preventDefault();cancelOvenEntryTime();}
+});
 document.getElementById('notesText').addEventListener('input',e=>{state.notes=e.target.value;saveState();queueRemoteSettings()});
 document.getElementById('goalInput').addEventListener('input',e=>{
   state.goal=e.target.value.replace(/[^0-9]/g,'');
@@ -1301,6 +2034,8 @@ document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redoChange()}
 });
+window.addEventListener('resize',fitCompactJobLabels);
+setInterval(refreshOvenTimerTitles,30000);
 
 loadState();buildSwatches();render();initializeLiveBoard();
 </script>
