@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- SECURED LOGIN BUILD: approved-user-login-v2 2026-07-21 -->
 <!-- saved from url=(0060)file:///C:/Users/bashar.shalabi/Downloads/preview%20(2).html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -22,7 +23,33 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
 button,input,select,textarea{font:inherit}
-.app{min-height:100vh;display:flex;flex-direction:column}
+.app{min-height:100vh;display:none;flex-direction:column}
+body.authenticated .app{display:flex}
+.auth-gate{
+  position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:linear-gradient(145deg,#eef4fb,#f8fafc 55%,#e8f0f8);
+}
+.auth-gate[hidden]{display:none}
+.auth-card{
+  width:min(430px,100%);padding:30px;background:#fff;border:1px solid #cbd5e1;border-radius:16px;
+  box-shadow:0 24px 70px rgba(15,23,42,.18);
+}
+.auth-card h1{margin:0 0 7px;font-size:24px;line-height:1.2;color:#0f172a;text-align:center}
+.auth-card p{margin:0 0 22px;color:#64748b;font-size:14px;line-height:1.5;text-align:center}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;margin-bottom:6px;color:#334155;font-size:13px;font-weight:900}
+.auth-field input{
+  width:100%;padding:12px 13px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;
+  color:#0f172a;font-size:16px;outline:none;
+}
+.auth-field input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.13)}
+.auth-submit{
+  width:100%;min-height:44px;margin-top:4px;border:0;border-radius:9px;background:#0f62fe;
+  color:#fff;font-size:15px;font-weight:900;cursor:pointer;
+}
+.auth-submit:hover{background:#0353e9}
+.auth-submit:disabled{cursor:wait;opacity:.7}
+.auth-error{min-height:18px;margin:12px 0 0;color:#b91c1c;font-size:13px;font-weight:800;text-align:center}
 .app-title{
   text-align:center;
   font-size:22px;
@@ -253,13 +280,29 @@ button,input,select,textarea{font:inherit}
 .primary{background:#0f62fe;color:#fff;border-color:#0f62fe}
 .primary:hover{background:#0353e9}
 @media print{
-  .toolbar,.board-note,.modal-backdrop,.bottom-panel,.toast{display:none!important}
+  .auth-gate,.toolbar,.board-note,.modal-backdrop,.bottom-panel,.toast{display:none!important}
   .board-shell{padding:0;overflow:visible}
   .board{min-width:0;transform:scale(.63);transform-origin:top left}
 }
 </style>
 </head>
 <body>
+<div class="auth-gate" id="authGate">
+  <form class="auth-card" id="loginForm" autocomplete="on">
+    <h1>Production Coordination Board</h1>
+    <p>Sign in with your approved work email and board password.</p>
+    <div class="auth-field">
+      <label for="loginEmail">Email</label>
+      <input id="loginEmail" name="email" type="email" autocomplete="username" required autofocus>
+    </div>
+    <div class="auth-field">
+      <label for="loginPassword">Password</label>
+      <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="auth-submit" id="loginButton" type="submit">Sign in</button>
+    <div class="auth-error" id="loginError" role="alert" aria-live="polite"></div>
+  </form>
+</div>
 <div class="app">
   <header class="app-title">Production Coordination Board</header>
   <div class="toolbar">
@@ -272,6 +315,7 @@ button,input,select,textarea{font:inherit}
     <div class="sep"></div>
     <span class="counter" id="counter">0 jobs</span>
     <span class="live-status connecting" id="liveStatus">Connecting</span>
+    <button class="tb-btn" id="btnSignOut" type="button">Sign out</button>
   </div>
   <div class="board-shell">
     <div class="board" id="board"><section class="stage department" style="grid-area: 1 / 1;"><div class="stage-title">Winding</div><div class="slots"></div></section><section class="stage department" style="grid-area: 1 / 3;"><div class="stage-title">Lacing</div><div class="slots"></div></section><section class="stage department" style="grid-area: 1 / 5;"><div class="stage-title">Core &amp; Coil</div><div class="slots"></div></section><section class="stage department" style="grid-area: 1 / 7;"><div class="stage-title">Oven</div><div class="split-wrap" style="--cols: 3;"><div class="split-col"><div class="split-name">A</div><div class="slots"></div></div><div class="split-col"><div class="split-name">B</div><div class="slots"></div></div><div class="split-col"><div class="split-name">C</div><div class="slots"></div></div></div></section><section class="stage department" style="grid-area: 1 / 9;"><div class="stage-title">Tanking</div><div class="split-wrap" style="--cols: 2;"><div class="split-col"><div class="split-name">1st</div><div class="slots"></div></div><div class="split-col"><div class="split-name">2nd</div><div class="slots"></div></div></div></section><section class="stage department" style="grid-area: 1 / 11;"><div class="stage-title">Testing</div><div class="slots"></div></section><section class="stage department" style="grid-area: 1 / 13;"><div class="stage-title">Final Weld</div><div class="slots"></div></section><section class="stage department" style="grid-area: 1 / 15;"><div class="stage-title">Final Buffing</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 1;"><div class="stage-title">Welding / Buffing</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 3;"><div class="stage-title">M-Blast</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 5;"><div class="stage-title">Prime / Paint</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 7;"><div class="stage-title">Radiator</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 9;"><div class="stage-title">T-Complete</div><div class="slots"></div></section><section class="stage department" style="grid-area: 3 / 15;"><div class="stage-title">Final Paint</div><div class="slots"></div></section><section class="stage department completed-stage" style="grid-area: 5 / 9;"><div class="stage-title">Completed<span class="completed-count-pill" id="completedBoxCounter">0</span></div><div class="slots"></div></section><section class="stage department" style="grid-area: 5 / 11;"><div class="stage-title">QC</div><div class="slots"></div></section><section class="stage department" style="grid-area: 5 / 13;"><div class="stage-title">Engineering</div><div class="slots"></div></section><section class="stage department" style="grid-area: 5 / 15;"><div class="stage-title">Final Finish</div><div class="slots"></div></section><section class="stage department special" style="grid-area: 6 / 8 / auto / span 2;"><div class="stage-title">RMA</div><div class="slots"></div></section><section class="stage department special" style="grid-area: 6 / 10;"><div class="stage-title">WT</div><div class="slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 2;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 4;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 6;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 8;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 10;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 12;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 1 / 14;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage down" style="grid-area: 2 / 15;"><div class="arrow-line-v"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage down" style="grid-area: 4 / 15;"><div class="arrow-line-v"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage left " style="grid-area: 5 / 14;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage left " style="grid-area: 5 / 12;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage left " style="grid-area: 5 / 10;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 3 / 2;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 3 / 4;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 3 / 6;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage " style="grid-area: 3 / 8;"><div class="arrow-line"></div><div class="arrow-slots"></div></section><section class="stage arrow-stage up " style="grid-area: 2 / 9;"><div class="arrow-line-v"></div><div class="arrow-slots"></div></section></div>
@@ -392,6 +436,46 @@ let liveReady=false;
 let remotePositions={};
 let settingsTimer=null;
 let toastTimer=null;
+
+function showLogin(message){
+  document.body.classList.remove('authenticated');
+  document.getElementById('authGate').hidden=false;
+  document.getElementById('loginError').textContent=message||'';
+  setTimeout(()=>document.getElementById('loginEmail').focus(),0);
+}
+function showBoard(){
+  document.getElementById('authGate').hidden=true;
+  document.body.classList.add('authenticated');
+}
+async function handleLogin(event){
+  event.preventDefault();
+  const button=document.getElementById('loginButton');
+  const errorBox=document.getElementById('loginError');
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  if(!db){errorBox.textContent='The secure service is still starting. Try again.';return;}
+  button.disabled=true;
+  button.textContent='Signing in';
+  errorBox.textContent='';
+  const {error}=await db.auth.signInWithPassword({email,password});
+  if(error){
+    errorBox.textContent='The email or password is incorrect.';
+    button.disabled=false;
+    button.textContent='Sign in';
+    return;
+  }
+  document.getElementById('loginPassword').value='';
+  showBoard();
+  await loadSharedBoard();
+  button.disabled=false;
+  button.textContent='Sign in';
+}
+async function handleSignOut(){
+  if(liveChannel&&db){await db.removeChannel(liveChannel);liveChannel=null;}
+  liveReady=false;
+  if(db)await db.auth.signOut();
+  showLogin('You have been signed out.');
+}
 
 function setLiveStatus(kind,text){
   const el=document.getElementById('liveStatus');
@@ -569,9 +653,18 @@ async function initializeLiveBoard(){
     return;
   }
   db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
-    auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
   });
-  await loadSharedBoard();
+  db.auth.onAuthStateChange((event,session)=>{
+    if(event==='SIGNED_OUT'&&!session){
+      liveReady=false;
+      showLogin('Your session ended. Sign in again.');
+    }
+  });
+  const {data,error}=await db.auth.getSession();
+  if(error){showLogin('The secure service could not verify this device. Refresh and try again.');return;}
+  if(data&&data.session){showBoard();await loadSharedBoard();}
+  else showLogin('');
 }
 
 let selectedColor=0;
@@ -970,6 +1063,8 @@ document.getElementById('btnRedo').addEventListener('click',redoChange);
 document.getElementById('btnNotes').addEventListener('click',()=>document.getElementById('notesPanel').classList.toggle('open'));
 document.getElementById('btnSaveBoard').addEventListener('click',saveBoardFile);
 document.getElementById('btnClear').addEventListener('click',clearBoard);
+document.getElementById('btnSignOut').addEventListener('click',handleSignOut);
+document.getElementById('loginForm').addEventListener('submit',handleLogin);
 document.getElementById('btnCancel').addEventListener('click',closeModal);
 document.getElementById('btnSubmit').addEventListener('click',submitModal);
 document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal()});
