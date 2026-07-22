@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SECURED REVIEW BUILD: Forgent branded review v12 with Excel summary export 2026-07-21 -->
+<!-- SECURED REVIEW BUILD: Forgent branded review v15 with Recent Activity, 15-second move highlight, and W/E Excel summary 2026-07-22 -->
 <!-- saved from url=(0060)file:///C:/Users/bashar.shalabi/Downloads/preview%20(2).html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -109,10 +109,11 @@ body.authenticated .app{display:flex}
 .board-shell{flex:1;overflow:auto;padding:18px 18px 28px}
 .board{
   display:grid;
-  grid-template-columns:repeat(7,260px 95px) 260px;
-  grid-template-rows:310px 90px 310px 90px 310px 180px;
+  grid-template-columns:repeat(7,var(--department-width,260px) var(--arrow-width,95px)) var(--department-width,260px);
+  grid-template-rows:var(--department-height,310px) 90px var(--department-height,310px) 90px var(--department-height,310px);
   gap:10px;
-  min-width:3065px;
+  width:max-content;
+  min-width:0;
   align-items:stretch;
 }
 .stage{position:relative;min-height:0;overflow:hidden}
@@ -266,24 +267,36 @@ body.authenticated .app{display:flex}
 .plain-connector .zoom-plain-line{display:none}
 .job{
   position:relative;display:flex;align-items:center;justify-content:center;
-  min-width:0;max-width:100%;min-height:34px;padding:6px 5px;border-radius:4px;
-  border:1px solid rgba(0,0,0,.3);font-size:15px;font-weight:900;line-height:1.1;letter-spacing:0;
+  min-width:0;max-width:100%;min-height:38px;padding:7px 6px;border-radius:4px;
+  border:1px solid rgba(0,0,0,.3);font-size:18px;font-weight:900;line-height:1.1;letter-spacing:0;
   text-align:center;cursor:grab;user-select:none;overflow:hidden;
 }
 .job:active{cursor:grabbing}
 .job.dragging{opacity:.45}
 .job:hover{filter:brightness(.96)}
+.job.recently-moved{
+  z-index:12;
+  animation:recentlyMovedHighlight 15s linear var(--recent-move-delay,0ms) both;
+}
+@keyframes recentlyMovedHighlight{
+  0%{transform:scale(1.045);outline:4px solid var(--electric);outline-offset:2px;box-shadow:inset 0 0 0 3px rgba(115,243,255,.96),0 0 0 5px rgba(0,158,172,.62),0 0 24px 9px rgba(115,243,255,.78)}
+  8%{transform:scale(1);outline:4px solid var(--electric);outline-offset:2px;box-shadow:inset 0 0 0 3px rgba(115,243,255,.96),0 0 0 4px rgba(0,158,172,.5),0 0 18px 7px rgba(115,243,255,.62)}
+  16%{transform:scale(1.035);outline:4px solid var(--electric);outline-offset:2px;box-shadow:inset 0 0 0 3px rgba(115,243,255,.96),0 0 0 5px rgba(0,158,172,.58),0 0 23px 9px rgba(115,243,255,.72)}
+  25%,86%{transform:scale(1);outline:4px solid var(--electric);outline-offset:2px;box-shadow:inset 0 0 0 3px rgba(115,243,255,.94),0 0 0 4px rgba(0,158,172,.48),0 0 18px 7px rgba(115,243,255,.56)}
+  100%{transform:scale(1);outline:4px solid transparent;outline-offset:2px;box-shadow:inset 0 0 0 3px transparent,0 0 0 4px transparent,0 0 18px 7px transparent}
+}
 .job-label{
   display:block;width:100%;min-width:0;max-width:100%;pointer-events:none;
   white-space:nowrap;overflow:hidden;text-overflow:clip;word-break:keep-all;
 }
-.oven-clock{
+.oven-timer-readout{
   display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
-  width:22px;height:22px;margin-left:3px;border:1px solid currentColor;border-radius:50%;
-  background:rgba(255,255,255,.82);color:#1E393B;font-size:14px;line-height:1;
-  cursor:pointer;box-shadow:0 1px 3px rgba(15,23,42,.18);z-index:2;
+  min-width:0;max-width:100%;padding:2px 5px;border:1px solid currentColor;border-radius:999px;
+  background:rgba(255,255,255,.86);color:#1E393B;font-size:11px;font-weight:950;line-height:1;
+  white-space:nowrap;cursor:pointer;box-shadow:0 1px 3px rgba(15,23,42,.18);z-index:2;
 }
-.oven-clock:hover,.oven-clock:focus{transform:scale(1.08);outline:2px solid rgba(115,243,255,.9);outline-offset:1px}
+.oven-timer-readout:hover,.oven-timer-readout:focus{transform:scale(1.04);outline:2px solid rgba(115,243,255,.9);outline-offset:1px}
+.department[data-dept-id="oven"] .job{flex-direction:column;gap:4px;min-height:56px;padding:6px 3px}
 .job-x{
   display:none;position:absolute;left:2px;top:2px;width:15px;height:15px;border-radius:50%;
   background:rgba(15,23,42,.88);color:#fff;font-size:11px;line-height:15px;text-align:center;cursor:pointer;z-index:3
@@ -305,6 +318,35 @@ body.authenticated .app{display:flex}
 .board-note.open{display:block}
 .board-note label{display:block;font-size:13px;font-weight:900;color:#475569;margin-bottom:6px}
 .board-note textarea{width:100%;height:100px;resize:vertical;border:1px solid var(--soft-border);border-radius:8px;padding:9px;font-size:14px}
+.activity-panel{
+  position:fixed;right:18px;top:150px;bottom:18px;z-index:90;
+  width:min(470px,calc(100vw - 36px));display:flex;flex-direction:column;
+  border:2px solid var(--teal-dark);border-radius:15px;background:#f7fbfb;
+  box-shadow:0 24px 70px rgba(5,37,40,.38);overflow:hidden;
+  opacity:0;pointer-events:none;transform:translateX(calc(100% + 34px));
+  transition:transform .22s ease,opacity .18s ease;
+}
+.activity-panel.open{opacity:1;pointer-events:auto;transform:translateX(0)}
+.activity-panel-head{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:17px 18px;background:#000;border-bottom:5px solid var(--electric);color:#fff;
+}
+.activity-panel-title{min-width:0}
+.activity-panel-title strong{display:block;font-size:21px;font-weight:1000;letter-spacing:.045em;text-transform:uppercase}
+.activity-panel-title span{display:block;margin-top:4px;color:var(--electric);font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.activity-close{width:34px;height:34px;flex:0 0 auto;border:2px solid var(--electric);border-radius:8px;background:var(--teal-dark);color:var(--electric);font-size:23px;font-weight:900;line-height:1;cursor:pointer}
+.activity-close:hover{background:var(--teal-medium);color:#fff}
+.activity-list{flex:1;min-height:0;overflow-y:auto;padding:12px;background:linear-gradient(180deg,#f7fbfb,#dceced)}
+.activity-item{position:relative;margin-bottom:9px;padding:12px 13px 12px 16px;border:2px solid #b8d6d8;border-radius:10px;background:#fff;box-shadow:0 3px 10px rgba(30,57,59,.08)}
+.activity-item:before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:5px;border-radius:0 5px 5px 0;background:var(--teal)}
+.activity-item-top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--teal-dark)}
+.activity-job{min-width:0;font-size:17px;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.activity-time{flex:0 0 auto;color:#526b6d;font-size:11px;font-weight:900;white-space:nowrap}
+.activity-route{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;margin-top:8px;color:#334f51;font-size:13px;font-weight:850;line-height:1.25}
+.activity-route span:first-child{text-align:right}
+.activity-route-arrow{color:var(--teal);font-size:18px;font-weight:1000}
+.activity-empty{margin:4px;padding:28px 18px;border:2px dashed #9dbfc2;border-radius:11px;background:rgba(255,255,255,.58);color:#526b6d;text-align:center;font-size:14px;font-weight:850;line-height:1.5}
+.activity-count{padding:10px 14px;border-top:2px solid #b8d6d8;background:#fff;color:#526b6d;font-size:12px;font-weight:850;text-align:center}
 .bottom-panel{
   min-width:2240px;margin-top:14px;
   display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap;
@@ -347,6 +389,30 @@ body.authenticated .app{display:flex}
 .modal-colors .swatch.selected{border-color:var(--teal-dark);box-shadow:0 0 0 3px rgba(115,243,255,.95)}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:18px;border-top:2px solid rgba(0,94,102,.18)}
 .modal-actions .tb-btn{min-width:112px;min-height:46px;padding:10px 22px;font-size:15px}
+.backup-modal{width:min(1120px,96vw);max-height:min(900px,94vh)}
+.backup-modal .modal-body{padding:24px 28px 28px;overflow-y:auto}
+.backup-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(135px,1fr));gap:10px;margin-bottom:18px}
+.backup-stat{padding:13px 14px;border:2px solid #b8d6d8;border-radius:10px;background:#f5fbfb;color:var(--teal-dark)}
+.backup-stat strong{display:block;font-size:22px;font-weight:1000;line-height:1.1}
+.backup-stat span{display:block;margin-top:4px;font-size:11px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
+.backup-file-details{margin:0 0 18px;padding:12px 14px;border-left:5px solid var(--electric);border-radius:7px;background:var(--teal-dark);color:#fff;font-size:13px;font-weight:800;line-height:1.5}
+.backup-actions-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.backup-choice{padding:16px 15px;border:2px solid #b8d6d8;border-radius:11px;background:#fff;color:var(--teal-dark);text-align:left;cursor:pointer}
+.backup-choice:hover{border-color:var(--teal);background:var(--electric-soft)}
+.backup-choice strong{display:block;font-size:17px;font-weight:1000}
+.backup-choice small{display:block;margin-top:6px;color:#526b6d;font-size:12px;font-weight:750;line-height:1.4}
+.backup-choice.replace{border-color:#f2a3a3}
+.backup-choice.replace:hover{border-color:#b91c1c;background:#fff1f2}
+.backup-preview{display:none;margin-top:18px;padding-top:18px;border-top:2px solid #c6dcde}
+.backup-preview.open{display:block}
+.backup-preview-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;color:var(--teal-dark)}
+.backup-preview-heading h3{margin:0;font-size:18px;font-weight:1000;text-transform:uppercase;letter-spacing:.04em}
+.backup-preview-board{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:10px;max-height:390px;overflow:auto;padding:2px}
+.backup-preview-location{min-height:92px;padding:10px;border:2px solid var(--teal-dark);border-radius:9px;background:linear-gradient(145deg,var(--electric-soft),#c9eff1)}
+.backup-preview-location h4{margin:0 0 8px;padding:6px;border-radius:5px;background:var(--teal-dark);color:#fff;font-size:12px;font-weight:950;text-align:center;text-transform:uppercase}
+.backup-preview-jobs{display:flex;flex-wrap:wrap;gap:5px}
+.backup-preview-job{max-width:100%;padding:5px 7px;border:1px solid rgba(0,0,0,.3);border-radius:5px;font-size:12px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.backup-preview-empty{grid-column:1/-1;padding:24px;border:2px dashed #9dbfc2;border-radius:10px;color:#526b6d;text-align:center;font-weight:850}
 .job-modal.has-workflow{width:980px}
 .job-modal.has-workflow .modal-body{
   display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:26px;align-items:start;
@@ -401,7 +467,7 @@ body.authenticated .app{display:flex}
 .primary{background:#0f62fe;color:#fff;border-color:#0f62fe}
 .primary:hover{background:#0353e9}
 @media print{
-  .auth-gate,.toolbar,.board-note,.modal-backdrop,.bottom-panel,.toast{display:none!important}
+  .auth-gate,.toolbar,.board-note,.activity-panel,.modal-backdrop,.bottom-panel,.toast{display:none!important}
   .board-shell{padding:0;overflow:visible}
   .board{min-width:0;transform:scale(.63);transform-origin:top left}
 }
@@ -431,6 +497,7 @@ body.authenticated .app{display:flex}
 .app-heading span{display:block;margin-top:5px;color:var(--electric);font-size:11px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
 .toolbar{padding:10px 14px;background:#000;border-color:#000;box-shadow:0 3px 14px rgba(0,0,0,.3)}
 .toolbar .tb-btn{background:#f7fbfb;border-color:rgba(115,243,255,.68);color:var(--teal-dark);font-weight:800}
+.toolbar #btnActivity.active{background:var(--electric);border-color:var(--electric);color:var(--teal-dark)}
 .tb-btn:hover{background:var(--electric-soft);border-color:var(--teal)}
 .tb-btn.save{color:#fff;border-color:var(--teal-medium);background:var(--teal-medium)}
 .tb-btn.save:hover{background:var(--teal-dark)}
@@ -454,6 +521,58 @@ body.authenticated .app{display:flex}
 .primary:hover{background:var(--teal-dark)}
 .zoom-control{position:relative}
 .zoom-control>.tb-btn.active{background:var(--electric);border-color:var(--electric);color:var(--teal-dark)}
+.display-control{position:relative}
+.display-control>.tb-btn{display:flex;align-items:center;gap:7px}
+.display-control>.tb-btn:after{content:"▾";font-size:11px;line-height:1;transition:transform .18s ease}
+.display-control>.tb-btn.active:after{transform:rotate(180deg)}
+.display-control>.tb-btn.mode-fit,.display-control>.tb-btn.mode-tv{background:var(--electric);border-color:var(--electric);color:var(--teal-dark)}
+.display-menu{
+  position:absolute;top:calc(100% + 9px);left:50%;z-index:85;width:360px;padding:10px;
+  border:2px solid var(--teal-dark);border-radius:12px;background:#fff;
+  box-shadow:0 20px 55px rgba(5,37,40,.34);transform:translateX(-50%)
+}
+.display-menu[hidden]{display:none}
+.display-menu-title{padding:4px 6px 10px;border-bottom:2px solid var(--electric-soft);color:var(--teal-dark);font-size:14px;font-weight:950;letter-spacing:.05em;text-transform:uppercase}
+.display-option{
+  display:grid;grid-template-columns:28px minmax(0,1fr) 22px;gap:9px;align-items:center;width:100%;
+  margin-top:6px;padding:11px 10px;border:1px solid transparent;border-radius:9px;background:#fff;
+  color:var(--teal-dark);text-align:left;cursor:pointer
+}
+.display-option:hover{border-color:#a9dfe3;background:var(--electric-soft)}
+.display-option.selected{border-color:var(--teal);background:#e8fbfc;box-shadow:inset 4px 0 0 var(--teal)}
+.display-option-icon{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:var(--teal-dark);color:var(--electric);font-size:15px;font-weight:950}
+.display-option-copy strong{display:block;font-size:14px;font-weight:950}
+.display-option-copy small{display:block;margin-top:3px;color:#526b6d;font-size:11px;font-weight:750;line-height:1.3}
+.display-option-check{color:var(--teal-medium);font-size:18px;font-weight:950;opacity:0}
+.display-option.selected .display-option-check{opacity:1}
+.display-stage{position:relative;transform-origin:top left}
+body.display-fit .app,body.display-tv .app{height:100vh;min-height:0;overflow:hidden}
+body.display-fit .board-shell,body.display-tv .board-shell{min-height:0;overflow:hidden;padding:12px}
+body.display-fit .display-stage,body.display-tv .display-stage{transform:scale(var(--display-scale,1));will-change:transform}
+body.display-fit .job,body.display-tv .job{min-height:44px;font-size:22px}
+body.display-fit .department[data-dept-id="oven"] .job,body.display-tv .department[data-dept-id="oven"] .job{min-height:64px}
+body.display-fit .oven-timer-readout,body.display-tv .oven-timer-readout{font-size:14px;padding:3px 7px}
+body.display-tv .app-title{min-height:62px;padding:9px 18px}
+body.display-tv .app-logo{width:265px;max-height:36px}
+body.display-tv .app-heading strong{font-size:20px}
+body.display-tv .app-heading span{display:none}
+body.display-tv #btnAdd,
+body.display-tv #btnUndo,
+body.display-tv #btnRedo,
+body.display-tv #btnNotes,
+body.display-tv #btnSaveBoard,
+body.display-tv #btnUploadBoard,
+body.display-tv #btnExportSummary,
+body.display-tv #btnClear,
+body.display-tv .toolbar>.sep{display:none}
+body.display-tv .job-x{display:none!important}
+body.display-tv .job{cursor:default}
+body.display-tv .goal-box input,
+body.display-tv .week-panel input,
+body.display-tv .week-panel select,
+body.display-tv .week-panel button{cursor:default}
+.tv-readonly-pill{display:none;align-items:center;gap:6px;min-height:30px;padding:5px 10px;border:1px solid var(--electric);border-radius:999px;background:var(--teal-dark);color:var(--electric);font-size:12px;font-weight:950;white-space:nowrap}
+body.display-tv .tv-readonly-pill{display:inline-flex}
 .zoom-menu{position:absolute;top:calc(100% + 9px);left:50%;z-index:80;width:330px;max-height:min(570px,calc(100vh - 145px));padding:14px;background:#fff;border:2px solid var(--teal-dark);border-radius:12px;box-shadow:0 20px 55px rgba(5,37,40,.34);transform:translateX(-50%);overflow:auto}
 .zoom-menu[hidden]{display:none}
 .zoom-menu-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px;padding-bottom:9px;border-bottom:2px solid var(--electric-soft);color:var(--teal-dark);font-size:16px;font-weight:950}
@@ -498,7 +617,8 @@ body.authenticated .app{display:flex}
 .week-row input{width:68px;min-height:36px;padding:6px 7px;border:2px solid var(--teal-medium);font-size:16px;color:var(--teal-dark)}
 .week-color-button{width:34px;height:34px;border:2px solid var(--teal-dark);border-radius:7px}
 .week-color-select{min-width:105px;min-height:36px;max-width:none;padding:6px 7px;border:2px solid var(--teal-medium);font-size:14px;color:var(--teal-dark);flex:1 1 105px}
-@media(max-width:700px){.zoom-menu{position:fixed;top:132px;left:10px;right:10px;width:auto;transform:none}.zoom-options{grid-template-columns:1fr}.board-shell.zoomed .board{display:grid;grid-template-columns:1fr}.board-shell.zoomed .arrow-stage.box-zoom-arrow{min-height:100px;padding:0}.board-shell.zoomed .plain-connector.box-zoom-connector{min-height:100px}.board-shell.zoomed .arrow-stage.box-zoom-arrow .arrow-line{margin-top:20px}.modal-brand{padding:21px 20px 17px}.modal-logo{width:min(390px,96%)}.modal h2{font-size:23px}.modal-body{padding:21px 20px 23px}}
+@media(max-width:900px){.backup-summary-grid,.backup-actions-grid,.backup-preview-board{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.zoom-menu,.display-menu{position:fixed;top:132px;left:10px;right:10px;width:auto;transform:none}.zoom-options{grid-template-columns:1fr}.board-shell.zoomed .board{display:grid;grid-template-columns:1fr}.board-shell.zoomed .arrow-stage.box-zoom-arrow{min-height:100px;padding:0}.board-shell.zoomed .plain-connector.box-zoom-connector{min-height:100px}.board-shell.zoomed .arrow-stage.box-zoom-arrow .arrow-line{margin-top:20px}.modal-brand{padding:21px 20px 17px}.modal-logo{width:min(390px,96%)}.modal h2{font-size:23px}.modal-body{padding:21px 20px 23px}.backup-summary-grid,.backup-actions-grid,.backup-preview-board{grid-template-columns:1fr}.activity-panel{right:10px;bottom:10px;width:calc(100vw - 20px)}}
 </style>
 </head>
 <body>
@@ -532,6 +652,7 @@ body.authenticated .app{display:flex}
     <button class="tb-btn" id="btnUndo">Undo</button>
     <button class="tb-btn" id="btnRedo">Redo</button>
     <button class="tb-btn" id="btnNotes">Notes</button>
+    <button class="tb-btn" id="btnActivity" type="button" aria-expanded="false">Recent Activity</button>
     <div class="zoom-control">
       <button class="tb-btn" id="btnBoxZoom" type="button" aria-expanded="false">Box Zoom</button>
       <div class="zoom-menu" id="boxZoomMenu" hidden>
@@ -543,27 +664,64 @@ body.authenticated .app{display:flex}
         </div>
       </div>
     </div>
-    <button class="tb-btn save" id="btnSaveBoard">Save board</button>
+    <div class="display-control">
+      <button class="tb-btn" id="btnDisplay" type="button" aria-expanded="false">Display: Control</button>
+      <div class="display-menu" id="displayMenu" hidden>
+        <div class="display-menu-title">Choose display mode</div>
+        <button class="display-option" type="button" data-display-mode="control">
+          <span class="display-option-icon">C</span>
+          <span class="display-option-copy"><strong>Control Mode</strong><small>Original size with full editing and scrolling</small></span>
+          <span class="display-option-check">✓</span>
+        </button>
+        <button class="display-option" type="button" data-display-mode="fit">
+          <span class="display-option-icon">F</span>
+          <span class="display-option-copy"><strong>Fit to Screen</strong><small>Automatically fits the full board and stays editable</small></span>
+          <span class="display-option-check">✓</span>
+        </button>
+        <button class="display-option" type="button" data-display-mode="tv">
+          <span class="display-option-icon">TV</span>
+          <span class="display-option-copy"><strong>TV Mode</strong><small>Automatic fit with a clean, read only display</small></span>
+          <span class="display-option-check">✓</span>
+        </button>
+      </div>
+    </div>
+    <button class="tb-btn save" id="btnSaveBoard" type="button">Save Board</button>
+    <button class="tb-btn save" id="btnUploadBoard" type="button">Upload Board</button>
+    <input id="boardBackupInput" type="file" accept="application/json,.json" hidden>
     <button class="tb-btn save" id="btnExportSummary" type="button">Export Summary</button>
     <button class="tb-btn danger" id="btnClear">Clear board</button>
     <div class="sep"></div>
     <span class="counter" id="counter">0 jobs</span>
     <span class="live-status connecting" id="liveStatus">Connecting</span>
+    <span class="tv-readonly-pill">Read only</span>
     <button class="tb-btn" id="btnSignOut" type="button">Sign out</button>
   </div>
   <div class="board-shell">
-    <div class="box-zoom-banner" id="boxZoomBanner"><span id="boxZoomSummary">Box Zoom active</span><button id="btnExitZoom" type="button">Show full board</button></div>
-    <div class="board" id="board"></div>
-    <div class="bottom-panel">
-      <div class="goal-box">
-        <label for="goalInput">Goal (In units):</label>
-        <input id="goalInput" type="number" min="0" step="1" placeholder="____">
-        <span class="goal-stat">Completed: <span id="completedTotal">0</span></span>
-        <span class="goal-stat remaining">Remaining: <span id="remainingTotal">100</span></span>
+    <div class="display-stage" id="displayStage">
+      <div class="box-zoom-banner" id="boxZoomBanner"><span id="boxZoomSummary">Box Zoom active</span><button id="btnExitZoom" type="button">Show full board</button></div>
+      <div class="board" id="board"></div>
+      <div class="bottom-panel">
+        <div class="goal-box">
+          <label for="goalInput">Goal (In units):</label>
+          <input id="goalInput" type="number" min="0" step="1" placeholder="____">
+          <span class="goal-stat">Completed: <span id="completedTotal">0</span></span>
+          <span class="goal-stat remaining">Remaining: <span id="remainingTotal">100</span></span>
+        </div>
+        <div class="week-panel" id="weekPanel"><div class="week-title">W/E Color Key</div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(139, 47, 63);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(47, 95, 158);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(39, 133, 106);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(245, 200, 75);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(220, 38, 38);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(124, 58, 237);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div></div>
       </div>
-      <div class="week-panel" id="weekPanel"><div class="week-title">W/E Color Key</div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(139, 47, 63);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(47, 95, 158);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(39, 133, 106);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(245, 200, 75);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(220, 38, 38);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div><div class="week-row"><label>W/E</label><input placeholder="M/D" maxlength="5" inputmode="numeric" title="Use M/D format only, like 6/28" class=""><button class="week-color-button" title="Click to use this color for new jobs" style="background: rgb(124, 58, 237);"></button><select class="week-color-select"><option value="0">Maroon</option><option value="1">Blue</option><option value="2">Green</option><option value="3">Yellow</option><option value="4">Orange</option><option value="5">Purple</option><option value="6">Gray</option><option value="7">Black</option><option value="8">Red</option><option value="9">Teal</option></select></div></div>
     </div>
   </div>
+  <aside class="activity-panel" id="activityPanel" aria-hidden="true" aria-labelledby="activityPanelHeading">
+    <div class="activity-panel-head">
+      <div class="activity-panel-title">
+        <strong id="activityPanelHeading">Recent Activity</strong>
+        <span>Latest job movements</span>
+      </div>
+      <button class="activity-close" id="btnCloseActivity" type="button" aria-label="Close Recent Activity">&times;</button>
+    </div>
+    <div class="activity-list" id="activityList"></div>
+    <div class="activity-count" id="activityCount">No movements recorded</div>
+  </aside>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -629,6 +787,44 @@ body.authenticated .app{display:flex}
       <div class="modal-actions">
         <button class="tb-btn" id="btnOvenTimeCancel" type="button">Cancel</button>
         <button class="tb-btn primary" id="btnOvenTimeConfirm" type="button">Start Timer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="backupBackdrop" aria-hidden="true">
+  <div class="modal backup-modal" role="dialog" aria-modal="true" aria-labelledby="backupTitle">
+    <div class="modal-brand">
+      <img class="modal-logo" src="Forgent_Logo_FullColour_OnDark_RGB.png" alt="Forgent">
+      <h2 id="backupTitle">Board Backup &amp; Restore</h2>
+      <div class="modal-kicker">Preview, merge, or replace the current board</div>
+    </div>
+    <div class="modal-body">
+      <div class="backup-file-details" id="backupFileDetails"></div>
+      <div class="backup-summary-grid" id="backupSummaryGrid"></div>
+      <div class="backup-actions-grid">
+        <button class="backup-choice" id="btnPreviewBackup" type="button">
+          <strong>Preview Board</strong>
+          <small>Inspect the uploaded board and every job location without changing the live board.</small>
+        </button>
+        <button class="backup-choice" id="btnMergeBackup" type="button">
+          <strong>Merge With Current Board</strong>
+          <small>Add missing jobs while keeping the current version of jobs that already exist.</small>
+        </button>
+        <button class="backup-choice replace" id="btnReplaceBackup" type="button">
+          <strong>Replace Current Board</strong>
+          <small>Replace the live board, settings, ordering, and metadata with this backup.</small>
+        </button>
+      </div>
+      <section class="backup-preview" id="backupPreview" aria-labelledby="backupPreviewHeading">
+        <div class="backup-preview-heading">
+          <h3 id="backupPreviewHeading">Uploaded Board Preview</h3>
+          <button class="tb-btn" id="btnCloseBackupPreview" type="button">Hide Preview</button>
+        </div>
+        <div class="backup-preview-board" id="backupPreviewBoard"></div>
+      </section>
+      <div class="modal-actions">
+        <button class="tb-btn" id="btnCancelBackup" type="button">Cancel</button>
       </div>
     </div>
   </div>
@@ -722,6 +918,161 @@ let remotePositions={};
 let settingsTimer=null;
 let toastTimer=null;
 let boxZoomSelection=new Set();
+const DISPLAY_MODE_KEY='production_coordination_display_mode_v1';
+const DISPLAY_MODE_LABELS={control:'Control',fit:'Fit to Screen',tv:'TV'};
+let displayMode='control';
+let displayFitFrame=0;
+let displayResizeObserver=null;
+const RECENT_MOVE_WINDOW_MS=15000;
+const RECENT_ACTIVITY_LIMIT=12;
+let recentMoveTimers=new Map();
+let activityPanelOpen=false;
+
+function isTvMode(){return displayMode==='tv'}
+function isAutoFitMode(){return displayMode==='fit'||displayMode==='tv'}
+function restoreDisplayMode(){
+  try{
+    const saved=localStorage.getItem(DISPLAY_MODE_KEY);
+    displayMode=DISPLAY_MODE_LABELS[saved]?saved:'control';
+  }catch(error){
+    displayMode='control';
+  }
+  document.body.classList.toggle('display-fit',displayMode==='fit');
+  document.body.classList.toggle('display-tv',displayMode==='tv');
+  updateDisplayControls();
+}
+function setDisplayMenu(open){
+  const menu=document.getElementById('displayMenu');
+  const button=document.getElementById('btnDisplay');
+  menu.hidden=!open;
+  button.classList.toggle('active',open);
+  button.setAttribute('aria-expanded',String(open));
+}
+function updateDisplayControls(){
+  const button=document.getElementById('btnDisplay');
+  if(button){
+    button.textContent='Display: '+DISPLAY_MODE_LABELS[displayMode];
+    button.classList.toggle('mode-fit',displayMode==='fit');
+    button.classList.toggle('mode-tv',displayMode==='tv');
+    button.title=displayMode==='control'?'Original board size and full editing':displayMode==='fit'?'Automatic screen fit with full editing':'Automatic screen fit with read only TV controls';
+  }
+  document.querySelectorAll('[data-display-mode]').forEach(option=>{
+    const selected=option.dataset.displayMode===displayMode;
+    option.classList.toggle('selected',selected);
+    option.setAttribute('aria-pressed',String(selected));
+  });
+  updateDisplayInteractivity();
+}
+function updateDisplayInteractivity(){
+  const readOnly=isTvMode();
+  document.querySelectorAll('#goalInput,#weekPanel input,#weekPanel select,#weekPanel button').forEach(control=>{
+    control.disabled=readOnly;
+    control.setAttribute('aria-disabled',String(readOnly));
+  });
+  document.querySelectorAll('#board .job').forEach(job=>{job.draggable=!readOnly});
+}
+function resetDisplayStage(){
+  const stage=document.getElementById('displayStage');
+  if(!stage)return;
+  stage.style.removeProperty('--display-scale');
+  stage.style.removeProperty('--department-width');
+  stage.style.removeProperty('--department-height');
+  stage.style.removeProperty('--arrow-width');
+  stage.style.width='';
+  stage.style.marginLeft='';
+  stage.style.marginTop='';
+  stage.removeAttribute('data-display-scale');
+}
+function applyDisplayFit(){
+  if(!isAutoFitMode()){
+    resetDisplayStage();
+    return;
+  }
+  const shell=document.querySelector('.board-shell');
+  const stage=document.getElementById('displayStage');
+  if(!shell||!stage||!document.body.classList.contains('authenticated'))return;
+
+  stage.style.setProperty('--display-scale','1');
+  stage.style.removeProperty('--department-width');
+  stage.style.removeProperty('--department-height');
+  stage.style.removeProperty('--arrow-width');
+  stage.style.marginLeft='0px';
+  stage.style.marginTop='0px';
+  const shellStyle=getComputedStyle(shell);
+  const horizontalPadding=parseFloat(shellStyle.paddingLeft)+parseFloat(shellStyle.paddingRight);
+  const verticalPadding=parseFloat(shellStyle.paddingTop)+parseFloat(shellStyle.paddingBottom);
+  const availableWidth=Math.max(1,shell.clientWidth-horizontalPadding);
+  const availableHeight=Math.max(1,shell.clientHeight-verticalPadding);
+  const zoomed=shell.classList.contains('zoomed');
+  if(zoomed){
+    const selectedCount=Math.max(1,boxZoomSelection.size);
+    const preferredColumns=Math.min(selectedCount,4);
+    const targetWidth=Math.max(availableWidth,Math.min(2200,preferredColumns*470+(preferredColumns-1)*18));
+    stage.style.width=targetWidth+'px';
+  }else{
+    stage.style.width='max-content';
+    let naturalWidth=Math.max(1,stage.scrollWidth);
+    let naturalHeight=Math.max(1,stage.scrollHeight);
+    const availableAspect=availableWidth/availableHeight;
+    const naturalAspect=naturalWidth/naturalHeight;
+    if(naturalAspect<availableAspect){
+      const targetWidth=naturalHeight*availableAspect;
+      const extraPerDepartment=Math.max(0,(targetWidth-naturalWidth)/8);
+      stage.style.setProperty('--department-width',(260+extraPerDepartment)+'px');
+    }else if(naturalAspect>availableAspect){
+      const targetHeight=naturalWidth/availableAspect;
+      const extraPerDepartmentRow=Math.max(0,(targetHeight-naturalHeight)/3);
+      stage.style.setProperty('--department-height',(310+extraPerDepartmentRow)+'px');
+    }
+  }
+
+  const naturalWidth=Math.max(1,stage.scrollWidth);
+  const naturalHeight=Math.max(1,stage.scrollHeight);
+  stage.style.width=naturalWidth+'px';
+  const scale=Math.max(.12,Math.min(2.5,availableWidth/naturalWidth,availableHeight/naturalHeight));
+  const scaledWidth=naturalWidth*scale;
+  const scaledHeight=naturalHeight*scale;
+  stage.style.setProperty('--display-scale',String(scale));
+  stage.style.marginLeft=Math.max(0,(availableWidth-scaledWidth)/2)+'px';
+  stage.style.marginTop=Math.max(0,(availableHeight-scaledHeight)/2)+'px';
+  stage.dataset.displayScale=Math.round(scale*100)+'%';
+  fitCompactJobLabels();
+}
+function scheduleDisplayFit(){
+  cancelAnimationFrame(displayFitFrame);
+  displayFitFrame=requestAnimationFrame(()=>requestAnimationFrame(applyDisplayFit));
+}
+function setDisplayMode(mode,announce=true){
+  if(!DISPLAY_MODE_LABELS[mode])return;
+  displayMode=mode;
+  document.body.classList.toggle('display-fit',mode==='fit');
+  document.body.classList.toggle('display-tv',mode==='tv');
+  if(mode==='tv'){
+    document.getElementById('notesPanel').classList.remove('open');
+    if(document.getElementById('modalBackdrop').classList.contains('open'))closeModal();
+    if(document.getElementById('ovenTimeBackdrop').classList.contains('open'))cancelOvenEntryTime();
+    if(document.getElementById('backupBackdrop').classList.contains('open'))closeBackupModal();
+  }
+  try{localStorage.setItem(DISPLAY_MODE_KEY,mode)}catch(error){}
+  updateDisplayControls();
+  setDisplayMenu(false);
+  document.querySelector('.board-shell').scrollTo({top:0,left:0});
+  if(isAutoFitMode())scheduleDisplayFit();else resetDisplayStage();
+  if(announce){
+    const message=mode==='control'?'Control Mode restored. Full editing and normal scrolling are active.':mode==='fit'?'Fit to Screen is active. The full board stays editable.':'TV Mode is active. The board is read only and automatically fits the screen.';
+    showToast(message);
+  }
+}
+function startDisplayResizeObserver(){
+  if(!window.ResizeObserver||displayResizeObserver)return;
+  displayResizeObserver=new ResizeObserver(scheduleDisplayFit);
+  const title=document.querySelector('.app-title');
+  const toolbar=document.querySelector('.toolbar');
+  const shell=document.querySelector('.board-shell');
+  if(title)displayResizeObserver.observe(title);
+  if(toolbar)displayResizeObserver.observe(toolbar);
+  if(shell)displayResizeObserver.observe(shell);
+}
 
 function showLogin(message){
   document.body.classList.remove('authenticated');
@@ -733,6 +1084,7 @@ function showBoard(){
   document.getElementById('authGate').hidden=true;
   document.body.classList.add('authenticated');
   fitCompactJobLabels();
+  scheduleDisplayFit();
 }
 async function handleLogin(event){
   event.preventDefault();
@@ -778,6 +1130,79 @@ function showToast(message,isError){
   el.className='toast show'+(isError?' error':'');
   toastTimer=setTimeout(()=>{el.className='toast'},3600);
 }
+function positionActivityPanel(){
+  const panel=document.getElementById('activityPanel');
+  const toolbar=document.querySelector('.toolbar');
+  if(!panel||!toolbar)return;
+  panel.style.top=Math.max(12,Math.ceil(toolbar.getBoundingClientRect().bottom+10))+'px';
+}
+function setActivityPanel(open){
+  activityPanelOpen=!!open;
+  const panel=document.getElementById('activityPanel');
+  const button=document.getElementById('btnActivity');
+  if(!panel||!button)return;
+  if(activityPanelOpen){positionActivityPanel();renderRecentActivity()}
+  panel.classList.toggle('open',activityPanelOpen);
+  panel.setAttribute('aria-hidden',String(!activityPanelOpen));
+  button.classList.toggle('active',activityPanelOpen);
+  button.setAttribute('aria-expanded',String(activityPanelOpen));
+}
+function recentActivityEntries(){
+  const entries=[];
+  Object.keys(state.jobs||{}).forEach(jobId=>{
+    const job=state.jobs[jobId];
+    const workflow=sanitizeWorkflow(job&&job.workflow);
+    for(let index=1;index<workflow.length;index++){
+      const current=workflow[index];
+      const previous=workflow[index-1];
+      if(!validIsoTime(current.enteredAt))continue;
+      entries.push({
+        jobId,
+        jobText:String((job&&job.text)||jobId),
+        movedAt:current.enteredAt,
+        from:workflowLocationInfo(previous.locationKey).label,
+        to:workflowLocationInfo(current.locationKey).label
+      });
+    }
+  });
+  entries.sort((left,right)=>Date.parse(right.movedAt)-Date.parse(left.movedAt));
+  return entries;
+}
+function formatActivityTime(value){
+  const date=new Date(value);
+  if(!Number.isFinite(date.getTime()))return 'Time unavailable';
+  return date.toLocaleString([],{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+}
+function renderRecentActivity(){
+  const list=document.getElementById('activityList');
+  const count=document.getElementById('activityCount');
+  if(!list||!count)return;
+  const entries=recentActivityEntries();
+  list.innerHTML='';
+  if(!entries.length){
+    const empty=document.createElement('div');
+    empty.className='activity-empty';
+    empty.textContent='No job movements yet. Activity will appear here as jobs move between locations.';
+    list.appendChild(empty);
+    count.textContent='No movements recorded';
+    return;
+  }
+  entries.slice(0,RECENT_ACTIVITY_LIMIT).forEach(entry=>{
+    const item=document.createElement('article');
+    item.className='activity-item';
+    const top=document.createElement('div');top.className='activity-item-top';
+    const job=document.createElement('div');job.className='activity-job';job.textContent=entry.jobText;job.title=entry.jobText;
+    const time=document.createElement('time');time.className='activity-time';time.dateTime=entry.movedAt;time.textContent=formatActivityTime(entry.movedAt);
+    top.append(job,time);
+    const route=document.createElement('div');route.className='activity-route';route.title=entry.from+' to '+entry.to;
+    const from=document.createElement('span');from.textContent=entry.from;
+    const arrow=document.createElement('span');arrow.className='activity-route-arrow';arrow.textContent='→';arrow.setAttribute('aria-hidden','true');
+    const to=document.createElement('span');to.textContent=entry.to;
+    route.append(from,arrow,to);
+    item.append(top,route);list.appendChild(item);
+  });
+  count.textContent='Showing '+Math.min(entries.length,RECENT_ACTIVITY_LIMIT)+' of '+entries.length+' recorded movement'+(entries.length===1?'':'s');
+}
 function findJobLocation(jobId){
   return Object.keys(state.locations).find(key=>(state.locations[key]||[]).includes(jobId))||'';
 }
@@ -793,11 +1218,21 @@ function sanitizeWorkflow(value){
     exitedAt:validIsoTime(step.exitedAt)?step.exitedAt:''
   })).filter(step=>step.locationKey&&step.enteredAt);
 }
+function jobExtraMetadata(job){
+  const extra={};
+  const standard=new Set(['text','color','note','ovenEnteredAt','workflow','created']);
+  Object.keys(job||{}).forEach(key=>{
+    if(standard.has(key))return;
+    try{extra[key]=JSON.parse(JSON.stringify(job[key]));}catch(error){}
+  });
+  return extra;
+}
 function packRemoteNote(job){
   const note=job.note||'';
   const workflow=sanitizeWorkflow(job.workflow);
-  if(!job.ovenEnteredAt&&!workflow.length)return note;
-  return OVEN_META_PREFIX+JSON.stringify({note,ovenEnteredAt:job.ovenEnteredAt||'',workflow});
+  const extra=jobExtraMetadata(job);
+  if(!job.ovenEnteredAt&&!workflow.length&&!Object.keys(extra).length)return note;
+  return JOB_META_PREFIX+JSON.stringify({note,ovenEnteredAt:job.ovenEnteredAt||'',workflow,extra});
 }
 function unpackRemoteNote(value){
   const raw=typeof value==='string'?value:'';
@@ -807,18 +1242,19 @@ function unpackRemoteNote(value){
       return {
         note:typeof data.note==='string'?data.note:'',
         ovenEnteredAt:validIsoTime(data.ovenEnteredAt)?data.ovenEnteredAt:'',
-        workflow:sanitizeWorkflow(data.workflow)
+        workflow:sanitizeWorkflow(data.workflow),
+        extra:data.extra&&typeof data.extra==='object'&&!Array.isArray(data.extra)?data.extra:{}
       };
     }catch(e){
-      return {note:'',ovenEnteredAt:'',workflow:[]};
+      return {note:'',ovenEnteredAt:'',workflow:[],extra:{}};
     }
   }
-  if(!raw.startsWith(OVEN_META_PREFIX))return {note:raw,ovenEnteredAt:'',workflow:[]};
+  if(!raw.startsWith(OVEN_META_PREFIX))return {note:raw,ovenEnteredAt:'',workflow:[],extra:{}};
   try{
     const data=JSON.parse(raw.slice(OVEN_META_PREFIX.length));
-    return {note:typeof data.note==='string'?data.note:'',ovenEnteredAt:validIsoTime(data.ovenEnteredAt)?data.ovenEnteredAt:'',workflow:sanitizeWorkflow(data.workflow)};
+    return {note:typeof data.note==='string'?data.note:'',ovenEnteredAt:validIsoTime(data.ovenEnteredAt)?data.ovenEnteredAt:'',workflow:sanitizeWorkflow(data.workflow),extra:{}};
   }catch(e){
-    return {note:raw,ovenEnteredAt:'',workflow:[]};
+    return {note:raw,ovenEnteredAt:'',workflow:[],extra:{}};
   }
 }
 function remoteJobRow(jobId){
@@ -898,6 +1334,7 @@ function applyRemoteJob(payload){
     if(!row||row.board_id!==BOARD_ID)return;
     const remoteNote=unpackRemoteNote(row.note);
     state.jobs[row.id]={
+      ...remoteNote.extra,
       text:row.job_text,
       color:Number(row.color)||0,
       note:remoteNote.note,
@@ -954,7 +1391,7 @@ async function loadSharedBoard(){
   remotePositions={};
   (jobsResult.data||[]).forEach(row=>{
     const remoteNote=unpackRemoteNote(row.note);
-    state.jobs[row.id]={text:row.job_text,color:Number(row.color)||0,note:remoteNote.note,ovenEnteredAt:remoteNote.ovenEnteredAt,workflow:remoteNote.workflow,created:row.created_at};
+    state.jobs[row.id]={...remoteNote.extra,text:row.job_text,color:Number(row.color)||0,note:remoteNote.note,ovenEnteredAt:remoteNote.ovenEnteredAt,workflow:remoteNote.workflow,created:row.created_at};
     remotePositions[row.id]=Number(row.position)||0;
     if(row.location_key){
       if(!state.locations[row.location_key])state.locations[row.location_key]=[];
@@ -1024,6 +1461,7 @@ function normalizeState(obj){
     if(!job||typeof job!=='object')return;
     job.workflow=sanitizeWorkflow(job.workflow);
     if(!validIsoTime(job.ovenEnteredAt))job.ovenEnteredAt='';
+    if(!validIsoTime(job.lastMovedAt))job.lastMovedAt='';
   });
   if(typeof next.notes!=='string')next.notes='';
   if(typeof next.goal==='undefined'||next.goal===null)next.goal='';
@@ -1137,6 +1575,7 @@ function recordJobMove(job,previousLocation,destination,movedAt){
   current.exitedAt=moveTime;
   workflow.push({locationKey:destination,enteredAt:moveTime,exitedAt:''});
   job.workflow=workflow;
+  job.lastMovedAt=new Date().toISOString();
 }
 function formatWorkflowDate(value){
   const date=new Date(value);
@@ -1295,6 +1734,15 @@ function formatElapsedTime(startValue){
   parts.push(minutes+'m');
   return parts.join(' ');
 }
+function formatOvenCompactElapsed(startValue){
+  const start=Date.parse(startValue||'');
+  if(!Number.isFinite(start))return '--:--';
+  const totalMinutes=Math.max(0,Math.floor((Date.now()-start)/60000));
+  const days=Math.floor(totalMinutes/1440);
+  const hours=Math.floor((totalMinutes%1440)/60);
+  const minutes=totalMinutes%60;
+  return (days?days+'d ':'')+String(hours)+':'+String(minutes).padStart(2,'0');
+}
 function ovenTimerDetails(job){
   const start=new Date(job.ovenEnteredAt);
   if(!Number.isFinite(start.getTime()))return 'Oven timer unavailable';
@@ -1302,20 +1750,22 @@ function ovenTimerDetails(job){
   return 'Placed in oven: '+placed+' | Elapsed: '+formatElapsedTime(job.ovenEnteredAt);
 }
 function refreshOvenTimerTitles(){
-  document.querySelectorAll('.oven-clock[data-job-id]').forEach(clock=>{
-    const job=state.jobs[clock.dataset.jobId];
+  document.querySelectorAll('.oven-timer-readout[data-job-id]').forEach(timer=>{
+    const job=state.jobs[timer.dataset.jobId];
     if(!job)return;
     const details=ovenTimerDetails(job);
-    clock.title=details;
-    clock.setAttribute('aria-label',details);
-    const card=clock.closest('.job');
+    timer.textContent='⏱ '+formatOvenCompactElapsed(job.ovenEnteredAt);
+    timer.title=details;
+    timer.setAttribute('aria-label',details);
+    const card=timer.closest('.job');
     if(card)card.title=job.text+' | '+details;
   });
 }
 function setupDrop(el,key){
-  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drop-active')});
+  el.addEventListener('dragover',e=>{if(isTvMode())return;e.preventDefault();el.classList.add('drop-active')});
   el.addEventListener('dragleave',()=>el.classList.remove('drop-active'));
   el.addEventListener('drop',async e=>{
+    if(isTvMode()){el.classList.remove('drop-active');return;}
     e.preventDefault();el.classList.remove('drop-active');
     const id=e.dataTransfer.getData('text/plain')||dragId;
     if(!id||!state.jobs[id])return;
@@ -1336,6 +1786,7 @@ function setupDrop(el,key){
 }
 function setupDepartmentAdd(el,key){
   el.addEventListener('dblclick',e=>{
+    if(isTvMode())return;
     if(e.target.closest('.job,.stage-title,.split-name'))return;
     e.preventDefault();
     e.stopPropagation();
@@ -1356,16 +1807,35 @@ function fitCompactJobLabels(){
     refreshOvenTimerTitles();
   });
 }
+function clearRecentMoveTimers(){
+  recentMoveTimers.forEach(timer=>clearTimeout(timer));
+  recentMoveTimers.clear();
+}
+function applyRecentMoveHighlight(element,jobId,job){
+  const movedAt=Date.parse((job&&job.lastMovedAt)||'');
+  if(!Number.isFinite(movedAt))return;
+  const age=Math.max(0,Date.now()-movedAt);
+  if(age>=RECENT_MOVE_WINDOW_MS)return;
+  element.classList.add('recently-moved');
+  element.style.setProperty('--recent-move-delay','-'+Math.floor(age)+'ms');
+  const timer=setTimeout(()=>{
+    element.classList.remove('recently-moved');
+    element.style.removeProperty('--recent-move-delay');
+    recentMoveTimers.delete(jobId);
+  },Math.max(0,RECENT_MOVE_WINDOW_MS-age)+35);
+  recentMoveTimers.set(jobId,timer);
+}
 function makeJob(jobId){
   const job=state.jobs[jobId];
   const location=findJobLocation(jobId);
   const ovenTimerActive=isOvenLocation(location)&&!!job.ovenEnteredAt;
   const c=COLORS[job.color||0];
   const el=document.createElement('div');
-  el.className='job';el.draggable=true;
+  el.className='job';el.draggable=!isTvMode();
   el.title=job.text;
   el.setAttribute('aria-label','Job '+job.text);
   el.style.background=c.bg;el.style.color=c.tx;el.style.borderColor='rgba(0,0,0,.3)';
+  applyRecentMoveHighlight(el,jobId,job);
 
   const label=document.createElement('span');
   label.className='job-label';
@@ -1374,9 +1844,9 @@ function makeJob(jobId){
 
   if(ovenTimerActive){
     const clock=document.createElement('span');
-    clock.className='oven-clock';
+    clock.className='oven-timer-readout';
     clock.dataset.jobId=jobId;
-    clock.textContent='◷';
+    clock.textContent='⏱ '+formatOvenCompactElapsed(job.ovenEnteredAt);
     clock.tabIndex=0;
     const showTimer=e=>{
       e.stopPropagation();
@@ -1399,15 +1869,15 @@ function makeJob(jobId){
   const x=document.createElement('span');
   x.className='job-x';x.textContent='×';x.title='Delete job';
   x.addEventListener('mousedown',e=>e.stopPropagation());
-  x.addEventListener('click',e=>{e.stopPropagation();snapshot();delete state.jobs[jobId];removeFromLocations(jobId);render();saveState();deleteRemoteJob(jobId);});
+  x.addEventListener('click',e=>{e.stopPropagation();if(isTvMode())return;snapshot();delete state.jobs[jobId];removeFromLocations(jobId);render();saveState();deleteRemoteJob(jobId);});
   el.appendChild(x);
 
   el.addEventListener('click',e=>{
-    if(!ovenTimerActive||e.target.closest('.job-x,.oven-clock'))return;
+    if(!ovenTimerActive||e.target.closest('.job-x,.oven-timer-readout'))return;
     showToast(ovenTimerDetails(state.jobs[jobId]));
   });
-  el.addEventListener('dblclick',()=>openModal(jobId));
-  el.addEventListener('dragstart',e=>{dragId=jobId;el.classList.add('dragging');e.dataTransfer.setData('text/plain',jobId);e.dataTransfer.effectAllowed='move'});
+  el.addEventListener('dblclick',()=>{if(!isTvMode())openModal(jobId)});
+  el.addEventListener('dragstart',e=>{if(isTvMode()){e.preventDefault();return;}dragId=jobId;el.classList.add('dragging');e.dataTransfer.setData('text/plain',jobId);e.dataTransfer.effectAllowed='move'});
   el.addEventListener('dragend',()=>{dragId=null;el.classList.remove('dragging')});
   return el;
 }
@@ -1485,6 +1955,7 @@ function makePlainConnector(def){
   return zone;
 }
 function render(){
+  clearRecentMoveTimers();
   const board=document.getElementById('board');
   board.innerHTML='';
   DEPTS.forEach(d=>board.appendChild(makeDept(d)));
@@ -1494,7 +1965,11 @@ function render(){
   document.getElementById('notesText').value=state.notes||'';
   document.getElementById('goalInput').value=state.goal||'';
   renderWeekPanel();
+  renderRecentActivity();
+  if(activityPanelOpen)positionActivityPanel();
   saveState();
+  updateDisplayInteractivity();
+  scheduleDisplayFit();
 }
 function buildBoxZoomOptions(){
   const wrap=document.getElementById('boxZoomOptions');
@@ -1549,6 +2024,7 @@ function updateBoxZoomView(){
   document.getElementById('boxZoomSummary').textContent=active?'Focused departments: '+labels.join(', '):'Box Zoom active';
   document.getElementById('btnBoxZoom').classList.toggle('active',active||!document.getElementById('boxZoomMenu').hidden);
   fitCompactJobLabels();
+  scheduleDisplayFit();
 }
 function applyBoxZoom(){
   const checked=[...document.querySelectorAll('#boxZoomOptions input:checked')].map(input=>input.value);
@@ -1599,6 +2075,10 @@ function buildStageSelect(){
   sel.appendChild(groupDept);sel.appendChild(groupArrow);
 }
 function openModal(jobId,preferredLocationKey){
+  if(isTvMode()){
+    showToast('TV Mode is read only. Switch to Control Mode or Fit to Screen to edit.');
+    return;
+  }
   editingJobId=jobId||null;
   const modal=document.getElementById('modalBackdrop');
   const jobModal=document.getElementById('jobModal');
@@ -1722,6 +2202,11 @@ function renderWeekPanel(){
 function exportDate(value){
   const timestamp=Date.parse(value||'');
   return Number.isFinite(timestamp)?new Date(timestamp):null;
+}
+function exportJobWeekEnding(job){
+  const jobColor=Number(job&&job.color)||0;
+  const matchingWeek=(state.weeks||[]).find(week=>week&&validWeekDate(String(week.date||'').trim())&&(Number(week.color)||0)===jobColor);
+  return matchingWeek?String(matchingWeek.date).trim():'';
 }
 function exportDuration(startValue,endValue){
   const start=Date.parse(startValue||'');
@@ -1854,9 +2339,8 @@ async function exportExcelSummary(){
       {header:'Created',key:'created',width:23},
       {header:'Completed',key:'completed',width:23},
       {header:'Total Elapsed Time',key:'totalElapsed',width:20},
-      {header:'Color',key:'color',width:14},
-      {header:'Notes',key:'notes',width:45},
-      {header:'Workflow',key:'workflow',width:62}
+      {header:'W/E',key:'weekEnding',width:14},
+      {header:'Notes',key:'notes',width:45}
     ];
 
     const movement=workbook.addWorksheet('Movement History');
@@ -1887,7 +2371,6 @@ async function exportExcelSummary(){
       const createdAt=validIsoTime(job.created)?job.created:(workflow[0]&&workflow[0].enteredAt)||'';
       const completedAt=isCompleted&&currentStep?currentStep.enteredAt:'';
       const elapsedEnd=completedAt||reportIso;
-      const workflowText=workflow.map(step=>workflowLocationInfo(step.locationKey).label).join(' → ');
       summary.addRow({
         jobNumber:String(job.text||''),
         status:exportJobStatus(currentInfo),
@@ -1897,9 +2380,8 @@ async function exportExcelSummary(){
         created:exportDate(createdAt),
         completed:exportDate(completedAt),
         totalElapsed:exportDuration(createdAt,elapsedEnd),
-        color:(COLORS[Number(job.color)||0]||COLORS[0]).name,
-        notes:job.note||'',
-        workflow:workflowText
+        weekEnding:exportJobWeekEnding(job),
+        notes:job.note||''
       });
 
       workflow.forEach((step,index)=>{
@@ -1923,7 +2405,6 @@ async function exportExcelSummary(){
     styleExportSheet(summary,[4,6,7],[5,8],2);
     styleExportSheet(movement,[5,6],[7],8);
     summary.getColumn(10).alignment={vertical:'top',wrapText:true};
-    summary.getColumn(11).alignment={vertical:'top',wrapText:true};
     summary.getColumn(1).alignment={vertical:'middle',horizontal:'left'};
     movement.getColumn(1).alignment={vertical:'middle',horizontal:'left'};
     movement.getColumn(2).alignment={vertical:'middle',horizontal:'center'};
@@ -1942,30 +2423,232 @@ async function exportExcelSummary(){
   }
 }
 
-function safeStateJson(){
-  return JSON.stringify(state).replace(/</g,'\\u003c');
+const BOARD_BACKUP_FORMAT='forgent-waco1-production-coordination-board';
+const BOARD_BACKUP_VERSION=1;
+let pendingBoardBackup=null;
+
+function cloneJsonValue(value){return JSON.parse(JSON.stringify(value));}
+function backupFileStamp(date){
+  return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0')+'_'+String(date.getHours()).padStart(2,'0')+String(date.getMinutes()).padStart(2,'0');
+}
+function boardBackupPayload(){
+  return {
+    format:BOARD_BACKUP_FORMAT,
+    version:BOARD_BACKUP_VERSION,
+    boardId:BOARD_ID,
+    boardName:'Waco 1 - Production Coordination Board',
+    createdAt:new Date().toISOString(),
+    includes:['job locations and ordering','colors and priorities','notes','oven start times','movement history','Corrective Action and Testing history','W/E information','goal','future metadata'],
+    state:cloneJsonValue(state)
+  };
+}
+function safeObjectKey(key){return key!=='__proto__'&&key!=='prototype'&&key!=='constructor';}
+function sanitizeBackupState(source){
+  if(!source||typeof source!=='object'||Array.isArray(source))throw new Error('This file does not contain a board state.');
+  const safe={};
+  Object.keys(source).forEach(key=>{
+    if(!safeObjectKey(key))return;
+    try{safe[key]=cloneJsonValue(source[key]);}catch(error){}
+  });
+  safe.locations={};
+  safe.jobs={};
+  const rawJobs=source.jobs&&typeof source.jobs==='object'&&!Array.isArray(source.jobs)?source.jobs:{};
+  const jobIds=Object.keys(rawJobs).filter(safeObjectKey);
+  if(jobIds.length>5000)throw new Error('This backup contains more than 5,000 jobs and cannot be opened safely.');
+  jobIds.forEach(id=>{
+    const raw=rawJobs[id];
+    if(!raw||typeof raw!=='object'||Array.isArray(raw))return;
+    const job={};
+    Object.keys(raw).forEach(key=>{
+      if(!safeObjectKey(key))return;
+      try{job[key]=cloneJsonValue(raw[key]);}catch(error){}
+    });
+    job.text=String(raw.text||'').slice(0,120);
+    job.color=Math.max(0,Math.min(COLORS.length-1,Number(raw.color)||0));
+    job.note=typeof raw.note==='string'?raw.note.slice(0,5000):'';
+    job.ovenEnteredAt=validIsoTime(raw.ovenEnteredAt)?raw.ovenEnteredAt:'';
+    job.workflow=sanitizeWorkflow(raw.workflow);
+    job.created=validIsoTime(raw.created)?raw.created:(job.workflow[0]&&job.workflow[0].enteredAt)||new Date().toISOString();
+    safe.jobs[id]=job;
+  });
+  const rawLocations=source.locations&&typeof source.locations==='object'&&!Array.isArray(source.locations)?source.locations:{};
+  const placed=new Set();
+  Object.keys(rawLocations).filter(safeObjectKey).forEach(key=>{
+    if(!Array.isArray(rawLocations[key]))return;
+    const ordered=[];
+    rawLocations[key].forEach(id=>{
+      if(typeof id!=='string'||!safe.jobs[id]||placed.has(id))return;
+      placed.add(id);ordered.push(id);
+    });
+    if(ordered.length)safe.locations[key]=ordered;
+  });
+  return normalizeState(safe);
+}
+function parseBoardBackup(text){
+  let payload;
+  try{payload=JSON.parse(text);}catch(error){throw new Error('The selected file is not valid JSON.');}
+  if(!payload||typeof payload!=='object'||Array.isArray(payload))throw new Error('The selected file is not a board backup.');
+  if(payload.format!==BOARD_BACKUP_FORMAT)throw new Error('This is not a Waco 1 Production Coordination Board backup.');
+  if(!Number.isFinite(Number(payload.version))||Number(payload.version)<1)throw new Error('This backup does not have a valid format version.');
+  return {payload,state:sanitizeBackupState(payload.state)};
+}
+function backupStateStats(backupState){
+  const jobIds=Object.keys(backupState.jobs||{});
+  const completed=new Set(backupState.locations['dept:completed']||[]);
+  const oven=new Set();
+  Object.keys(backupState.locations||{}).filter(isOvenLocation).forEach(key=>(backupState.locations[key]||[]).forEach(id=>oven.add(id)));
+  const movements=jobIds.reduce((sum,id)=>sum+sanitizeWorkflow(backupState.jobs[id].workflow).length,0);
+  const configuredWeeks=(backupState.weeks||[]).filter(week=>week&&week.date).length;
+  return {jobs:jobIds.length,completed:completed.size,oven:oven.size,movements,configuredWeeks};
+}
+function closeBackupModal(){
+  const backdrop=document.getElementById('backupBackdrop');
+  backdrop.classList.remove('open');
+  backdrop.setAttribute('aria-hidden','true');
+  document.getElementById('backupPreview').classList.remove('open');
+  document.getElementById('backupPreviewBoard').innerHTML='';
+  document.getElementById('boardBackupInput').value='';
+  pendingBoardBackup=null;
+}
+function fillBackupSummary(stats){
+  const grid=document.getElementById('backupSummaryGrid');
+  grid.innerHTML='';
+  [
+    [stats.jobs,'Jobs'],[stats.completed,'Completed'],[stats.oven,'Active Oven Timers'],[stats.movements,'Workflow Records']
+  ].forEach(([value,label])=>{
+    const card=document.createElement('div');card.className='backup-stat';
+    const strong=document.createElement('strong');strong.textContent=String(value);
+    const span=document.createElement('span');span.textContent=label;
+    card.append(strong,span);grid.appendChild(card);
+  });
+}
+function openBackupModal(fileName,parsed){
+  pendingBoardBackup={fileName,payload:parsed.payload,state:parsed.state};
+  const stats=backupStateStats(parsed.state);
+  const savedDate=new Date(parsed.payload.createdAt||'');
+  const savedText=Number.isFinite(savedDate.getTime())?savedDate.toLocaleString():'Unknown time';
+  document.getElementById('backupFileDetails').textContent=fileName+' • Saved '+savedText+' • Backup format v'+parsed.payload.version+' • '+stats.configuredWeeks+' W/E entries configured';
+  fillBackupSummary(stats);
+  document.getElementById('backupPreview').classList.remove('open');
+  const backdrop=document.getElementById('backupBackdrop');
+  backdrop.classList.add('open');
+  backdrop.setAttribute('aria-hidden','false');
+}
+function orderedBackupLocationKeys(backupState){
+  const ordered=[];
+  DEPTS.forEach(def=>{
+    if(def.split)def.split.forEach(split=>ordered.push(locationKey('dept',def.id,split)));
+    else ordered.push(locationKey('dept',def.id));
+  });
+  ARROWS.forEach(def=>ordered.push(locationKey('arrow',def.id)));
+  Object.keys(backupState.locations||{}).forEach(key=>{if(!ordered.includes(key))ordered.push(key)});
+  return ordered;
+}
+function renderBackupPreview(){
+  if(!pendingBoardBackup)return;
+  const backupState=pendingBoardBackup.state;
+  const board=document.getElementById('backupPreviewBoard');
+  board.innerHTML='';
+  const shown=new Set();
+  orderedBackupLocationKeys(backupState).forEach(key=>{
+    const ids=(backupState.locations[key]||[]).filter(id=>backupState.jobs[id]);
+    if(!ids.length)return;
+    const card=document.createElement('section');card.className='backup-preview-location';
+    const heading=document.createElement('h4');heading.textContent=workflowLocationInfo(key).label+' ('+ids.length+')';card.appendChild(heading);
+    const jobs=document.createElement('div');jobs.className='backup-preview-jobs';
+    ids.forEach(id=>{
+      shown.add(id);
+      const job=backupState.jobs[id];
+      const color=COLORS[Number(job.color)||0]||COLORS[0];
+      const tag=document.createElement('span');tag.className='backup-preview-job';tag.textContent=job.text||id;tag.style.background=color.bg;tag.style.color=color.tx;jobs.appendChild(tag);
+    });
+    card.appendChild(jobs);board.appendChild(card);
+  });
+  const unplaced=Object.keys(backupState.jobs||{}).filter(id=>!shown.has(id));
+  if(unplaced.length){
+    const card=document.createElement('section');card.className='backup-preview-location';
+    const heading=document.createElement('h4');heading.textContent='Unplaced Jobs ('+unplaced.length+')';card.appendChild(heading);
+    const jobs=document.createElement('div');jobs.className='backup-preview-jobs';
+    unplaced.forEach(id=>{const job=backupState.jobs[id];const color=COLORS[Number(job.color)||0]||COLORS[0];const tag=document.createElement('span');tag.className='backup-preview-job';tag.textContent=job.text||id;tag.style.background=color.bg;tag.style.color=color.tx;jobs.appendChild(tag)});
+    card.appendChild(jobs);board.appendChild(card);
+  }
+  if(!board.children.length){const empty=document.createElement('div');empty.className='backup-preview-empty';empty.textContent='This backup contains an empty board.';board.appendChild(empty)}
+  document.getElementById('backupPreview').classList.add('open');
+  document.getElementById('backupPreview').scrollIntoView({block:'nearest'});
+}
+function mergeBackupState(backupState){
+  const imported=cloneJsonValue(backupState);
+  const existingText=new Set(Object.values(state.jobs||{}).map(job=>String(job.text||'').trim().toLowerCase()).filter(Boolean));
+  const importedLocation={};
+  Object.keys(imported.locations||{}).forEach(key=>(imported.locations[key]||[]).forEach(id=>{if(!importedLocation[id])importedLocation[id]=key}));
+  let added=0;
+  let skipped=0;
+  Object.keys(imported.jobs||{}).forEach(id=>{
+    const job=imported.jobs[id];
+    const textKey=String(job.text||'').trim().toLowerCase();
+    if(state.jobs[id]||(textKey&&existingText.has(textKey))){skipped++;return;}
+    state.jobs[id]=job;
+    if(textKey)existingText.add(textKey);
+    const destination=importedLocation[id];
+    if(destination){if(!state.locations[destination])state.locations[destination]=[];state.locations[destination].push(id)}
+    added++;
+  });
+  if(imported.notes&&imported.notes!==state.notes){
+    state.notes=state.notes?state.notes+'\n\n--- Imported backup notes ---\n'+imported.notes:imported.notes;
+  }
+  if(!state.goal&&imported.goal)state.goal=imported.goal;
+  if(Array.isArray(imported.weeks)){
+    state.weeks=state.weeks.map((week,index)=>week&&week.date?week:(imported.weeks[index]||week));
+  }
+  const reserved=new Set(['locations','jobs','notes','goal','weeks','updatedAt','exportedAt']);
+  Object.keys(imported).forEach(key=>{if(!reserved.has(key)&&safeObjectKey(key)&&typeof state[key]==='undefined')state[key]=imported[key]});
+  return {added,skipped};
+}
+async function mergePendingBackup(){
+  if(!pendingBoardBackup||isTvMode())return;
+  const stats=backupStateStats(pendingBoardBackup.state);
+  if(!confirm('Merge '+stats.jobs+' backup jobs with the current board? Current jobs win when the same job already exists.'))return;
+  snapshot();
+  const result=mergeBackupState(pendingBoardBackup.state);
+  closeBackupModal();render();saveState();await syncEntireBoard();
+  showToast('Backup merged: '+result.added+' jobs added, '+result.skipped+' existing jobs kept.');
+}
+async function replaceWithPendingBackup(){
+  if(!pendingBoardBackup||isTvMode())return;
+  const stats=backupStateStats(pendingBoardBackup.state);
+  if(!confirm('Replace the current live board with this backup containing '+stats.jobs+' jobs? You can use Undo immediately afterward if needed.'))return;
+  snapshot();
+  state=normalizeState(cloneJsonValue(pendingBoardBackup.state));
+  closeBackupModal();render();saveState();await syncEntireBoard();
+  showToast('Current board replaced with the uploaded backup.');
+}
+async function readBoardBackupFile(file){
+  if(!file)return;
+  if(file.size>50*1024*1024){showToast('The selected backup is larger than 50 MB and cannot be opened.',true);return;}
+  try{
+    const parsed=parseBoardBackup(await file.text());
+    openBackupModal(file.name,parsed);
+  }catch(error){
+    console.error('Opening board backup',error);
+    document.getElementById('boardBackupInput').value='';
+    showToast(error.message||'The selected backup could not be opened.',true);
+  }
 }
 async function saveBoardFile(){
   saveState();
-  state.exportedAt=new Date().toISOString();
-  const json=safeStateJson();
-  let html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
-  const re=/(<script id="initialBoardState" type="application\/json">)([\s\S]*?)(<\/script>)/;
-  if(re.test(html)){
-    html=html.replace(re,(_,openTag,oldJson,closeTag)=>openTag+json+closeTag);
-  }
-  const stamp=new Date().toISOString().slice(0,10);
-  const filename='Production_Coordination_Board_'+stamp+'.html';
-  const blob=new Blob([html],{type:'text/html'});
+  const payload=boardBackupPayload();
+  const filename='Waco1_Board_Backup_'+backupFileStamp(new Date())+'.json';
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   if(window.showSaveFilePicker){
     try{
       const handle=await window.showSaveFilePicker({
         suggestedName:filename,
-        types:[{description:'HTML file',accept:{'text/html':['.html']}}]
+        types:[{description:'Production Coordination Board backup',accept:{'application/json':['.json']}}]
       });
       const writable=await handle.createWritable();
       await writable.write(blob);
       await writable.close();
+      showToast('Board backup saved. It can be restored with Upload Board.');
       return;
     }catch(e){
       if(e&&e.name==='AbortError')return;
@@ -1979,6 +2662,7 @@ async function saveBoardFile(){
   a.click();
   a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showToast('Board backup downloaded. It can be restored with Upload Board.');
 }
 function clearBoard(){
   if(!confirm('Clear all jobs from this board? This keeps the goal and W/E color key.'))return;
@@ -1996,14 +2680,31 @@ document.getElementById('btnAdd').addEventListener('click',()=>openModal());
 document.getElementById('btnUndo').addEventListener('click',undo);
 document.getElementById('btnRedo').addEventListener('click',redoChange);
 document.getElementById('btnNotes').addEventListener('click',()=>document.getElementById('notesPanel').classList.toggle('open'));
-document.getElementById('btnBoxZoom').addEventListener('click',e=>{e.stopPropagation();setBoxZoomMenu(document.getElementById('boxZoomMenu').hidden)});
+document.getElementById('btnActivity').addEventListener('click',()=>setActivityPanel(!activityPanelOpen));
+document.getElementById('btnCloseActivity').addEventListener('click',()=>setActivityPanel(false));
+document.getElementById('btnBoxZoom').addEventListener('click',e=>{e.stopPropagation();setDisplayMenu(false);setBoxZoomMenu(document.getElementById('boxZoomMenu').hidden)});
 document.getElementById('btnCloseZoomMenu').addEventListener('click',()=>setBoxZoomMenu(false));
 document.getElementById('btnZoomApply').addEventListener('click',applyBoxZoom);
 document.getElementById('btnZoomClear').addEventListener('click',clearBoxZoom);
 document.getElementById('btnExitZoom').addEventListener('click',clearBoxZoom);
 document.getElementById('boxZoomMenu').addEventListener('click',e=>e.stopPropagation());
-document.addEventListener('click',()=>setBoxZoomMenu(false));
+document.getElementById('btnDisplay').addEventListener('click',e=>{e.stopPropagation();setBoxZoomMenu(false);setDisplayMenu(document.getElementById('displayMenu').hidden)});
+document.getElementById('displayMenu').addEventListener('click',e=>e.stopPropagation());
+document.querySelectorAll('[data-display-mode]').forEach(option=>option.addEventListener('click',()=>setDisplayMode(option.dataset.displayMode)));
+document.addEventListener('click',()=>{setBoxZoomMenu(false);setDisplayMenu(false)});
 document.getElementById('btnSaveBoard').addEventListener('click',saveBoardFile);
+document.getElementById('btnUploadBoard').addEventListener('click',()=>{
+  if(isTvMode())return;
+  const input=document.getElementById('boardBackupInput');
+  input.value='';input.click();
+});
+document.getElementById('boardBackupInput').addEventListener('change',event=>readBoardBackupFile(event.target.files&&event.target.files[0]));
+document.getElementById('btnPreviewBackup').addEventListener('click',renderBackupPreview);
+document.getElementById('btnCloseBackupPreview').addEventListener('click',()=>document.getElementById('backupPreview').classList.remove('open'));
+document.getElementById('btnMergeBackup').addEventListener('click',mergePendingBackup);
+document.getElementById('btnReplaceBackup').addEventListener('click',replaceWithPendingBackup);
+document.getElementById('btnCancelBackup').addEventListener('click',closeBackupModal);
+document.getElementById('backupBackdrop').addEventListener('click',event=>{if(event.target.id==='backupBackdrop')closeBackupModal()});
 document.getElementById('btnExportSummary').addEventListener('click',exportExcelSummary);
 document.getElementById('btnClear').addEventListener('click',clearBoard);
 document.getElementById('btnSignOut').addEventListener('click',handleSignOut);
@@ -2028,16 +2729,21 @@ document.getElementById('goalInput').addEventListener('input',e=>{
 });
 document.addEventListener('keydown',e=>{
   const tag=(e.target.tagName||'').toLowerCase();
+  if(e.key==='Escape'&&document.getElementById('backupBackdrop').classList.contains('open')){closeBackupModal();return;}
   if(e.key==='Escape'&&!document.getElementById('boxZoomMenu').hidden){setBoxZoomMenu(false);return;}
+  if(e.key==='Escape'&&!document.getElementById('displayMenu').hidden){setDisplayMenu(false);return;}
+  if(e.key==='Escape'&&activityPanelOpen){setActivityPanel(false);return;}
   if(tag==='input'||tag==='textarea'||tag==='select')return;
+  if(isTvMode())return;
   if(e.key==='1')openModal();
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redoChange()}
 });
-window.addEventListener('resize',fitCompactJobLabels);
+window.addEventListener('resize',()=>{fitCompactJobLabels();scheduleDisplayFit();if(activityPanelOpen)positionActivityPanel()});
+document.addEventListener('fullscreenchange',scheduleDisplayFit);
 setInterval(refreshOvenTimerTitles,30000);
 
-loadState();buildSwatches();render();initializeLiveBoard();
+restoreDisplayMode();startDisplayResizeObserver();loadState();buildSwatches();render();initializeLiveBoard();
 </script>
 
 </body></html>
