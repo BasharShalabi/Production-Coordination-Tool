@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SECURED REVIEW BUILD: Forgent branded review v15 with Recent Activity, 15-second move highlight, and W/E Excel summary 2026-07-22 -->
+<!-- SECURED REVIEW BUILD: PCB Waco1 V3 review v2 with post-login app selector, non-blocking tutorial guidance, and live department job counts 2026-07-23 -->
 <!-- saved from url=(0060)file:///C:/Users/bashar.shalabi/Downloads/preview%20(2).html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -24,7 +24,8 @@
 html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
 button,input,select,textarea{font:inherit}
 .app{min-height:100vh;display:none;flex-direction:column}
-body.authenticated .app{display:flex}
+body.authenticated.board-active .app,
+body.authenticated.tutorial-open .app{display:flex}
 .auth-gate{
   position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;
   padding:24px;background:linear-gradient(145deg,#eef4fb,#f8fafc 55%,#e8f0f8);
@@ -50,6 +51,48 @@ body.authenticated .app{display:flex}
 .auth-submit:hover{background:#0353e9}
 .auth-submit:disabled{cursor:wait;opacity:.7}
 .auth-error{min-height:18px;margin:12px 0 0;color:#b91c1c;font-size:13px;font-weight:800;text-align:center}
+.app-selector{
+  position:fixed;inset:0;z-index:1550;display:none;align-items:center;justify-content:center;
+  padding:28px;background:radial-gradient(circle at 15% 18%,rgba(115,243,255,.18),transparent 30%),radial-gradient(circle at 85% 82%,rgba(0,158,172,.19),transparent 34%),linear-gradient(145deg,#142c2e,#1E393B 52%,#0f2426);
+}
+body.authenticated.app-selecting .app-selector{display:flex}
+.app-selector-card{
+  width:min(920px,100%);overflow:hidden;border:1px solid rgba(115,243,255,.65);border-radius:18px;
+  background:#f7fbfb;box-shadow:0 28px 90px rgba(0,0,0,.38);
+}
+.app-selector-brand{
+  display:flex;flex-direction:column;align-items:center;padding:30px 36px 23px;
+  border-bottom:4px solid var(--electric);background:#000;
+}
+.app-selector-logo{display:block;width:min(590px,90%);height:auto;object-fit:contain}
+.app-selector-kicker{margin-top:15px;color:var(--electric);font-size:12px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}
+.app-selector-content{padding:30px 34px 32px}
+.app-selector-content h1{margin:0;color:var(--teal-dark);font-size:28px;font-weight:1000;text-align:center}
+.app-selector-intro{margin:8px 0 24px;color:#526b6d;font-size:14px;font-weight:750;text-align:center}
+.app-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.app-choice{
+  position:relative;min-height:205px;padding:24px;border:2px solid #a7c9cc;border-radius:14px;
+  background:#fff;color:var(--teal-dark);text-align:left;cursor:pointer;transition:.18s ease;
+}
+.app-choice:hover,.app-choice:focus-visible{
+  border-color:var(--teal);background:var(--electric-soft);outline:none;
+  transform:translateY(-3px);box-shadow:0 14px 32px rgba(30,57,59,.18);
+}
+.app-choice-icon{
+  display:flex;align-items:center;justify-content:center;width:52px;height:52px;margin-bottom:18px;
+  border-radius:12px;background:var(--teal-dark);color:var(--electric);font-size:17px;font-weight:1000;
+}
+.app-choice strong{display:block;font-size:22px;font-weight:1000;line-height:1.18}
+.app-choice small{display:block;margin-top:10px;color:#526b6d;font-size:13px;font-weight:750;line-height:1.5}
+.app-choice-tag{
+  display:inline-flex;align-items:center;gap:6px;margin-top:17px;padding:6px 9px;border-radius:999px;
+  background:#e7f8f9;color:var(--teal-medium);font-size:11px;font-weight:950;text-transform:uppercase;
+}
+.app-choice-live .app-choice-tag:before{content:"";width:8px;height:8px;border-radius:50%;background:#22c55e}
+.app-selector-signout{
+  display:block;margin:22px auto 0;border:0;background:transparent;color:#526b6d;
+  font-size:13px;font-weight:900;text-decoration:underline;cursor:pointer;
+}
 .app-title{
   text-align:center;
   font-size:22px;
@@ -165,11 +208,17 @@ body.authenticated .app{display:flex}
 }
 .corrective .stage-title{background:#fca5a5;color:#7f1d1d;border-color:#b91c1c;border-left-color:#7f1d1d}
 .completed-stage .stage-title{background:#dcfce7;color:#14532d;border-color:#86efac}
-.completed-count-pill{
+.dept-count-pill{
   display:inline-flex;align-items:center;justify-content:center;
-  min-width:22px;height:22px;padding:0 7px;border-radius:999px;
-  background:#166534;color:#fff;font-size:13px;font-weight:900;
+  min-width:27px;height:24px;padding:0 8px;border-radius:999px;
+  background:var(--electric);color:var(--teal-dark);font-size:13px;font-weight:1000;
+  line-height:1;border:1px solid rgba(255,255,255,.55);box-shadow:0 2px 7px rgba(0,0,0,.22);
+  flex:0 0 auto;
 }
+.stage-title-label{min-width:0}
+.special .dept-count-pill{background:#fff7d1;color:#5f4500;border-color:#c99700}
+.corrective .dept-count-pill{background:#fff;color:#7f1d1d;border-color:#b91c1c}
+.completed-stage .dept-count-pill{background:var(--teal-dark);color:var(--electric);border-color:var(--electric)}
 .slots{
   flex:1;
   display:grid;
@@ -466,8 +515,142 @@ body.authenticated .app{display:flex}
 .oven-time-error{min-height:18px;margin-top:8px;color:#b91c1c;font-size:13px;font-weight:900}
 .primary{background:#0f62fe;color:#fff;border-color:#0f62fe}
 .primary:hover{background:#0353e9}
+
+/* PCB Waco1 V3 in-app tutorial */
+.tutorial-module{
+  position:fixed;inset:0;z-index:1600;display:none;flex-direction:column;
+  background:#dce9e9;color:var(--teal-dark);
+}
+.tutorial-module.open{display:flex}
+body.tutorial-open{overflow:hidden}
+.tutorial-header{
+  display:flex;align-items:center;justify-content:space-between;gap:22px;min-height:78px;
+  padding:12px 20px;background:#000;border-bottom:5px solid var(--electric);color:#fff;
+  box-shadow:0 5px 20px rgba(0,0,0,.34);
+}
+.tutorial-brand{display:flex;align-items:center;gap:22px;min-width:0}
+.tutorial-logo{display:block;width:255px;max-height:38px;object-fit:contain;object-position:left center}
+.tutorial-heading{min-width:0}
+.tutorial-heading strong{display:block;font-size:21px;font-weight:1000;letter-spacing:.05em;text-transform:uppercase}
+.tutorial-heading span{display:block;margin-top:4px;color:var(--electric);font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.tutorial-safe-pill{
+  display:inline-flex;align-items:center;gap:7px;margin-left:auto;padding:8px 12px;
+  border:1px solid var(--electric);border-radius:999px;background:var(--teal-dark);color:var(--electric);
+  font-size:12px;font-weight:950;white-space:nowrap;
+}
+.tutorial-safe-pill:before{content:"";width:9px;height:9px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+.tutorial-close{
+  min-width:126px;height:40px;flex:0 0 auto;padding:0 14px;border:2px solid var(--electric);border-radius:9px;
+  background:var(--teal-dark);color:var(--electric);font-size:13px;font-weight:950;line-height:1;cursor:pointer;
+}
+.tutorial-close:hover{background:var(--teal-medium);color:#fff}
+.tutorial-layout{display:grid;grid-template-columns:330px minmax(0,1fr);flex:1;min-height:0}
+.tutorial-sidebar{
+  display:flex;flex-direction:column;min-height:0;padding:18px;background:#f7fbfb;
+  border-right:3px solid var(--teal-dark);box-shadow:5px 0 18px rgba(30,57,59,.13);overflow-y:auto;
+}
+.tutorial-progress{color:var(--teal-medium);font-size:11px;font-weight:1000;letter-spacing:.12em;text-transform:uppercase}
+.tutorial-progress-bar{height:7px;margin:8px 0 16px;border-radius:99px;background:#c7dddf;overflow:hidden}
+.tutorial-progress-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--electric));transition:width .25s ease}
+.tutorial-lesson-nav{display:grid;gap:6px;margin-bottom:18px}
+.tutorial-step-button{
+  display:grid;grid-template-columns:28px minmax(0,1fr);gap:9px;align-items:center;width:100%;
+  min-height:42px;padding:7px 9px;border:1px solid transparent;border-radius:9px;background:transparent;
+  color:#425e60;text-align:left;cursor:pointer;
+}
+.tutorial-step-button:hover{background:var(--electric-soft)}
+.tutorial-step-button.active{border-color:var(--teal);background:#e8fbfc;box-shadow:inset 4px 0 0 var(--teal)}
+.tutorial-step-number{
+  display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;
+  background:#c7dddf;color:var(--teal-dark);font-size:12px;font-weight:1000;
+}
+.tutorial-step-button.active .tutorial-step-number{background:var(--teal-dark);color:var(--electric)}
+.tutorial-step-button.completed .tutorial-step-number{background:#166534;color:#fff}
+.tutorial-step-copy strong{display:block;font-size:13px;font-weight:950}
+.tutorial-step-copy small{display:block;margin-top:2px;color:#6b8284;font-size:10px;font-weight:750}
+.tutorial-lesson-card{
+  margin-top:auto;padding:15px;border:2px solid var(--teal-dark);border-top:6px solid var(--electric);
+  border-radius:11px;background:#fff;box-shadow:0 7px 20px rgba(30,57,59,.11);
+}
+.tutorial-lesson-card h2{margin:0;color:var(--teal-dark);font-size:20px;font-weight:1000;line-height:1.15}
+.tutorial-lesson-card p{margin:9px 0 0;color:#425e60;font-size:13px;font-weight:750;line-height:1.45}
+.tutorial-task{
+  margin-top:12px;padding:10px 11px;border-left:5px solid var(--teal);border-radius:6px;
+  background:var(--electric-soft);color:var(--teal-dark);font-size:12px;font-weight:900;line-height:1.4;
+}
+.tutorial-nav-actions{display:flex;gap:8px;margin-top:14px}
+.tutorial-nav-actions .tb-btn{flex:1}
+.tutorial-workspace{display:flex;flex-direction:column;min-width:0;min-height:0;background:linear-gradient(180deg,#cfe2e3,#edf7f7)}
+.tutorial-toolbar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;background:#000;
+  border-bottom:2px solid var(--teal-dark);
+}
+.tutorial-toolbar .tb-btn{min-height:34px;padding:7px 10px}
+.tutorial-toolbar .tb-btn:disabled{opacity:.45;cursor:not-allowed}
+.tutorial-mode-label{
+  margin-left:auto;padding:6px 10px;border:1px solid var(--electric);border-radius:999px;
+  color:var(--electric);font-size:11px;font-weight:950;white-space:nowrap;
+}
+.tutorial-board-wrap{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;flex:1;min-height:0;padding:12px 14px 14px}
+.tutorial-board-viewport{
+  position:relative;flex:1;min-width:0;min-height:0;overflow:auto;padding:14px;
+  border:2px solid var(--teal-dark);border-radius:13px;background:linear-gradient(180deg,#dce9e9,#f4fafa 38%,#d7e6e7);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.75),0 12px 28px rgba(30,57,59,.16);
+}
+.tutorial-board-canvas{position:relative;margin:0 auto}
+.tutorial-board{transform-origin:top left}
+.tutorial-board .job{cursor:grab}
+.tutorial-board .job:active{cursor:grabbing}
+.tutorial-board .job-x{display:none!important}
+.tutorial-board .department.tutorial-highlight,
+.tutorial-board .job.tutorial-highlight,
+.tutorial-board .dept-count-pill.tutorial-highlight,
+.tutorial-toolbar .tutorial-highlight{
+  position:relative;z-index:25;outline:5px solid var(--electric);outline-offset:3px;
+  box-shadow:0 0 0 7px rgba(0,158,172,.42),0 0 28px 12px rgba(115,243,255,.72);
+  animation:tutorialTargetPulse 1.45s ease-in-out infinite;
+}
+@keyframes tutorialTargetPulse{
+  0%,100%{filter:brightness(1);transform:scale(1)}
+  50%{filter:brightness(1.05);transform:scale(1.025)}
+}
+.tutorial-board.is-focused{
+  display:flex;align-items:stretch;gap:18px;min-width:0;width:max-content;min-height:470px;
+}
+.tutorial-board.is-focused .department{display:none;flex:0 0 330px;min-height:470px;order:0}
+.tutorial-board.is-focused .department.tutorial-focus{display:flex}
+.tutorial-board.is-focused .arrow-stage{display:none;flex:0 0 92px;min-height:470px;padding-top:66px;order:0}
+.tutorial-board.is-focused .arrow-stage.tutorial-focus{display:flex}
+.tutorial-board.is-focused .plain-connector{display:none}
+.tutorial-board.is-focused .stage-title{min-height:44px;font-size:24px}
+.tutorial-board.is-focused .job{min-height:44px;font-size:18px}
+.tutorial-callout{
+  position:relative;z-index:2;width:auto;margin:10px 14px 0;
+  padding:11px 16px 11px 18px;border:2px solid var(--teal-dark);border-left:8px solid var(--electric);
+  border-radius:10px;background:#fff;color:var(--teal-dark);box-shadow:0 7px 18px rgba(5,37,40,.16);
+  font-size:13px;font-weight:850;line-height:1.4;
+}
+.tutorial-callout strong{display:inline;margin-right:9px;font-size:14px;font-weight:1000;text-transform:uppercase}
+.tutorial-activity{
+  position:static;z-index:1;width:380px;max-width:32vw;min-height:0;
+  display:none;flex-direction:column;border:2px solid var(--teal-dark);border-radius:11px;background:#f7fbfb;
+  box-shadow:0 10px 26px rgba(5,37,40,.2);overflow:hidden;
+}
+.tutorial-activity.open{display:flex;grid-column:2}
+.tutorial-board-wrap:has(.tutorial-activity.open){grid-template-columns:minmax(0,1fr) 380px}
+.tutorial-activity-head{padding:11px 14px;border-bottom:4px solid var(--electric);background:#000;color:#fff;font-size:15px;font-weight:1000;text-transform:uppercase}
+.tutorial-activity-list{overflow:auto;padding:9px}
+.tutorial-activity-item{margin-bottom:7px;padding:9px 10px;border:1px solid #b8d6d8;border-radius:8px;background:#fff;color:#425e60;font-size:11px;font-weight:800}
+.tutorial-activity-item strong{display:block;margin-bottom:4px;color:var(--teal-dark);font-size:13px}
+.tutorial-activity-empty{padding:18px;color:#526b6d;text-align:center;font-size:12px;font-weight:850}
+.tutorial-readonly .tutorial-board .job{cursor:default}
+.tutorial-readonly .tutorial-board-viewport:after{
+  content:"TV Mode practice: read only";position:absolute;left:24px;bottom:24px;z-index:40;
+  padding:8px 11px;border:1px solid var(--electric);border-radius:999px;background:var(--teal-dark);
+  color:var(--electric);font-size:12px;font-weight:950;
+}
 @media print{
-  .auth-gate,.toolbar,.board-note,.activity-panel,.modal-backdrop,.bottom-panel,.toast{display:none!important}
+  .auth-gate,.toolbar,.board-note,.activity-panel,.modal-backdrop,.bottom-panel,.toast,.tutorial-module{display:none!important}
   .board-shell{padding:0;overflow:visible}
   .board{min-width:0;transform:scale(.63);transform-origin:top left}
 }
@@ -513,7 +696,7 @@ body.authenticated .app{display:flex}
 .corrective .stage-title{background:#fca5a5;color:#7f1d1d;border-color:#b91c1c;border-left-color:#7f1d1d}
 .completed-stage{background:linear-gradient(145deg,#c9f7f8,#9edee1);border-color:var(--teal)}
 .completed-stage .stage-title{background:var(--teal);color:#062f33;border-color:var(--teal);border-left-color:var(--teal-dark)}
-.completed-count-pill{background:var(--teal-dark);color:var(--electric)}
+.completed-stage .dept-count-pill{background:var(--teal-dark);color:var(--electric)}
 .split-name{color:var(--teal-dark);font-weight:950}
 .job{border-color:rgba(30,57,59,.42)}
 .bottom-panel{border-top:5px solid var(--teal);background:linear-gradient(180deg,#f7fbfb,#dce9e9)}
@@ -619,6 +802,35 @@ body.display-tv .tv-readonly-pill{display:inline-flex}
 .week-color-select{min-width:105px;min-height:36px;max-width:none;padding:6px 7px;border:2px solid var(--teal-medium);font-size:14px;color:var(--teal-dark);flex:1 1 105px}
 @media(max-width:900px){.backup-summary-grid,.backup-actions-grid,.backup-preview-board{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){.zoom-menu,.display-menu{position:fixed;top:132px;left:10px;right:10px;width:auto;transform:none}.zoom-options{grid-template-columns:1fr}.board-shell.zoomed .board{display:grid;grid-template-columns:1fr}.board-shell.zoomed .arrow-stage.box-zoom-arrow{min-height:100px;padding:0}.board-shell.zoomed .plain-connector.box-zoom-connector{min-height:100px}.board-shell.zoomed .arrow-stage.box-zoom-arrow .arrow-line{margin-top:20px}.modal-brand{padding:21px 20px 17px}.modal-logo{width:min(390px,96%)}.modal h2{font-size:23px}.modal-body{padding:21px 20px 23px}.backup-summary-grid,.backup-actions-grid,.backup-preview-board{grid-template-columns:1fr}.activity-panel{right:10px;bottom:10px;width:calc(100vw - 20px)}}
+@media(max-width:1050px){
+  .tutorial-layout{grid-template-columns:280px minmax(0,1fr)}
+  .tutorial-logo{width:215px}
+  .tutorial-safe-pill{display:none}
+}
+@media(max-width:760px){
+  .app-selector{padding:14px}
+  .app-selector-content{padding:22px 18px 24px}
+  .app-selector-content h1{font-size:23px}
+  .app-choice-grid{grid-template-columns:1fr}
+  .app-choice{min-height:150px;padding:19px}
+  .tutorial-header{min-height:68px;padding:10px 12px}
+  .tutorial-logo{width:165px}
+  .tutorial-heading strong{font-size:16px}
+  .tutorial-heading span{display:none}
+  .tutorial-close{min-width:106px;padding:0 10px;font-size:12px}
+  .tutorial-layout{display:flex;flex-direction:column}
+  .tutorial-sidebar{flex:0 0 auto;max-height:42vh;border-right:0;border-bottom:3px solid var(--teal-dark);padding:12px}
+  .tutorial-lesson-nav{grid-template-columns:repeat(3,1fr)}
+  .tutorial-step-button{display:block;min-height:38px;padding:6px;text-align:center}
+  .tutorial-step-number{margin:auto}
+  .tutorial-step-copy{display:none}
+  .tutorial-lesson-card{margin-top:0}
+  .tutorial-toolbar{padding:7px}
+  .tutorial-mode-label{display:none}
+  .tutorial-callout{margin:8px 8px 0}
+  .tutorial-board-wrap,.tutorial-board-wrap:has(.tutorial-activity.open){display:flex;flex-direction:column;padding:8px}
+  .tutorial-activity,.tutorial-activity.open{width:auto;max-width:none;max-height:180px;flex:0 0 auto}
+}
 </style>
 </head>
 <body>
@@ -641,6 +853,33 @@ body.display-tv .tv-readonly-pill{display:inline-flex}
     <button class="auth-submit" id="loginButton" type="submit">Sign in</button>
     <div class="auth-error" id="loginError" role="alert" aria-live="polite"></div>
   </form>
+</div>
+<div class="app-selector" id="appSelector" aria-hidden="true">
+  <section class="app-selector-card" aria-labelledby="appSelectorTitle">
+    <div class="app-selector-brand">
+      <img class="app-selector-logo" src="Forgent_Logo_FullColour_OnDark_RGB.png" alt="Forgent">
+      <div class="app-selector-kicker">Powering progress together</div>
+    </div>
+    <div class="app-selector-content">
+      <h1 id="appSelectorTitle">Choose where you want to go</h1>
+      <p class="app-selector-intro">Select the live production board or open the safe practice tutorial.</p>
+      <div class="app-choice-grid">
+        <button class="app-choice app-choice-live" id="btnOpenBoard" type="button">
+          <span class="app-choice-icon">LIVE</span>
+          <strong>Waco 1 Production Coordination Board</strong>
+          <small>Open the live plant workflow, current production jobs, and board controls.</small>
+          <span class="app-choice-tag">Live production data</span>
+        </button>
+        <button class="app-choice" id="btnOpenTutorial" type="button">
+          <span class="app-choice-icon">HOW</span>
+          <strong>Tutorial</strong>
+          <small>Learn and practice with fake jobs without changing the live production board.</small>
+          <span class="app-choice-tag">Safe practice</span>
+        </button>
+      </div>
+      <button class="app-selector-signout" id="btnSelectorSignOut" type="button">Sign out</button>
+    </div>
+  </section>
 </div>
 <div class="app">
   <header class="app-title">
@@ -722,6 +961,58 @@ body.display-tv .tv-readonly-pill{display:inline-flex}
     <div class="activity-list" id="activityList"></div>
     <div class="activity-count" id="activityCount">No movements recorded</div>
   </aside>
+
+  <section class="tutorial-module" id="tutorialModule" aria-hidden="true" aria-labelledby="tutorialModuleTitle">
+    <header class="tutorial-header">
+      <div class="tutorial-brand">
+        <img class="tutorial-logo" src="Forgent_Logo_FullColour_OnDark_RGB.png" alt="Forgent">
+        <div class="tutorial-heading">
+          <strong id="tutorialModuleTitle">Tutorial / How to Use</strong>
+          <span>Waco 1 Production Coordination Board</span>
+        </div>
+      </div>
+      <span class="tutorial-safe-pill">Safe practice board · Never synced</span>
+      <button class="tutorial-close" id="btnCloseTutorial" type="button" aria-label="Back to board options">Back to Options</button>
+    </header>
+    <div class="tutorial-layout">
+      <aside class="tutorial-sidebar">
+        <div class="tutorial-progress" id="tutorialProgress">Lesson 1 of 6</div>
+        <div class="tutorial-progress-bar" aria-hidden="true"><span class="tutorial-progress-fill" id="tutorialProgressFill"></span></div>
+        <nav class="tutorial-lesson-nav" id="tutorialLessonNav" aria-label="Tutorial lessons"></nav>
+        <section class="tutorial-lesson-card" aria-live="polite">
+          <h2 id="tutorialLessonTitle">Welcome to the Board</h2>
+          <p id="tutorialLessonText"></p>
+          <div class="tutorial-task" id="tutorialTask"></div>
+          <div class="tutorial-nav-actions">
+            <button class="tb-btn" id="btnTutorialPrevious" type="button">Previous</button>
+            <button class="tb-btn primary" id="btnTutorialNext" type="button">Next</button>
+          </div>
+        </section>
+      </aside>
+      <main class="tutorial-workspace" id="tutorialWorkspace">
+        <div class="tutorial-toolbar">
+          <button class="tb-btn" id="btnTutorialReset" type="button">Reset Practice</button>
+          <button class="tb-btn" id="btnTutorialAdd" type="button">+ Add Fake Job</button>
+          <button class="tb-btn primary" id="btnTutorialMove" type="button">Simulate Movement</button>
+          <button class="tb-btn" id="btnTutorialFocus" type="button">Show Full Board</button>
+          <button class="tb-btn" id="btnTutorialDisplay" type="button">Display: Control</button>
+          <span class="tutorial-mode-label" id="tutorialModeLabel">Practice Mode · Fake data only</span>
+        </div>
+        <div class="tutorial-callout" id="tutorialCallout"></div>
+        <div class="tutorial-board-wrap">
+          <div class="tutorial-board-viewport" id="tutorialBoardViewport">
+            <div class="tutorial-board-canvas" id="tutorialBoardCanvas">
+              <div class="board tutorial-board" id="tutorialBoard"></div>
+            </div>
+          </div>
+          <section class="tutorial-activity" id="tutorialActivity" aria-label="Practice Recent Activity">
+            <div class="tutorial-activity-head">Practice Recent Activity</div>
+            <div class="tutorial-activity-list" id="tutorialActivityList"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </section>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -914,6 +1205,7 @@ const BOARD_ID='main';
 let db=null;
 let liveChannel=null;
 let liveReady=false;
+let boardDataLoaded=false;
 let remotePositions={};
 let settingsTimer=null;
 let toastTimer=null;
@@ -927,6 +1219,69 @@ const RECENT_MOVE_WINDOW_MS=15000;
 const RECENT_ACTIVITY_LIMIT=12;
 let recentMoveTimers=new Map();
 let activityPanelOpen=false;
+const TUTORIAL_LESSONS=[
+  {
+    title:'Welcome to the Board',
+    short:'Board overview',
+    text:'This is a safe copy of the real production board. It uses the same department layout and job cards, but every job here is fake and nothing in this tutorial is sent to Supabase.',
+    task:'Look over the full workflow. Use Next when you are ready to practice.',
+    focus:[],
+    callout:'<strong>Safe Practice Area</strong>Everything inside this tutorial is temporary. Your live production jobs, notes, history, and settings cannot be changed here.'
+  },
+  {
+    title:'Read Department Counts',
+    short:'Live totals',
+    text:'The number beside every department name is the current total in that department. Oven and Tanking totals include every split column inside the department.',
+    task:'Watch the Winding total, then click Add Fake Job. The count changes immediately.',
+    focus:['winding','lacing'],
+    target:{type:'count',dept:'winding'},
+    callout:'<strong>Automatic Job Count</strong>Counts update after adds, moves, deletes, backup restores, and live changes from other connected board users.'
+  },
+  {
+    title:'Move a Job',
+    short:'Drag and drop',
+    text:'Move jobs by dragging a card into another department or an arrow drop area. Movement history, Recent Activity, and the 15 second highlight update automatically.',
+    task:'Drag job 26001-1 from Winding to Lacing, or click Simulate Movement.',
+    focus:['winding','lacing'],
+    target:{type:'job',jobId:'tutorial-26001'},
+    callout:'<strong>Try a Movement</strong>Drop the highlighted job in Lacing. This movement is simulated locally and never reaches the live board.'
+  },
+  {
+    title:'Ovens and Job Details',
+    short:'Timers and notes',
+    text:'Jobs placed in an oven show an elapsed timer. A folded corner means the job has a note. On the live board, double click a job to edit it and review its full movement history.',
+    task:'Move a job toward Oven A or inspect the highlighted timer and note indicators.',
+    focus:['core_coil','oven','tanking'],
+    target:{type:'job',jobId:'tutorial-oven'},
+    callout:'<strong>Job Details</strong>Oven timers remain attached to the job while it is in an oven. Notes and workflow history travel with the job.'
+  },
+  {
+    title:'Recent Activity',
+    short:'Movement log',
+    text:'Recent Activity lists the latest movements newest first, including the job number, timestamp, previous location, and new location.',
+    task:'Click Simulate Movement once or twice and watch the practice activity list update.',
+    focus:['testing','final_weld'],
+    showActivity:true,
+    callout:'<strong>Newest Movements First</strong>The practice list mirrors the live Recent Activity panel but contains only tutorial movements.'
+  },
+  {
+    title:'Display and Box Zoom',
+    short:'Choose a view',
+    text:'Control Mode is fully editable, Fit to Screen keeps the full board visible and editable, and TV Mode is read only. Box Zoom focuses only on selected departments while keeping their counts visible.',
+    task:'Try Show Full Board, Display, and the focused lesson view. Then select Finish Tutorial.',
+    focus:['welding_buffing','m_blast','prime_paint'],
+    target:{type:'toolbar',id:'btnTutorialDisplay'},
+    callout:'<strong>Choose the Right View</strong>Display settings affect only how the board is shown. Department counts remain visible in Control, Fit to Screen, TV, and Box Zoom.'
+  }
+];
+let tutorialState=null;
+let tutorialStep=0;
+let tutorialCompletedSteps=new Set();
+let tutorialDragId=null;
+let tutorialShowFullBoard=false;
+let tutorialDisplayMode='control';
+let tutorialFitFrame=0;
+let tutorialRecentTimer=null;
 
 function isTvMode(){return displayMode==='tv'}
 function isAutoFitMode(){return displayMode==='fit'||displayMode==='tv'}
@@ -1075,16 +1430,34 @@ function startDisplayResizeObserver(){
 }
 
 function showLogin(message){
-  document.body.classList.remove('authenticated');
+  document.body.classList.remove('authenticated','app-selecting','board-active','tutorial-open');
+  document.getElementById('tutorialModule').classList.remove('open');
+  document.getElementById('tutorialModule').setAttribute('aria-hidden','true');
+  document.getElementById('appSelector').setAttribute('aria-hidden','true');
   document.getElementById('authGate').hidden=false;
   document.getElementById('loginError').textContent=message||'';
   setTimeout(()=>document.getElementById('loginEmail').focus(),0);
 }
-function showBoard(){
+function showAppSelector(){
   document.getElementById('authGate').hidden=true;
   document.body.classList.add('authenticated');
+  document.body.classList.remove('board-active','tutorial-open');
+  document.body.classList.add('app-selecting');
+  document.getElementById('tutorialModule').classList.remove('open');
+  document.getElementById('tutorialModule').setAttribute('aria-hidden','true');
+  document.getElementById('appSelector').setAttribute('aria-hidden','false');
+  setTimeout(()=>document.getElementById('btnOpenBoard').focus(),0);
+}
+async function openProductionBoard(){
+  document.body.classList.remove('app-selecting','tutorial-open');
+  document.body.classList.add('board-active');
+  document.getElementById('appSelector').setAttribute('aria-hidden','true');
   fitCompactJobLabels();
   scheduleDisplayFit();
+  if(!boardDataLoaded){
+    const loaded=await loadSharedBoard();
+    boardDataLoaded=!!loaded;
+  }
 }
 async function handleLogin(event){
   event.preventDefault();
@@ -1104,14 +1477,15 @@ async function handleLogin(event){
     return;
   }
   document.getElementById('loginPassword').value='';
-  showBoard();
-  await loadSharedBoard();
+  boardDataLoaded=false;
+  showAppSelector();
   button.disabled=false;
   button.textContent='Sign in';
 }
 async function handleSignOut(){
   if(liveChannel&&db){await db.removeChannel(liveChannel);liveChannel=null;}
   liveReady=false;
+  boardDataLoaded=false;
   if(db)await db.auth.signOut();
   showLogin('You have been signed out.');
 }
@@ -1435,7 +1809,7 @@ async function initializeLiveBoard(){
   });
   const {data,error}=await db.auth.getSession();
   if(error){showLogin('The secure service could not verify this device. Refresh and try again.');return;}
-  if(data&&data.session){showBoard();await loadSharedBoard();}
+  if(data&&data.session)showAppSelector();
   else showLogin('');
 }
 
@@ -1493,8 +1867,26 @@ function loadState(){
     state=normalizeState(state);
   }
 }
+function departmentJobCount(def,boardState=state){
+  if(!def||!boardState)return 0;
+  const jobs=boardState.jobs||{};
+  const locations=boardState.locations||{};
+  const countFor=key=>(locations[key]||[]).filter(id=>jobs[id]).length;
+  if(Array.isArray(def.split)){
+    return def.split.reduce((sum,split)=>sum+countFor(locationKey('dept',def.id,split)),0);
+  }
+  return countFor(locationKey('dept',def.id));
+}
+function updateDepartmentCountPills(){
+  document.querySelectorAll('#board .dept-count-pill[data-dept-count]').forEach(pill=>{
+    const def=DEPTS.find(item=>item.id===pill.dataset.deptCount);
+    const count=departmentJobCount(def);
+    pill.textContent=String(count);
+    pill.setAttribute('aria-label',count+' job'+(count===1?'':'s')+' in '+(def?(def.selectLabel||def.label):'department'));
+  });
+}
 function completedKey(){return locationKey('dept','completed');}
-function completedCount(){return jobsFor(completedKey()).filter(id=>state.jobs[id]).length;}
+function completedCount(){return departmentJobCount(DEPTS.find(def=>def.id==='completed'));}
 function saveState(){
   state.updatedAt=new Date().toISOString();
   try{localStorage.setItem(storageKey(),JSON.stringify(state));}catch(e){}
@@ -1513,6 +1905,7 @@ function updateCounters(){
   if(remainingTotal)remainingTotal.textContent=remaining;
   const titleCounter=document.getElementById('completedBoxCounter');
   if(titleCounter)titleCounter.textContent=done;
+  updateDepartmentCountPills();
 }
 function snapshot(){
   history.push(JSON.stringify(state));
@@ -1761,6 +2154,15 @@ function refreshOvenTimerTitles(){
     if(card)card.title=job.text+' | '+details;
   });
 }
+function refreshTutorialTimerTitles(){
+  if(!tutorialState)return;
+  document.querySelectorAll('#tutorialBoard .oven-timer-readout[data-tutorial-job-id]').forEach(timer=>{
+    const job=tutorialState.jobs[timer.dataset.tutorialJobId];
+    if(!job||!job.ovenEnteredAt)return;
+    timer.textContent='⏱ '+formatOvenCompactElapsed(job.ovenEnteredAt);
+    timer.title='Practice oven timer: '+formatElapsedTime(job.ovenEnteredAt);
+  });
+}
 function setupDrop(el,key){
   el.addEventListener('dragover',e=>{if(isTvMode())return;e.preventDefault();el.classList.add('drop-active')});
   el.addEventListener('dragleave',()=>el.classList.remove('drop-active'));
@@ -1895,14 +2297,15 @@ function makeDept(def){
 
   const title=document.createElement('div');
   title.className='stage-title';
-  title.textContent=def.label;
-  if(def.completed){
-    const pill=document.createElement('span');
-    pill.className='completed-count-pill';
-    pill.id='completedBoxCounter';
-    pill.textContent=completedCount();
-    title.appendChild(pill);
-  }
+  const titleLabel=document.createElement('span');
+  titleLabel.className='stage-title-label';
+  titleLabel.textContent=def.label;
+  const pill=document.createElement('span');
+  pill.className='dept-count-pill';
+  pill.dataset.deptCount=def.id;
+  pill.textContent=String(departmentJobCount(def));
+  if(def.completed)pill.id='completedBoxCounter';
+  title.append(titleLabel,pill);
   card.appendChild(title);
 
   if(def.split){
@@ -1953,6 +2356,447 @@ function makePlainConnector(def){
   zoomLine.className='zoom-plain-line';
   zone.appendChild(zoomLine);
   return zone;
+}
+
+function createTutorialState(){
+  const now=Date.now();
+  return {
+    jobs:{
+      'tutorial-26001':{text:'26001-1',color:1,note:'Priority job for the tutorial.',created:new Date(now-5*60*60*1000).toISOString(),lastMovedAt:''},
+      'tutorial-winding-2':{text:'26014-2',color:3,note:'W/E example job.',created:new Date(now-3*60*60*1000).toISOString(),lastMovedAt:''},
+      'tutorial-core':{text:'26022-1',color:2,note:'Ready for the oven.',created:new Date(now-9*60*60*1000).toISOString(),lastMovedAt:''},
+      'tutorial-oven':{text:'26031-1',color:4,note:'Temperature verification required before removal.',created:new Date(now-14*60*60*1000).toISOString(),ovenEnteredAt:new Date(now-2*60*60*1000-17*60*1000).toISOString(),lastMovedAt:''},
+      'tutorial-testing':{text:'26040-3',color:5,note:'Review the test results before Final Weld.',created:new Date(now-22*60*60*1000).toISOString(),lastMovedAt:''},
+      'tutorial-paint':{text:'26055-1',color:9,note:'Customer color confirmed.',created:new Date(now-28*60*60*1000).toISOString(),lastMovedAt:''},
+      'tutorial-complete':{text:'25988-1',color:0,note:'Completed example job.',created:new Date(now-48*60*60*1000).toISOString(),lastMovedAt:''}
+    },
+    locations:{
+      'dept:winding':['tutorial-26001','tutorial-winding-2'],
+      'dept:core_coil':['tutorial-core'],
+      'dept:oven:A':['tutorial-oven'],
+      'dept:testing':['tutorial-testing'],
+      'dept:prime_paint':['tutorial-paint'],
+      'dept:completed':['tutorial-complete']
+    },
+    activity:[]
+  };
+}
+function tutorialIsOpen(){
+  const module=document.getElementById('tutorialModule');
+  return !!module&&module.classList.contains('open');
+}
+function tutorialIsReadOnly(){return tutorialDisplayMode==='tv';}
+function tutorialFindJobLocation(jobId){
+  if(!tutorialState)return '';
+  return Object.keys(tutorialState.locations||{}).find(key=>(tutorialState.locations[key]||[]).includes(jobId))||'';
+}
+function tutorialRemoveFromLocations(jobId){
+  Object.keys(tutorialState.locations||{}).forEach(key=>{
+    tutorialState.locations[key]=(tutorialState.locations[key]||[]).filter(id=>id!==jobId);
+    if(!tutorialState.locations[key].length)delete tutorialState.locations[key];
+  });
+}
+function tutorialShowTemporaryCallout(title,message){
+  const callout=document.getElementById('tutorialCallout');
+  if(!callout)return;
+  clearTimeout(tutorialRecentTimer);
+  callout.innerHTML='<strong>'+title+'</strong>'+message;
+  tutorialRecentTimer=setTimeout(()=>{
+    const lesson=TUTORIAL_LESSONS[tutorialStep];
+    if(tutorialIsOpen()&&lesson)callout.innerHTML=lesson.callout;
+  },3300);
+}
+function tutorialMoveJob(jobId,destination){
+  if(tutorialIsReadOnly()||!tutorialState||!tutorialState.jobs[jobId])return;
+  const previous=tutorialFindJobLocation(jobId);
+  if(!previous||previous===destination)return;
+  const movedAt=new Date().toISOString();
+  const job=tutorialState.jobs[jobId];
+  tutorialRemoveFromLocations(jobId);
+  if(!tutorialState.locations[destination])tutorialState.locations[destination]=[];
+  tutorialState.locations[destination].push(jobId);
+  job.lastMovedAt=movedAt;
+  if(isOvenLocation(destination)&&!job.ovenEnteredAt)job.ovenEnteredAt=movedAt;
+  if(!isOvenLocation(destination))job.ovenEnteredAt='';
+  tutorialState.activity.unshift({
+    jobId,
+    jobText:job.text,
+    movedAt,
+    from:workflowLocationInfo(previous).label,
+    to:workflowLocationInfo(destination).label
+  });
+  tutorialState.activity=tutorialState.activity.slice(0,12);
+  tutorialCompletedSteps.add(tutorialStep);
+  renderTutorialBoard();
+  renderTutorialActivity();
+  renderTutorialLessonNav();
+  tutorialShowTemporaryCallout('Practice Movement Recorded',job.text+' moved from '+workflowLocationInfo(previous).label+' to '+workflowLocationInfo(destination).label+'. The live board was not changed.');
+}
+function setupTutorialDrop(element,key){
+  element.addEventListener('dragover',event=>{
+    if(tutorialIsReadOnly())return;
+    event.preventDefault();
+    element.classList.add('drop-active');
+  });
+  element.addEventListener('dragleave',()=>element.classList.remove('drop-active'));
+  element.addEventListener('drop',event=>{
+    element.classList.remove('drop-active');
+    if(tutorialIsReadOnly())return;
+    event.preventDefault();
+    const jobId=event.dataTransfer.getData('text/plain')||tutorialDragId;
+    if(jobId)tutorialMoveJob(jobId,key);
+  });
+}
+function makeTutorialJob(jobId){
+  const job=tutorialState.jobs[jobId];
+  const location=tutorialFindJobLocation(jobId);
+  const color=COLORS[job.color||0]||COLORS[0];
+  const element=document.createElement('div');
+  element.className='job tutorial-job';
+  element.dataset.tutorialJobId=jobId;
+  element.draggable=!tutorialIsReadOnly();
+  element.style.background=color.bg;
+  element.style.color=color.tx;
+  element.title=job.text+(job.note?' | '+job.note:'');
+  element.setAttribute('aria-label','Practice job '+job.text);
+  const movedAt=Date.parse(job.lastMovedAt||'');
+  if(Number.isFinite(movedAt)&&Date.now()-movedAt<RECENT_MOVE_WINDOW_MS){
+    element.classList.add('recently-moved');
+    element.style.setProperty('--recent-move-delay','-'+Math.max(0,Date.now()-movedAt)+'ms');
+  }
+  const label=document.createElement('span');
+  label.className='job-label';
+  label.textContent=job.text;
+  element.appendChild(label);
+  if(isOvenLocation(location)&&job.ovenEnteredAt){
+    const timer=document.createElement('span');
+    timer.className='oven-timer-readout';
+    timer.dataset.tutorialJobId=jobId;
+    timer.textContent='⏱ '+formatOvenCompactElapsed(job.ovenEnteredAt);
+    timer.title='Practice oven timer: '+formatElapsedTime(job.ovenEnteredAt);
+    element.appendChild(timer);
+  }
+  if((job.note||'').trim()){
+    const corner=document.createElement('span');
+    corner.className='job-note-corner';
+    corner.title=job.note;
+    element.appendChild(corner);
+  }
+  element.addEventListener('click',event=>{
+    event.stopPropagation();
+    tutorialShowTemporaryCallout('Fake Job '+job.text,(job.note||'No practice note')+(isOvenLocation(location)&&job.ovenEnteredAt?' Oven elapsed time: '+formatElapsedTime(job.ovenEnteredAt)+'.':''));
+  });
+  element.addEventListener('dragstart',event=>{
+    if(tutorialIsReadOnly()){event.preventDefault();return;}
+    tutorialDragId=jobId;
+    element.classList.add('dragging');
+    event.dataTransfer.setData('text/plain',jobId);
+    event.dataTransfer.effectAllowed='move';
+  });
+  element.addEventListener('dragend',()=>{
+    tutorialDragId=null;
+    element.classList.remove('dragging');
+  });
+  return element;
+}
+function renderTutorialJobs(container,key){
+  container.innerHTML='';
+  (tutorialState.locations[key]||[]).forEach(id=>{
+    if(tutorialState.jobs[id])container.appendChild(makeTutorialJob(id));
+  });
+}
+function makeTutorialDept(def){
+  const card=document.createElement('section');
+  card.className='stage department'+(def.special?' special':'')+(def.corrective?' corrective':'')+(def.completed?' completed-stage':'');
+  card.dataset.deptId=def.id;
+  if(def.id==='winding'||def.id==='welding_buffing')card.classList.add('header-emphasis');
+  card.style.gridColumn=def.col;
+  card.style.gridRow=def.row;
+  card.style.order=String((parseInt(def.row,10)||0)*100+(parseInt(def.col,10)||0));
+  const title=document.createElement('div');
+  title.className='stage-title';
+  const label=document.createElement('span');
+  label.className='stage-title-label';
+  label.textContent=def.label;
+  const count=document.createElement('span');
+  count.className='dept-count-pill';
+  count.dataset.tutorialDeptCount=def.id;
+  count.textContent=String(departmentJobCount(def,tutorialState));
+  title.append(label,count);
+  card.appendChild(title);
+  if(def.split){
+    const wrap=document.createElement('div');
+    wrap.className='split-wrap';
+    wrap.style.setProperty('--cols',def.split.length);
+    def.split.forEach(split=>{
+      const column=document.createElement('div');
+      column.className='split-col';
+      const splitName=document.createElement('div');
+      splitName.className='split-name';
+      splitName.textContent=split;
+      const slots=document.createElement('div');
+      slots.className='slots';
+      const key=locationKey('dept',def.id,split);
+      renderTutorialJobs(slots,key);
+      column.append(splitName,slots);
+      setupTutorialDrop(column,key);
+      wrap.appendChild(column);
+    });
+    card.appendChild(wrap);
+  }else{
+    const slots=document.createElement('div');
+    slots.className='slots';
+    const key=locationKey('dept',def.id);
+    renderTutorialJobs(slots,key);
+    card.appendChild(slots);
+    setupTutorialDrop(card,key);
+  }
+  return card;
+}
+function makeTutorialArrow(def){
+  const zone=document.createElement('section');
+  zone.className='stage arrow-stage '+(def.dir==='left'?'left ':def.dir==='up'?'up ':'')+(def.dir==='down'?'down':'');
+  zone.dataset.arrowId=def.id;
+  zone.style.gridColumn=def.col;
+  zone.style.gridRow=def.row;
+  zone.style.order=String((parseInt(def.row,10)||0)*100+(parseInt(def.col,10)||0));
+  const visual=document.createElement('div');
+  visual.className=(def.dir==='down'||def.dir==='up')?'arrow-line-v':'arrow-line';
+  const slots=document.createElement('div');
+  slots.className='arrow-slots';
+  const key=locationKey('arrow',def.id);
+  renderTutorialJobs(slots,key);
+  zone.append(visual,slots);
+  setupTutorialDrop(zone,key);
+  return zone;
+}
+function tutorialArrowConnectsFocus(def,focus){
+  if(!def||focus.size<2)return false;
+  return DEPTS.some(from=>focus.has(from.id)&&DEPTS.some(to=>focus.has(to.id)&&def.id===from.id+'_to_'+to.id));
+}
+function applyTutorialHighlight(){
+  const board=document.getElementById('tutorialBoard');
+  const lesson=TUTORIAL_LESSONS[tutorialStep];
+  document.querySelectorAll('#tutorialModule .tutorial-highlight').forEach(element=>element.classList.remove('tutorial-highlight'));
+  if(!lesson||!lesson.target)return;
+  let target=null;
+  if(lesson.target.type==='count'){
+    target=board.querySelector('.department[data-dept-id="'+lesson.target.dept+'"] .dept-count-pill');
+  }else if(lesson.target.type==='job'){
+    target=board.querySelector('[data-tutorial-job-id="'+lesson.target.jobId+'"]');
+  }else if(lesson.target.type==='toolbar'){
+    target=document.getElementById(lesson.target.id);
+  }
+  if(target)target.classList.add('tutorial-highlight');
+}
+function scheduleTutorialFit(){
+  cancelAnimationFrame(tutorialFitFrame);
+  tutorialFitFrame=requestAnimationFrame(()=>requestAnimationFrame(applyTutorialFit));
+}
+function applyTutorialFit(){
+  if(!tutorialIsOpen())return;
+  const viewport=document.getElementById('tutorialBoardViewport');
+  const canvas=document.getElementById('tutorialBoardCanvas');
+  const board=document.getElementById('tutorialBoard');
+  if(!viewport||!canvas||!board)return;
+  board.style.transform='scale(1)';
+  canvas.style.width='auto';
+  canvas.style.height='auto';
+  const naturalWidth=Math.max(1,board.scrollWidth);
+  const naturalHeight=Math.max(1,board.scrollHeight);
+  const availableWidth=Math.max(1,viewport.clientWidth-30);
+  const availableHeight=Math.max(1,viewport.clientHeight-30);
+  let scale=Math.min(1,availableWidth/naturalWidth,availableHeight/naturalHeight);
+  if(board.classList.contains('is-focused')&&tutorialDisplayMode==='control'){
+    scale=Math.min(1,availableWidth/naturalWidth,availableHeight/naturalHeight);
+  }
+  if(tutorialDisplayMode==='fit')scale=Math.min(1.25,availableWidth/naturalWidth,availableHeight/naturalHeight);
+  board.style.transform='scale('+scale+')';
+  canvas.style.width=Math.ceil(naturalWidth*scale)+'px';
+  canvas.style.height=Math.ceil(naturalHeight*scale)+'px';
+  canvas.dataset.scale=Math.round(scale*100)+'%';
+}
+function renderTutorialBoard(){
+  if(!tutorialState)return;
+  const board=document.getElementById('tutorialBoard');
+  board.innerHTML='';
+  DEPTS.forEach(def=>board.appendChild(makeTutorialDept(def)));
+  ARROWS.forEach(def=>board.appendChild(makeTutorialArrow(def)));
+  PLAIN_CONNECTORS.forEach(def=>board.appendChild(makePlainConnector(def)));
+  const lesson=TUTORIAL_LESSONS[tutorialStep];
+  const focus=new Set(!tutorialShowFullBoard&&lesson?lesson.focus:[]);
+  board.classList.toggle('is-focused',focus.size>0);
+  board.querySelectorAll('.department').forEach(card=>card.classList.toggle('tutorial-focus',focus.has(card.dataset.deptId)));
+  board.querySelectorAll('.arrow-stage').forEach(zone=>{
+    const def=ARROWS.find(item=>item.id===zone.dataset.arrowId);
+    zone.classList.toggle('tutorial-focus',tutorialArrowConnectsFocus(def,focus));
+  });
+  applyTutorialHighlight();
+  scheduleTutorialFit();
+}
+function renderTutorialActivity(){
+  const list=document.getElementById('tutorialActivityList');
+  if(!list||!tutorialState)return;
+  list.innerHTML='';
+  if(!tutorialState.activity.length){
+    const empty=document.createElement('div');
+    empty.className='tutorial-activity-empty';
+    empty.textContent='No practice movements yet. Use Simulate Movement or drag a fake job.';
+    list.appendChild(empty);
+    return;
+  }
+  tutorialState.activity.slice(0,6).forEach(entry=>{
+    const item=document.createElement('article');
+    item.className='tutorial-activity-item';
+    const heading=document.createElement('strong');
+    heading.textContent=entry.jobText+' · '+formatActivityTime(entry.movedAt);
+    const route=document.createElement('span');
+    route.textContent=entry.from+' → '+entry.to;
+    item.append(heading,route);
+    list.appendChild(item);
+  });
+}
+function renderTutorialLessonNav(){
+  const nav=document.getElementById('tutorialLessonNav');
+  if(!nav)return;
+  nav.innerHTML='';
+  TUTORIAL_LESSONS.forEach((lesson,index)=>{
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='tutorial-step-button'+(index===tutorialStep?' active':'')+(tutorialCompletedSteps.has(index)?' completed':'');
+    button.dataset.tutorialStep=String(index);
+    const number=document.createElement('span');
+    number.className='tutorial-step-number';
+    number.textContent=tutorialCompletedSteps.has(index)?'✓':String(index+1);
+    const copy=document.createElement('span');
+    copy.className='tutorial-step-copy';
+    const strong=document.createElement('strong');
+    strong.textContent=lesson.title;
+    const small=document.createElement('small');
+    small.textContent=lesson.short;
+    copy.append(strong,small);
+    button.append(number,copy);
+    button.addEventListener('click',()=>setTutorialStep(index));
+    nav.appendChild(button);
+  });
+}
+function applyTutorialLesson(){
+  const lesson=TUTORIAL_LESSONS[tutorialStep];
+  if(!lesson)return;
+  tutorialShowFullBoard=false;
+  document.getElementById('tutorialProgress').textContent='Lesson '+(tutorialStep+1)+' of '+TUTORIAL_LESSONS.length;
+  document.getElementById('tutorialProgressFill').style.width=((tutorialStep+1)/TUTORIAL_LESSONS.length*100)+'%';
+  document.getElementById('tutorialLessonTitle').textContent=lesson.title;
+  document.getElementById('tutorialLessonText').textContent=lesson.text;
+  document.getElementById('tutorialTask').textContent=lesson.task;
+  document.getElementById('tutorialCallout').innerHTML=lesson.callout;
+  document.getElementById('tutorialActivity').classList.toggle('open',!!lesson.showActivity);
+  document.getElementById('btnTutorialPrevious').disabled=tutorialStep===0;
+  document.getElementById('btnTutorialNext').textContent=tutorialStep===TUTORIAL_LESSONS.length-1?'Finish Tutorial':'Next';
+  document.getElementById('btnTutorialFocus').textContent=lesson.focus.length?'Show Full Board':'Focus Lesson';
+  renderTutorialLessonNav();
+  renderTutorialBoard();
+  renderTutorialActivity();
+}
+function setTutorialStep(index){
+  if(index<0||index>=TUTORIAL_LESSONS.length)return;
+  if(index!==tutorialStep)tutorialCompletedSteps.add(tutorialStep);
+  tutorialStep=index;
+  applyTutorialLesson();
+}
+function resetTutorialPractice(keepLesson,announce=true){
+  tutorialState=createTutorialState();
+  tutorialCompletedSteps.clear();
+  if(!keepLesson)tutorialStep=0;
+  renderTutorialActivity();
+  applyTutorialLesson();
+  if(announce)tutorialShowTemporaryCallout('Practice Board Reset','All fake jobs returned to their starting locations. The live production board was not changed.');
+}
+function tutorialAddFakeJob(){
+  if(tutorialIsReadOnly())return;
+  const number=Object.keys(tutorialState.jobs).length+1;
+  const id='tutorial-added-'+Date.now();
+  tutorialState.jobs[id]={
+    text:'26'+String(100+number)+'-'+((number%3)+1),
+    color:number%COLORS.length,
+    note:'Fake job added during the tutorial.',
+    created:new Date().toISOString(),
+    lastMovedAt:''
+  };
+  if(!tutorialState.locations['dept:winding'])tutorialState.locations['dept:winding']=[];
+  tutorialState.locations['dept:winding'].push(id);
+  tutorialCompletedSteps.add(1);
+  renderTutorialBoard();
+  renderTutorialLessonNav();
+  tutorialShowTemporaryCallout('Fake Job Added','Winding now contains '+departmentJobCount(DEPTS.find(def=>def.id==='winding'),tutorialState)+' practice jobs. The header count updated immediately.');
+}
+function simulateTutorialMovement(){
+  if(tutorialIsReadOnly())return;
+  if(tutorialStep===3){
+    tutorialMoveJob('tutorial-core','dept:oven:B');
+    return;
+  }
+  if(tutorialStep===4){
+    const current=tutorialFindJobLocation('tutorial-testing');
+    tutorialMoveJob('tutorial-testing',current==='dept:testing'?'dept:final_weld':'dept:testing');
+    return;
+  }
+  const jobId='tutorial-26001';
+  const path=['dept:winding','dept:lacing','dept:core_coil','dept:oven:A','dept:tanking:1st','dept:testing','dept:final_weld'];
+  const current=tutorialFindJobLocation(jobId);
+  const index=path.indexOf(current);
+  tutorialMoveJob(jobId,path[(index+1+path.length)%path.length]);
+}
+function toggleTutorialFocus(){
+  const lesson=TUTORIAL_LESSONS[tutorialStep];
+  if(!lesson||!lesson.focus.length){
+    tutorialShowFullBoard=false;
+    tutorialShowTemporaryCallout('Full Board Overview','This lesson already uses the complete production workflow.');
+    return;
+  }
+  tutorialShowFullBoard=!tutorialShowFullBoard;
+  document.getElementById('btnTutorialFocus').textContent=tutorialShowFullBoard?'Focus Lesson':'Show Full Board';
+  renderTutorialBoard();
+}
+function cycleTutorialDisplayMode(){
+  const modes=['control','fit','tv'];
+  tutorialDisplayMode=modes[(modes.indexOf(tutorialDisplayMode)+1)%modes.length];
+  const label=DISPLAY_MODE_LABELS[tutorialDisplayMode];
+  document.getElementById('btnTutorialDisplay').textContent='Display: '+label;
+  const workspace=document.getElementById('tutorialWorkspace');
+  workspace.classList.toggle('tutorial-readonly',tutorialIsReadOnly());
+  document.getElementById('btnTutorialAdd').disabled=tutorialIsReadOnly();
+  document.getElementById('btnTutorialMove').disabled=tutorialIsReadOnly();
+  document.getElementById('tutorialModeLabel').textContent=tutorialIsReadOnly()?'Practice TV Mode · Read only':'Practice '+label+' · Fake data only';
+  renderTutorialBoard();
+  tutorialShowTemporaryCallout(label+' Selected',tutorialIsReadOnly()?'Practice jobs are read only until you change Display again.':'The practice board remains fully isolated from live production data.');
+}
+function openTutorial(){
+  setActivityPanel(false);
+  setBoxZoomMenu(false);
+  setDisplayMenu(false);
+  const module=document.getElementById('tutorialModule');
+  document.body.classList.remove('app-selecting','board-active');
+  document.getElementById('appSelector').setAttribute('aria-hidden','true');
+  module.classList.add('open');
+  module.setAttribute('aria-hidden','false');
+  document.body.classList.add('tutorial-open');
+  tutorialDisplayMode='control';
+  document.getElementById('tutorialWorkspace').classList.remove('tutorial-readonly');
+  document.getElementById('btnTutorialDisplay').textContent='Display: Control';
+  document.getElementById('tutorialModeLabel').textContent='Practice Mode · Fake data only';
+  document.getElementById('btnTutorialAdd').disabled=false;
+  document.getElementById('btnTutorialMove').disabled=false;
+  resetTutorialPractice(false,false);
+  setTimeout(()=>document.getElementById('btnCloseTutorial').focus(),0);
+}
+function closeTutorial(){
+  clearTimeout(tutorialRecentTimer);
+  const module=document.getElementById('tutorialModule');
+  module.classList.remove('open');
+  module.setAttribute('aria-hidden','true');
+  document.body.classList.remove('tutorial-open');
+  if(document.body.classList.contains('authenticated'))showAppSelector();
 }
 function render(){
   clearRecentMoveTimers();
@@ -2680,6 +3524,25 @@ document.getElementById('btnAdd').addEventListener('click',()=>openModal());
 document.getElementById('btnUndo').addEventListener('click',undo);
 document.getElementById('btnRedo').addEventListener('click',redoChange);
 document.getElementById('btnNotes').addEventListener('click',()=>document.getElementById('notesPanel').classList.toggle('open'));
+document.getElementById('btnOpenBoard').addEventListener('click',openProductionBoard);
+document.getElementById('btnOpenTutorial').addEventListener('click',openTutorial);
+document.getElementById('btnSelectorSignOut').addEventListener('click',handleSignOut);
+document.getElementById('btnCloseTutorial').addEventListener('click',closeTutorial);
+document.getElementById('btnTutorialReset').addEventListener('click',()=>resetTutorialPractice(true));
+document.getElementById('btnTutorialAdd').addEventListener('click',tutorialAddFakeJob);
+document.getElementById('btnTutorialMove').addEventListener('click',simulateTutorialMovement);
+document.getElementById('btnTutorialFocus').addEventListener('click',toggleTutorialFocus);
+document.getElementById('btnTutorialDisplay').addEventListener('click',cycleTutorialDisplayMode);
+document.getElementById('btnTutorialPrevious').addEventListener('click',()=>setTutorialStep(tutorialStep-1));
+document.getElementById('btnTutorialNext').addEventListener('click',()=>{
+  if(tutorialStep===TUTORIAL_LESSONS.length-1){
+    tutorialCompletedSteps.add(tutorialStep);
+    closeTutorial();
+    showToast('Tutorial complete. You are back on the live board.');
+  }else{
+    setTutorialStep(tutorialStep+1);
+  }
+});
 document.getElementById('btnActivity').addEventListener('click',()=>setActivityPanel(!activityPanelOpen));
 document.getElementById('btnCloseActivity').addEventListener('click',()=>setActivityPanel(false));
 document.getElementById('btnBoxZoom').addEventListener('click',e=>{e.stopPropagation();setDisplayMenu(false);setBoxZoomMenu(document.getElementById('boxZoomMenu').hidden)});
@@ -2729,6 +3592,7 @@ document.getElementById('goalInput').addEventListener('input',e=>{
 });
 document.addEventListener('keydown',e=>{
   const tag=(e.target.tagName||'').toLowerCase();
+  if(e.key==='Escape'&&tutorialIsOpen()){closeTutorial();return;}
   if(e.key==='Escape'&&document.getElementById('backupBackdrop').classList.contains('open')){closeBackupModal();return;}
   if(e.key==='Escape'&&!document.getElementById('boxZoomMenu').hidden){setBoxZoomMenu(false);return;}
   if(e.key==='Escape'&&!document.getElementById('displayMenu').hidden){setDisplayMenu(false);return;}
@@ -2739,9 +3603,9 @@ document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redoChange()}
 });
-window.addEventListener('resize',()=>{fitCompactJobLabels();scheduleDisplayFit();if(activityPanelOpen)positionActivityPanel()});
+window.addEventListener('resize',()=>{fitCompactJobLabels();scheduleDisplayFit();if(tutorialIsOpen())scheduleTutorialFit();if(activityPanelOpen)positionActivityPanel()});
 document.addEventListener('fullscreenchange',scheduleDisplayFit);
-setInterval(refreshOvenTimerTitles,30000);
+setInterval(()=>{refreshOvenTimerTitles();refreshTutorialTimerTitles();},30000);
 
 restoreDisplayMode();startDisplayResizeObserver();loadState();buildSwatches();render();initializeLiveBoard();
 </script>
