@@ -1903,6 +1903,12 @@ function jobExtraMetadata(job){
   });
   return extra;
 }
+function isShippingLocation(key){
+  return /^ship:(waco1|waco2):(ready|shipped)$/.test(String(key||''));
+}
+function sourceBoardIdForShippingJob(job){
+  return job&&job.sourcePlant==='waco2'?'waco2':'main';
+}
 function packRemoteNote(job){
   const note=job.note||'';
   const workflow=sanitizeWorkflow(job.workflow);
@@ -1939,7 +1945,7 @@ function remoteJobRow(jobId){
   const location=findJobLocation(jobId);
   return {
     id:jobId,
-    board_id:BOARD_ID,
+    board_id:currentView==='shipping'?sourceBoardIdForShippingJob(job):BOARD_ID,
     job_text:job.text,
     color:Number(job.color)||0,
     note:packRemoteNote(job),
@@ -1986,14 +1992,14 @@ async function syncEntireBoard(){
   if(!liveReady||!db)return;
   setLiveStatus('connecting','Synchronizing');
   const rows=Object.keys(state.jobs).map(remoteJobRow).filter(Boolean);
-  const {data:remoteJobs,error:readError}=await db.from('jobs').select('id').eq('board_id',BOARD_ID);
+  const {data:remoteJobs,error:readError}=await db.from('jobs').select('id,location_key').eq('board_id',BOARD_ID);
   if(readError){reportRemoteError(readError,'Reading shared jobs');return;}
   if(rows.length){
     const {error}=await db.from('jobs').upsert(rows,{onConflict:'id'});
     if(error){reportRemoteError(error,'Synchronizing jobs');return;}
   }
   const localIds=new Set(rows.map(row=>row.id));
-  const removed=(remoteJobs||[]).map(row=>row.id).filter(id=>!localIds.has(id));
+  const removed=(remoteJobs||[]).filter(row=>!isShippingLocation(row.location_key)).map(row=>row.id).filter(id=>!localIds.has(id));
   if(removed.length){
     const {error}=await db.from('jobs').delete().eq('board_id',BOARD_ID).in('id',removed);
     if(error){reportRemoteError(error,'Synchronizing deleted jobs');return;}
@@ -2008,7 +2014,9 @@ function applyRemoteJob(payload){
   }else{
     const row=payload.new;
     if(!row)return;
-    if(row.board_id!==BOARD_ID){
+    const belongsInShipping=currentView==='shipping'&&isShippingLocation(row.location_key)&&['main','waco2','shipping'].includes(row.board_id);
+    const belongsOnProductionBoard=currentView==='board'&&row.board_id===BOARD_ID&&!isShippingLocation(row.location_key);
+    if(!belongsInShipping&&!belongsOnProductionBoard){
       if(state.jobs[row.id]){delete state.jobs[row.id];delete remotePositions[row.id];removeFromLocations(row.id);render();}
       return;
     }
@@ -2059,6 +2067,7 @@ function subscribeToLiveChanges(){
     });
 }
 async function loadSharedBoard(){
+  if(currentView==='shipping')return loadSharedShippingBoard();
   setLiveStatus('connecting','Loading');
   const localCopy=JSON.parse(JSON.stringify(state));
   const [jobsResult,settingsResult]=await Promise.all([
@@ -2070,7 +2079,8 @@ async function loadSharedBoard(){
 
   state=normalizeState({locations:{},jobs:{},notes:'',goal:'',weeks:defaultWeeks()});
   remotePositions={};
-  (jobsResult.data||[]).forEach(row=>{
+  const productionRows=(jobsResult.data||[]).filter(row=>!isShippingLocation(row.location_key));
+  productionRows.forEach(row=>{
     const remoteNote=unpackRemoteNote(row.note);
     state.jobs[row.id]={...remoteNote.extra,text:row.job_text,color:Number(row.color)||0,note:remoteNote.note,ovenEnteredAt:remoteNote.ovenEnteredAt,workflow:remoteNote.workflow,created:row.created_at};
     remotePositions[row.id]=Number(row.position)||0;
@@ -2091,13 +2101,36 @@ async function loadSharedBoard(){
   render();
   subscribeToLiveChanges();
 
-  if(!(jobsResult.data||[]).length&&Object.keys(localCopy.jobs||{}).length){
+  if(!productionRows.length&&Object.keys(localCopy.jobs||{}).length){
     if(confirm('The shared board is empty. Upload the jobs saved in this browser?')){
       state=normalizeState(localCopy);
       render();
       await syncEntireBoard();
     }
   }
+  return true;
+}
+async function loadSharedShippingBoard(){
+  setLiveStatus('connecting','Loading');
+  const jobsResult=await db.from('jobs').select('*').in('board_id',['main','waco2','shipping']).like('location_key','ship:%').order('location_key').order('position');
+  if(jobsResult.error){reportRemoteError(jobsResult.error,'Loading shipping jobs');return false;}
+
+  state=normalizeState({locations:{},jobs:{},notes:'',goal:'',weeks:defaultWeeks()});
+  remotePositions={};
+  (jobsResult.data||[]).filter(row=>isShippingLocation(row.location_key)).forEach(row=>{
+    const remoteNote=unpackRemoteNote(row.note);
+    const inferredPlant=row.board_id==='waco2'?'waco2':'waco1';
+    state.jobs[row.id]={...remoteNote.extra,text:row.job_text,color:Number(row.color)||0,note:remoteNote.note,ovenEnteredAt:remoteNote.ovenEnteredAt,workflow:remoteNote.workflow,created:row.created_at};
+    if(!state.jobs[row.id].sourcePlant)state.jobs[row.id].sourcePlant=inferredPlant;
+    remotePositions[row.id]=Number(row.position)||0;
+    const remoteLocation=migrateLocationKey(row.location_key);
+    if(!state.locations[remoteLocation])state.locations[remoteLocation]=[];
+    state.locations[remoteLocation].push(row.id);
+  });
+  Object.keys(state.locations).forEach(key=>state.locations[key].sort((a,b)=>(remotePositions[a]||0)-(remotePositions[b]||0)));
+  liveReady=true;
+  render();
+  subscribeToLiveChanges();
   return true;
 }
 async function initializeLiveBoard(){
@@ -4087,23 +4120,78 @@ function renderShippingSystem(){
   addChartCard(charts,'Completed and Shipping Status',[{label:'Completed',value:completedRecords},{label:'Ready',value:w1Ready.length+w2Ready.length},{label:'Shipped',value:shipped.length}]);addChartCard(charts,'Shipped by Plant',[{label:'Waco 1',value:shippingIds('waco1','shipped').length},{label:'Waco 2',value:shippingIds('waco2','shipped').length}]);
 }
 async function markShippingJobShipped(jobId){
-  const job=state.jobs[jobId];if(!job)return;const previous=findJobLocation(jobId);const plant=shippingPlantFor(job,previous);const destination=shippingLocation(plant,'shipped');if(previous===destination)return;
-  snapshot();recordJobMove(job,previous,destination,new Date().toISOString());job.shippedAt=new Date().toISOString();addToLocation(destination,jobId);render();saveState();await upsertRemoteJob(jobId);showToast((job.text||jobId)+' marked Shipped.');
+  const original=state.jobs[jobId];
+  if(!original)return;
+  const previous=findJobLocation(jobId);
+  const plant=shippingPlantFor(original,previous);
+  const destination=shippingLocation(plant,'shipped');
+  if(previous===destination)return;
+  if(db&&!liveReady){showToast('Shipping is still connecting. Wait until the status shows Live, then try again.',true);return;}
+
+  const beforeState=JSON.stringify(state);
+  const job=cloneJsonValue(original);
+  const movedAt=new Date().toISOString();
+  recordJobMove(job,previous,destination,movedAt);
+  job.shippedAt=movedAt;
+  job.sourcePlant=plant;
+
+  if(db){
+    const row={id:jobId,board_id:sourceBoardIdForShippingJob(job),job_text:job.text,color:Number(job.color)||0,note:packRemoteNote(job),location_key:destination,position:0,created_at:job.created||movedAt};
+    const {error}=await db.from('jobs').upsert(row,{onConflict:'id'});
+    if(error){reportRemoteError(error,'Marking job Shipped');return;}
+  }
+
+  history.push(beforeState);if(history.length>80)history.shift();redo=[];
+  state.jobs[jobId]=job;
+  addToLocation(destination,jobId);
+  render();saveState();
+  showToast((job.text||jobId)+' marked Shipped.');
 }
+let shippingTransferInProgress=false;
 async function sendEditingJobToShipping(){
-  if(!editingJobId||currentView!=='board')return;const jobId=editingJobId;const original=state.jobs[jobId];const previous=findJobLocation(jobId);if(previous!=='dept:completed'){showToast('Only jobs in Completed can be sent to Ready to Ship.',true);return;}
-  const job=cloneJsonValue(original);const destination=shippingLocation(activePlant,'ready');const movedAt=new Date().toISOString();recordJobMove(job,previous,destination,movedAt);job.sourcePlant=activePlant;job.readyToShipAt=movedAt;job.ovenEnteredAt='';
-  if(!db||!liveReady){
+  if(shippingTransferInProgress||!editingJobId||currentView!=='board')return;
+  const jobId=editingJobId;
+  const original=state.jobs[jobId];
+  const previous=findJobLocation(jobId);
+  if(!original||previous!=='dept:completed'){showToast('Only jobs in Completed can be sent to Ready to Ship.',true);return;}
+  if(db&&!liveReady){showToast('The board is still connecting. Wait until the status shows Live, then try again.',true);return;}
+
+  const beforeState=JSON.stringify(state);
+  const job=cloneJsonValue(original);
+  const destination=shippingLocation(activePlant,'ready');
+  const movedAt=new Date().toISOString();
+  recordJobMove(job,previous,destination,movedAt);
+  job.sourcePlant=activePlant;
+  job.readyToShipAt=movedAt;
+  job.ovenEnteredAt='';
+  const readyButton=document.getElementById('btnReadyToShip');
+  shippingTransferInProgress=true;
+  readyButton.disabled=true;
+  readyButton.textContent='Sending...';
+
+  if(!db){
     try{
       sendJobToLocalShipping(jobId,job,destination);
-      snapshot();delete state.jobs[jobId];removeFromLocations(jobId);closeModal();render();saveState();
+      history.push(beforeState);if(history.length>80)history.shift();redo=[];
+      delete state.jobs[jobId];removeFromLocations(jobId);closeModal();render();saveState();
       setLiveStatus('local','Local test');
       showToast((job.text||jobId)+' sent to Ready to Ship in local test mode. Open Ship / Shipped System to continue testing.');
     }catch(error){showToast('The local shipping test could not save this job.',true);}
+    shippingTransferInProgress=false;
+    readyButton.disabled=false;
+    readyButton.textContent='Send to Ready to Ship';
     return;
   }
-  const row={id:jobId,board_id:'shipping',job_text:job.text,color:Number(job.color)||0,note:packRemoteNote(job),location_key:destination,position:0,created_at:job.created||movedAt};const {error}=await db.from('jobs').upsert(row,{onConflict:'id'});if(error){reportRemoteError(error,'Sending job to Ready to Ship');return;}
-  snapshot();delete state.jobs[jobId];removeFromLocations(jobId);closeModal();render();saveState();showToast((job.text||jobId)+' sent to Ready to Ship.');
+  const row={id:jobId,board_id:BOARD_ID,job_text:job.text,color:Number(job.color)||0,note:packRemoteNote(job),location_key:destination,position:0,created_at:job.created||movedAt};
+  const {error}=await db.from('jobs').upsert(row,{onConflict:'id'});
+  shippingTransferInProgress=false;
+  readyButton.disabled=false;
+  readyButton.textContent='Send to Ready to Ship';
+  if(error){reportRemoteError(error,'Sending job to Ready to Ship');return;}
+
+  history.push(beforeState);if(history.length>80)history.shift();redo=[];
+  delete state.jobs[jobId];removeFromLocations(jobId);closeModal();render();saveState();
+  showToast((job.text||jobId)+' sent to Ready to Ship. Open Ship / Shipped System to continue.');
 }
 async function exportShippingSummary(){
   if(!window.ExcelJS){showToast('Excel export could not start. Check the internet connection and refresh.',true);return;}const workbook=new window.ExcelJS.Workbook();const reportTime=new Date();workbook.creator='Forgent Power Solutions';workbook.title='Waco Shipping Summary';
@@ -4120,7 +4208,13 @@ function clearBoard(){
   render();
   saveState();
   if(liveReady&&db){
-    db.from('jobs').delete().eq('board_id',BOARD_ID).then(({error})=>{if(error)reportRemoteError(error,'Clearing jobs')});
+    db.from('jobs').select('id,location_key').eq('board_id',BOARD_ID).then(async({data,error})=>{
+      if(error){reportRemoteError(error,'Reading jobs before clearing');return;}
+      const ids=(data||[]).filter(row=>!isShippingLocation(row.location_key)).map(row=>row.id);
+      if(!ids.length)return;
+      const result=await db.from('jobs').delete().eq('board_id',BOARD_ID).in('id',ids);
+      if(result.error)reportRemoteError(result.error,'Clearing jobs');
+    });
   }
 }
 
