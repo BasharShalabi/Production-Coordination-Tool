@@ -700,7 +700,7 @@ body.tutorial-open{overflow:hidden}
 .app-heading{text-align:right;color:#fff}
 .app-heading strong{display:block;font-size:23px;line-height:1.05;font-weight:950;letter-spacing:.045em;text-transform:uppercase}
 .app-heading span{display:block;margin-top:5px;color:var(--electric);font-size:11px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
-.toolbar{padding:10px 14px;background:#000;border-color:#000;box-shadow:0 3px 14px rgba(0,0,0,.3)}
+.toolbar{padding:10px 14px;background:#000;border-color:#000;box-shadow:0 3px 14px rgba(0,0,0,.3);overflow:visible}
 .toolbar .tb-btn{background:#f7fbfb;border-color:rgba(115,243,255,.68);color:var(--teal-dark);font-weight:800}
 .toolbar #btnActivity.active{background:var(--electric);border-color:var(--electric);color:var(--teal-dark)}
 .tb-btn:hover{background:var(--electric-soft);border-color:var(--teal)}
@@ -754,22 +754,17 @@ body.tutorial-open{overflow:hidden}
 body.display-fit .app,body.display-tv .app{height:100vh;min-height:0;overflow:hidden}
 body.display-fit .board-shell,body.display-tv .board-shell{min-height:0;overflow:hidden;padding:12px}
 body.display-fit .display-stage,body.display-tv .display-stage{transform:scale(var(--display-scale,1));will-change:transform}
-body.display-fit .app-title{display:none!important}
-body.display-fit .toolbar{
-  flex-wrap:nowrap;justify-content:flex-start;min-height:46px;padding:5px 8px;
-  overflow-x:auto;overflow-y:hidden;scrollbar-width:thin
-}
-body.display-fit .toolbar .tb-btn{min-height:32px;padding:6px 9px;font-size:12px;white-space:nowrap}
-body.display-fit .find-control{min-width:225px}
-body.display-fit .find-control input{width:148px;min-height:32px;font-size:12px}
-body.display-fit .find-control .find-clear{left:120px}
 body.display-fit .job,body.display-tv .job{min-height:44px;font-size:22px}
 body.display-fit .department[data-dept-id="oven"] .job,body.display-tv .department[data-dept-id="oven"] .job{min-height:64px}
 body.display-fit .oven-timer-readout,body.display-tv .oven-timer-readout{font-size:14px;padding:3px 7px}
-body.display-tv .app-title{min-height:62px;padding:9px 18px}
-body.display-tv .app-logo{width:265px;max-height:36px}
-body.display-tv .app-heading strong{font-size:20px}
-body.display-tv .app-heading span{display:none}
+body.display-tv .toolbar{
+  flex-wrap:nowrap;justify-content:flex-start;min-height:44px;padding:5px 8px;
+  overflow:visible
+}
+body.display-tv .toolbar .tb-btn{min-height:32px;padding:6px 9px;font-size:12px;white-space:nowrap}
+body.display-tv .find-control{min-width:225px}
+body.display-tv .find-control input{width:148px;min-height:32px;font-size:12px}
+body.display-tv .find-control .find-clear{left:120px}
 body.display-tv #btnAdd,
 body.display-tv #btnUndo,
 body.display-tv #btnRedo,
@@ -969,7 +964,7 @@ body.display-tv .tv-readonly-pill{display:inline-flex}
 .tutorial-board>.department>.slots{grid-template-columns:repeat(2,minmax(0,1fr))}
 .board-shell.zoomed #board>.department>.slots,
 .tutorial-board.is-focused>.department>.slots{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
-body.display-tv .app-title{display:none!important}body.display-tv .toolbar{padding:6px 10px}
+body.display-tv .app-title{display:none!important}
 .box-zoom-banner{align-items:flex-start}.select-zoom-copy{display:flex;flex-direction:column;gap:3px}.select-zoom-copy strong{color:var(--electric);font-size:18px;letter-spacing:.075em;text-transform:uppercase}.select-zoom-copy span{font-size:15px;line-height:1.35}
 .week-row label{min-width:30px;text-align:center}.week-row:nth-child(n+6){display:none}
 .shipping-system{display:none;min-height:100vh;background:linear-gradient(180deg,#dce9e9,#f8fcfc 42%,#d4e5e6)}body.shipping-active .shipping-system{display:flex;flex-direction:column}body.shipping-active .app>.app-title,body.shipping-active .app>.toolbar,body.shipping-active .app>.board-shell,body.shipping-active .app>.board-note,body.shipping-active .app>.activity-panel{display:none!important}
@@ -1372,13 +1367,13 @@ const DEPTS=[
 
   {id:'rma',label:'RMA',layout:{left:'0',top:'900px',width:'13.5%',height:'292px'},special:true},
   {id:'customer_witness',label:'Customer Witness',layout:{left:'14.7%',top:'900px',width:'13.5%',height:'292px'},special:true},
-  {id:'failed_test',label:'Failed Unit',layout:{left:'74%',top:'356px',width:'11.2%',height:'152px'},failed:true}
+  {id:'failed_test',label:'Failed Unit',layout:{left:'74%',top:'348px',width:'11.2%',height:'128px'},failed:true}
 ];
 
 const AREAS=[
   {id:'core',label:'1. Core & Coil Assembly',layout:{left:'0',top:'0',width:'57.6%',height:'350px'}},
   {id:'fabrication',label:'2. Fabrication',layout:{left:'0',top:'488px',width:'61.8%',height:'358px'}},
-  {id:'internal',label:'3. Internal Assembly & Testing',layout:{left:'58.4%',top:'0',width:'41.6%',height:'520px'}},
+  {id:'internal',label:'3. Internal Assembly & Testing',layout:{left:'58.4%',top:'0',width:'41.6%',height:'488px'}},
   {id:'finish',label:'4. Final Finish',layout:{left:'62.2%',top:'488px',width:'37.8%',height:'358px'}},
   {id:'completion',label:'5. Final Completion',layout:{left:'61.8%',top:'858px',width:'38.2%',height:'342px'}}
 ];
