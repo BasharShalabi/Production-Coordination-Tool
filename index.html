@@ -967,11 +967,12 @@ body.display-tv .tv-readonly-pill{display:inline-flex}
 body.display-tv .app-title{display:none!important}
 .box-zoom-banner{align-items:flex-start}.select-zoom-copy{display:flex;flex-direction:column;gap:3px}.select-zoom-copy strong{color:var(--electric);font-size:18px;letter-spacing:.075em;text-transform:uppercase}.select-zoom-copy span{font-size:15px;line-height:1.35}
 .week-row label{min-width:30px;text-align:center}.week-row:nth-child(n+6){display:none}
-.shipping-system{display:none;min-height:100vh;background:linear-gradient(180deg,#dce9e9,#f8fcfc 42%,#d4e5e6)}body.shipping-active .shipping-system{display:flex;flex-direction:column}body.shipping-active .app>.app-title,body.shipping-active .app>.toolbar,body.shipping-active .app>.board-shell,body.shipping-active .app>.board-note,body.shipping-active .app>.activity-panel{display:none!important}
-.shipping-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 20px;border-bottom:5px solid var(--electric);background:#000;color:#fff}.shipping-brand{display:flex;align-items:center;gap:22px;min-width:0}.shipping-logo{width:260px;max-height:39px;object-fit:contain;object-position:left center}.shipping-heading strong{display:block;font-size:23px;font-weight:1000;text-transform:uppercase}.shipping-heading span{display:block;margin-top:4px;color:var(--electric);font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}.shipping-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
-.shipping-main{width:min(1600px,100%);margin:0 auto;padding:22px}.shipping-stats{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin-bottom:17px}.shipping-stat{padding:16px 18px;border:2px solid #a7c9cc;border-radius:12px;background:#fff;box-shadow:0 7px 18px rgba(30,57,59,.09)}.shipping-stat span{display:block;color:#526b6d;font-size:11px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.shipping-stat strong{display:block;margin-top:5px;color:var(--teal-dark);font-size:28px;font-weight:1000}
+.shipping-system{display:none;min-height:100vh;background:linear-gradient(180deg,#dce9e9,#f8fcfc 42%,#d4e5e6)}body.shipping-active .shipping-system{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;height:100vh;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}body.shipping-active .app{height:100vh!important;min-height:0!important;overflow:hidden!important}body.shipping-active .app>.app-title,body.shipping-active .app>.toolbar,body.shipping-active .app>.board-shell,body.shipping-active .app>.board-note,body.shipping-active .app>.activity-panel{display:none!important}
+.shipping-header{position:sticky;top:0;z-index:25;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 20px;border-bottom:5px solid var(--electric);background:#000;color:#fff}.shipping-brand{display:flex;align-items:center;gap:22px;min-width:0}.shipping-logo{width:260px;max-height:39px;object-fit:contain;object-position:left center}.shipping-heading strong{display:block;font-size:23px;font-weight:1000;text-transform:uppercase}.shipping-heading span{display:block;margin-top:4px;color:var(--electric);font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}.shipping-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.shipping-main{width:min(1600px,100%);margin:0 auto;padding:22px 22px 42px}.shipping-stats{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin-bottom:17px}.shipping-stat{padding:16px 18px;border:2px solid #a7c9cc;border-radius:12px;background:#fff;box-shadow:0 7px 18px rgba(30,57,59,.09)}.shipping-stat span{display:block;color:#526b6d;font-size:11px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.shipping-stat strong{display:block;margin-top:5px;color:var(--teal-dark);font-size:28px;font-weight:1000}
 .shipping-section{margin-top:16px;border:2px solid #8bbdc1;border-radius:14px;background:rgba(255,255,255,.68);overflow:hidden}.shipping-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;background:var(--teal-dark);color:#fff}.shipping-section-head h2{margin:0;font-size:18px;font-weight:1000;text-transform:uppercase}.shipping-section-head span{color:var(--electric);font-size:12px;font-weight:900}.shipping-ready-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px}.shipping-plant{min-height:230px;padding:12px;border:2px solid #a7c9cc;border-radius:11px;background:#f8fcfc}.shipping-plant h3{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px;color:#075985;font-size:17px;text-transform:uppercase}.shipping-job-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:9px}.shipping-card{position:relative;padding:13px;border:2px solid rgba(0,0,0,.18);border-radius:9px;box-shadow:0 5px 12px rgba(15,23,42,.12)}.shipping-card strong{display:block;padding-right:58px;font-size:18px;line-height:1.2;overflow-wrap:anywhere}.shipping-card small{display:block;margin-top:7px;font-size:11px;font-weight:800;opacity:.87}.shipping-card button{margin-top:10px;border:1px solid rgba(0,0,0,.3);border-radius:7px;background:rgba(255,255,255,.91);color:#0f172a;padding:7px 9px;font-size:12px;font-weight:950;cursor:pointer}.shipping-empty{padding:34px 15px;color:#64748b;font-size:13px;font-weight:800;text-align:center}
 .shipping-archive{width:100%;border-collapse:collapse;background:#fff}.shipping-archive th,.shipping-archive td{padding:11px 12px;border-bottom:1px solid #d8e3e4;text-align:left;font-size:13px}.shipping-archive th{background:#e4f4f5;color:var(--teal-dark);font-size:11px;font-weight:1000;letter-spacing:.05em;text-transform:uppercase}.shipping-archive td:first-child{font-weight:950}.shipping-archive button{border:1px solid #8bbdc1;border-radius:6px;background:#fff;padding:6px 8px;font-size:11px;font-weight:900;cursor:pointer}
+.shipping-card-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.shipping-card-actions button{margin-top:0}.shipping-archive-actions{display:flex;align-items:center;flex-wrap:wrap;gap:6px}.shipping-card button.shipping-delete,.shipping-archive button.shipping-delete{border-color:#b91c1c;background:#fff1f2;color:#b91c1c}.shipping-card button.shipping-delete:hover,.shipping-archive button.shipping-delete:hover{background:#b91c1c;color:#fff}.shipping-card button:disabled,.shipping-archive button:disabled{cursor:wait;opacity:.58}
 .shipping-chart{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px}.chart-card{padding:14px;border:1px solid #b9d5d7;border-radius:10px;background:#fff}.chart-card h3{margin:0 0 12px;color:var(--teal-dark);font-size:14px;text-transform:uppercase}.chart-bars{display:flex;align-items:flex-end;gap:12px;height:125px;padding-top:12px;border-bottom:2px solid #b9d5d7}.chart-bar-wrap{display:flex;flex:1;align-items:center;justify-content:flex-end;flex-direction:column;height:100%;gap:5px}.chart-bar{width:min(66px,72%);min-height:4px;border-radius:6px 6px 0 0;background:linear-gradient(var(--electric),var(--teal))}.chart-bar-wrap span{color:#526b6d;font-size:11px;font-weight:900}
 @media(max-width:900px){.app-choice-grid,.shipping-ready-grid,.shipping-chart{grid-template-columns:1fr}.shipping-stats{grid-template-columns:1fr 1fr}.shipping-header{align-items:flex-start;flex-direction:column}}
 </style>
@@ -1155,7 +1156,7 @@ body.display-tv .app-title{display:none!important}
       <section class="shipping-section">
         <div class="shipping-section-head"><h2>Shipping History and Reporting</h2><span>Complete job movement history is preserved</span></div>
         <div class="shipping-chart" id="shippingCharts"></div>
-        <div style="overflow:auto"><table class="shipping-archive"><thead><tr><th>Job Number</th><th>Plant</th><th>Ready Date</th><th>Shipped Date</th><th>Total Elapsed</th><th>History</th></tr></thead><tbody id="shippingArchiveBody"></tbody></table></div>
+        <div style="overflow:auto"><table class="shipping-archive"><thead><tr><th>Job Number</th><th>Plant</th><th>Ready Date</th><th>Shipped Date</th><th>Total Elapsed</th><th>Actions</th></tr></thead><tbody id="shippingArchiveBody"></tbody></table></div>
       </section>
     </main>
   </section>
@@ -1404,6 +1405,11 @@ const PLAIN_CONNECTORS=[
 
 const SUPABASE_URL='https://fithcsswvfczgpspywtw.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_0y7-2mefbQs77HN-wACHBw_c7DFK3cq';
+const REMOTE_SHARED_BOARD_ID='main';
+const WACO2_REMOTE_LOCATION_PREFIX='plant:waco2:';
+const WACO2_SETTINGS_JOB_ID='system_waco2_board_settings_v1';
+const WACO2_SETTINGS_LOCATION=WACO2_REMOTE_LOCATION_PREFIX+'system:settings';
+const WACO2_SETTINGS_PREFIX='__WACO2_BOARD_SETTINGS_V1__:';
 let activePlant='waco1';
 let currentView='menu';
 let BOARD_ID='main';
@@ -1906,8 +1912,47 @@ function jobExtraMetadata(job){
 function isShippingLocation(key){
   return /^ship:(waco1|waco2):(ready|shipped)$/.test(String(key||''));
 }
+function isWaco2SettingsRow(row){
+  return !!row&&(row.id===WACO2_SETTINGS_JOB_ID||row.location_key===WACO2_SETTINGS_LOCATION);
+}
+function isWaco2RemoteProductionRow(row){
+  if(!row||isShippingLocation(row.location_key)||isWaco2SettingsRow(row))return false;
+  return row.board_id==='waco2'||(row.board_id===REMOTE_SHARED_BOARD_ID&&String(row.location_key||'').startsWith(WACO2_REMOTE_LOCATION_PREFIX));
+}
+function isWaco1RemoteProductionRow(row){
+  if(!row||row.board_id!==REMOTE_SHARED_BOARD_ID||isShippingLocation(row.location_key)||isWaco2SettingsRow(row))return false;
+  return !String(row.location_key||'').startsWith(WACO2_REMOTE_LOCATION_PREFIX);
+}
+function remoteRowBelongsToActiveBoard(row){
+  return activePlant==='waco2'?isWaco2RemoteProductionRow(row):isWaco1RemoteProductionRow(row);
+}
+function remoteProductionLocation(localLocation,plant=activePlant){
+  const location=String(localLocation||'');
+  if(!location||isShippingLocation(location))return location;
+  return plant==='waco2'?WACO2_REMOTE_LOCATION_PREFIX+location:location;
+}
+function localProductionLocation(row){
+  let location=String((row&&row.location_key)||'');
+  if(row&&row.board_id===REMOTE_SHARED_BOARD_ID&&location.startsWith(WACO2_REMOTE_LOCATION_PREFIX))location=location.slice(WACO2_REMOTE_LOCATION_PREFIX.length);
+  return migrateLocationKey(location);
+}
+function packWaco2Settings(){
+  return WACO2_SETTINGS_PREFIX+JSON.stringify({notes:state.notes||'',goal:state.goal===''?null:Number(state.goal),weeks:state.weeks});
+}
+function unpackWaco2Settings(value){
+  const raw=String(value||'');
+  if(!raw.startsWith(WACO2_SETTINGS_PREFIX))return null;
+  try{
+    const data=JSON.parse(raw.slice(WACO2_SETTINGS_PREFIX.length));
+    return {
+      notes:typeof data.notes==='string'?data.notes:'',
+      goal:data.goal===null||typeof data.goal==='undefined'?'':String(data.goal),
+      weeks:Array.isArray(data.weeks)&&data.weeks.length===6?data.weeks:defaultWeeks()
+    };
+  }catch(error){return null;}
+}
 function sourceBoardIdForShippingJob(job){
-  return job&&job.sourcePlant==='waco2'?'waco2':'main';
+  return REMOTE_SHARED_BOARD_ID;
 }
 function packRemoteNote(job){
   const note=job.note||'';
@@ -1945,11 +1990,11 @@ function remoteJobRow(jobId){
   const location=findJobLocation(jobId);
   return {
     id:jobId,
-    board_id:currentView==='shipping'?sourceBoardIdForShippingJob(job):BOARD_ID,
+    board_id:REMOTE_SHARED_BOARD_ID,
     job_text:job.text,
     color:Number(job.color)||0,
     note:packRemoteNote(job),
-    location_key:location,
+    location_key:currentView==='shipping'?location:remoteProductionLocation(location),
     position:Math.max((state.locations[location]||[]).indexOf(jobId),0),
     created_at:job.created||new Date().toISOString()
   };
@@ -1969,7 +2014,7 @@ async function upsertRemoteJob(jobId){
 }
 async function deleteRemoteJob(jobId){
   if(!liveReady||!db)return;
-  const {error}=await db.from('jobs').delete().eq('board_id',BOARD_ID).eq('id',jobId);
+  const {error}=await db.from('jobs').delete().eq('id',jobId).in('board_id',activePlant==='waco2'?[REMOTE_SHARED_BOARD_ID,'waco2']:[REMOTE_SHARED_BOARD_ID]);
   if(error)reportRemoteError(error,'Deleting job');
 }
 function queueRemoteSettings(){
@@ -1978,22 +2023,40 @@ function queueRemoteSettings(){
   settingsTimer=setTimeout(saveRemoteSettings,350);
 }
 async function saveRemoteSettings(){
-  if(!liveReady||!db)return;
+  if(!liveReady||!db)return false;
+  if(activePlant==='waco2'&&currentView==='board'){
+    const row={
+      id:WACO2_SETTINGS_JOB_ID,
+      board_id:REMOTE_SHARED_BOARD_ID,
+      job_text:'Waco 2 Board Settings',
+      color:0,
+      note:packWaco2Settings(),
+      location_key:WACO2_SETTINGS_LOCATION,
+      position:0,
+      created_at:new Date().toISOString()
+    };
+    const {error}=await db.from('jobs').upsert(row,{onConflict:'id'});
+    if(error){reportRemoteError(error,'Saving Waco 2 board settings');return false;}
+    return true;
+  }
   const row={
-    board_id:BOARD_ID,
+    board_id:REMOTE_SHARED_BOARD_ID,
     notes:state.notes||'',
     goal:state.goal===''?null:Number(state.goal),
     weeks:state.weeks
   };
   const {error}=await db.from('board_settings').upsert(row,{onConflict:'board_id'});
-  if(error)reportRemoteError(error,'Saving board settings');
+  if(error){reportRemoteError(error,'Saving board settings');return false;}
+  return true;
 }
 async function syncEntireBoard(){
   if(!liveReady||!db)return;
   setLiveStatus('connecting','Synchronizing');
   const rows=Object.keys(state.jobs).map(remoteJobRow).filter(Boolean);
-  const {data:remoteJobs,error:readError}=await db.from('jobs').select('id,location_key').eq('board_id',BOARD_ID);
+  const boardIds=activePlant==='waco2'?[REMOTE_SHARED_BOARD_ID,'waco2']:[REMOTE_SHARED_BOARD_ID];
+  const {data:allRemoteJobs,error:readError}=await db.from('jobs').select('id,board_id,location_key').in('board_id',boardIds);
   if(readError){reportRemoteError(readError,'Reading shared jobs');return;}
+  const remoteJobs=(allRemoteJobs||[]).filter(remoteRowBelongsToActiveBoard);
   if(rows.length){
     const {error}=await db.from('jobs').upsert(rows,{onConflict:'id'});
     if(error){reportRemoteError(error,'Synchronizing jobs');return;}
@@ -2001,21 +2064,31 @@ async function syncEntireBoard(){
   const localIds=new Set(rows.map(row=>row.id));
   const removed=(remoteJobs||[]).filter(row=>!isShippingLocation(row.location_key)).map(row=>row.id).filter(id=>!localIds.has(id));
   if(removed.length){
-    const {error}=await db.from('jobs').delete().eq('board_id',BOARD_ID).in('id',removed);
+    const {error}=await db.from('jobs').delete().in('board_id',boardIds).in('id',removed);
     if(error){reportRemoteError(error,'Synchronizing deleted jobs');return;}
   }
-  await saveRemoteSettings();
+  if(!(await saveRemoteSettings()))return;
   setLiveStatus('live','Live');
 }
 function applyRemoteJob(payload){
+  const payloadRow=payload.eventType==='DELETE'?payload.old:payload.new;
+  if(isWaco2SettingsRow(payloadRow)){
+    if(currentView==='board'&&activePlant==='waco2'&&payload.eventType!=='DELETE'){
+      const settings=unpackWaco2Settings(payloadRow.note);
+      if(settings){state.notes=settings.notes;state.goal=settings.goal;state.weeks=settings.weeks;render();}
+    }
+    return;
+  }
   if(payload.eventType==='DELETE'){
+    if(currentView==='board'&&!remoteRowBelongsToActiveBoard(payload.old))return;
+    if(currentView==='shipping'&&!isShippingLocation(payload.old&&payload.old.location_key))return;
     const id=payload.old&&payload.old.id;
     if(id){delete state.jobs[id];delete remotePositions[id];removeFromLocations(id);}
   }else{
     const row=payload.new;
     if(!row)return;
     const belongsInShipping=currentView==='shipping'&&isShippingLocation(row.location_key)&&['main','waco2','shipping'].includes(row.board_id);
-    const belongsOnProductionBoard=currentView==='board'&&row.board_id===BOARD_ID&&!isShippingLocation(row.location_key);
+    const belongsOnProductionBoard=currentView==='board'&&remoteRowBelongsToActiveBoard(row);
     if(!belongsInShipping&&!belongsOnProductionBoard){
       if(state.jobs[row.id]){delete state.jobs[row.id];delete remotePositions[row.id];removeFromLocations(row.id);render();}
       return;
@@ -2033,7 +2106,7 @@ function applyRemoteJob(payload){
     remotePositions[row.id]=Number(row.position)||0;
     removeFromLocations(row.id);
     if(row.location_key){
-      const remoteLocation=migrateLocationKey(row.location_key);
+      const remoteLocation=belongsOnProductionBoard?localProductionLocation(row):migrateLocationKey(row.location_key);
       if(!state.locations[remoteLocation])state.locations[remoteLocation]=[];
       state.locations[remoteLocation].push(row.id);
       state.locations[remoteLocation].sort((a,b)=>(remotePositions[a]||0)-(remotePositions[b]||0));
@@ -2047,6 +2120,7 @@ function applyRemoteJob(payload){
 }
 function applyRemoteSettings(payload){
   const row=payload.new;
+  if(activePlant==='waco2')return;
   if(!row||row.board_id!==BOARD_ID)return;
   state.notes=row.notes||'';
   state.goal=row.goal===null||typeof row.goal==='undefined'?'':String(row.goal);
@@ -2070,28 +2144,36 @@ async function loadSharedBoard(){
   if(currentView==='shipping')return loadSharedShippingBoard();
   setLiveStatus('connecting','Loading');
   const localCopy=JSON.parse(JSON.stringify(state));
-  const [jobsResult,settingsResult]=await Promise.all([
-    db.from('jobs').select('*').eq('board_id',BOARD_ID).order('location_key').order('position'),
-    db.from('board_settings').select('*').eq('board_id',BOARD_ID).maybeSingle()
-  ]);
+  const jobsQuery=activePlant==='waco2'
+    ?db.from('jobs').select('*').in('board_id',[REMOTE_SHARED_BOARD_ID,'waco2']).order('location_key').order('position')
+    :db.from('jobs').select('*').eq('board_id',REMOTE_SHARED_BOARD_ID).order('location_key').order('position');
+  const settingsQuery=activePlant==='waco2'
+    ?Promise.resolve({data:null,error:null})
+    :db.from('board_settings').select('*').eq('board_id',REMOTE_SHARED_BOARD_ID).maybeSingle();
+  const [jobsResult,settingsResult]=await Promise.all([jobsQuery,settingsQuery]);
   if(jobsResult.error){reportRemoteError(jobsResult.error,'Loading shared jobs');return false;}
   if(settingsResult.error){reportRemoteError(settingsResult.error,'Loading board settings');return false;}
 
   state=normalizeState({locations:{},jobs:{},notes:'',goal:'',weeks:defaultWeeks()});
   remotePositions={};
-  const productionRows=(jobsResult.data||[]).filter(row=>!isShippingLocation(row.location_key));
+  const productionRows=(jobsResult.data||[]).filter(remoteRowBelongsToActiveBoard);
   productionRows.forEach(row=>{
     const remoteNote=unpackRemoteNote(row.note);
     state.jobs[row.id]={...remoteNote.extra,text:row.job_text,color:Number(row.color)||0,note:remoteNote.note,ovenEnteredAt:remoteNote.ovenEnteredAt,workflow:remoteNote.workflow,created:row.created_at};
     remotePositions[row.id]=Number(row.position)||0;
     if(row.location_key){
-      const remoteLocation=migrateLocationKey(row.location_key);
+      const remoteLocation=localProductionLocation(row);
       if(!state.locations[remoteLocation])state.locations[remoteLocation]=[];
       state.locations[remoteLocation].push(row.id);
     }
   });
   Object.keys(state.locations).forEach(key=>state.locations[key].sort((a,b)=>(remotePositions[a]||0)-(remotePositions[b]||0)));
-  if(settingsResult.data){
+  if(activePlant==='waco2'){
+    const settingsRow=(jobsResult.data||[]).find(isWaco2SettingsRow);
+    const settings=settingsRow?unpackWaco2Settings(settingsRow.note):null;
+    if(settings){state.notes=settings.notes;state.goal=settings.goal;state.weeks=settings.weeks;}
+    else{state.notes=localCopy.notes||'';state.goal=localCopy.goal||'';state.weeks=Array.isArray(localCopy.weeks)&&localCopy.weeks.length===6?localCopy.weeks:defaultWeeks();}
+  }else if(settingsResult.data){
     const row=settingsResult.data;
     state.notes=row.notes||'';
     state.goal=row.goal===null||typeof row.goal==='undefined'?'':String(row.goal);
@@ -2119,7 +2201,7 @@ async function loadSharedShippingBoard(){
   remotePositions={};
   (jobsResult.data||[]).filter(row=>isShippingLocation(row.location_key)).forEach(row=>{
     const remoteNote=unpackRemoteNote(row.note);
-    const inferredPlant=row.board_id==='waco2'?'waco2':'waco1';
+    const inferredPlant=row.board_id==='waco2'||String(row.location_key||'').includes(':waco2:')?'waco2':'waco1';
     state.jobs[row.id]={...remoteNote.extra,text:row.job_text,color:Number(row.color)||0,note:remoteNote.note,ovenEnteredAt:remoteNote.ovenEnteredAt,workflow:remoteNote.workflow,created:row.created_at};
     if(!state.jobs[row.id].sourcePlant)state.jobs[row.id].sourcePlant=inferredPlant;
     remotePositions[row.id]=Number(row.position)||0;
@@ -4098,9 +4180,11 @@ function makeShippingCard(jobId){
   const card=document.createElement('article');card.className='shipping-card';card.style.background=color.bg;card.style.color=color.tx;
   const title=document.createElement('strong');title.textContent=job.text||jobId;
   const detail=document.createElement('small');detail.textContent='Ready '+formatActivityTime(shippingStepDate(job,'ready')||job.created);
+  const actions=document.createElement('div');actions.className='shipping-card-actions';
   const shipped=document.createElement('button');shipped.type='button';shipped.textContent='Mark Shipped';shipped.addEventListener('click',()=>markShippingJobShipped(jobId));
-  const historyButton=document.createElement('button');historyButton.type='button';historyButton.textContent='View History';historyButton.style.marginLeft='6px';historyButton.addEventListener('click',()=>openModal(jobId));
-  card.append(title,detail,shipped,historyButton);return card;
+  const historyButton=document.createElement('button');historyButton.type='button';historyButton.textContent='View History';historyButton.addEventListener('click',()=>openModal(jobId));
+  const deleteButton=document.createElement('button');deleteButton.type='button';deleteButton.className='shipping-delete';deleteButton.textContent='Delete Job';deleteButton.setAttribute('aria-label','Delete job '+(job.text||jobId)+' from Ready to Ship');deleteButton.addEventListener('click',()=>deleteShippingJob(jobId,deleteButton));
+  actions.append(shipped,historyButton,deleteButton);card.append(title,detail,actions);return card;
 }
 function addChartCard(container,title,values){
   const card=document.createElement('section');card.className='chart-card';const heading=document.createElement('h3');heading.textContent=title;const bars=document.createElement('div');bars.className='chart-bars';const max=Math.max(1,...values.map(item=>item.value));
@@ -4115,9 +4199,67 @@ function renderShippingSystem(){
   [['shipW1ReadyList',w1Ready],['shipW2ReadyList',w2Ready]].forEach(([elementId,ids])=>{const list=document.getElementById(elementId);list.innerHTML='';if(!ids.length){const empty=document.createElement('div');empty.className='shipping-empty';empty.textContent='No jobs are currently ready to ship.';list.appendChild(empty);return;}ids.forEach(id=>list.appendChild(makeShippingCard(id)))});
   const archive=document.getElementById('shippingArchiveBody');archive.innerHTML='';
   if(!shipped.length){const row=document.createElement('tr');const cell=document.createElement('td');cell.colSpan=6;cell.className='shipping-empty';cell.textContent='No shipped jobs have been archived yet.';row.appendChild(cell);archive.appendChild(row)}
-  shipped.forEach(id=>{const job=state.jobs[id];const location=findJobLocation(id);const plant=shippingPlantFor(job,location);const row=document.createElement('tr');[job.text||id,plant==='waco2'?'Waco 2':'Waco 1',formatActivityTime(shippingStepDate(job,'ready')),formatActivityTime(shippingStepDate(job,'shipped')),shippingElapsed(job)].forEach(value=>{const cell=document.createElement('td');cell.textContent=value;row.appendChild(cell)});const action=document.createElement('td');const button=document.createElement('button');button.type='button';button.textContent='View Full History';button.addEventListener('click',()=>openModal(id));action.appendChild(button);row.appendChild(action);archive.appendChild(row)});
+  shipped.forEach(id=>{const job=state.jobs[id];const location=findJobLocation(id);const plant=shippingPlantFor(job,location);const row=document.createElement('tr');[job.text||id,plant==='waco2'?'Waco 2':'Waco 1',formatActivityTime(shippingStepDate(job,'ready')),formatActivityTime(shippingStepDate(job,'shipped')),shippingElapsed(job)].forEach(value=>{const cell=document.createElement('td');cell.textContent=value;row.appendChild(cell)});const action=document.createElement('td');const actions=document.createElement('div');actions.className='shipping-archive-actions';const historyButton=document.createElement('button');historyButton.type='button';historyButton.textContent='View Full History';historyButton.addEventListener('click',()=>openModal(id));const deleteButton=document.createElement('button');deleteButton.type='button';deleteButton.className='shipping-delete';deleteButton.textContent='Delete Job';deleteButton.setAttribute('aria-label','Delete shipped job '+(job.text||id));deleteButton.addEventListener('click',()=>deleteShippingJob(id,deleteButton));actions.append(historyButton,deleteButton);action.appendChild(actions);row.appendChild(action);archive.appendChild(row)});
   const charts=document.getElementById('shippingCharts');charts.innerHTML='';const completedRecords=Object.values(state.jobs).filter(job=>sanitizeWorkflow(job.workflow).some(step=>step.locationKey==='dept:completed')).length;
   addChartCard(charts,'Completed and Shipping Status',[{label:'Completed',value:completedRecords},{label:'Ready',value:w1Ready.length+w2Ready.length},{label:'Shipped',value:shipped.length}]);addChartCard(charts,'Shipped by Plant',[{label:'Waco 1',value:shippingIds('waco1','shipped').length},{label:'Waco 2',value:shippingIds('waco2','shipped').length}]);
+}
+const shippingDeleteInProgress=new Set();
+async function deleteShippingJob(jobId,triggerButton){
+  if(currentView!=='shipping'||shippingDeleteInProgress.has(jobId))return;
+  const job=state.jobs[jobId];
+  const location=findJobLocation(jobId);
+  if(!job||!isShippingLocation(location)){showToast('This job is no longer in the shipping system.',true);renderShippingSystem();return;}
+  if(db&&!liveReady){showToast('Shipping is still connecting. Wait until the status shows Live, then try again.',true);return;}
+
+  const plant=shippingPlantFor(job,location);
+  const plantLabel=plant==='waco2'?'Waco 2':'Waco 1';
+  const statusLabel=location.endsWith(':shipped')?'Shipped archive':'Ready to Ship';
+  const jobLabel=job.text||jobId;
+  if(!confirm('Permanently delete job '+jobLabel+' from '+plantLabel+' '+statusLabel+'?\n\nThis cannot be undone.'))return;
+
+  shippingDeleteInProgress.add(jobId);
+  if(triggerButton){triggerButton.disabled=true;triggerButton.textContent='Deleting...';}
+  try{
+    if(db){
+      const allowedBoardIds=[REMOTE_SHARED_BOARD_ID,'waco2','shipping'];
+      const allowedLocations=[shippingLocation(plant,'ready'),shippingLocation(plant,'shipped')];
+      const {error:deleteError}=await db.from('jobs').delete().eq('id',jobId).in('board_id',allowedBoardIds).in('location_key',allowedLocations);
+      if(deleteError){
+        console.error('Deleting shipping job',deleteError);
+        setLiveStatus('error','Sync error');
+        showToast('Delete failed. '+jobLabel+' was not removed.',true);
+        return;
+      }
+
+      // Supabase can legitimately return no deleted rows when DELETE is followed
+      // by select(), even when the deletion succeeded. Verify with a separate read
+      // so the card only disappears after the database confirms the row is gone.
+      const {data:remainingRows,error:verifyError}=await db.from('jobs').select('id').eq('id',jobId).in('board_id',allowedBoardIds).in('location_key',allowedLocations).limit(1);
+      if(verifyError){
+        console.error('Verifying deleted shipping job',verifyError);
+        setLiveStatus('error','Sync error');
+        showToast('The deletion could not be verified. Refresh Shipping before trying again.',true);
+        return;
+      }
+      if(Array.isArray(remainingRows)&&remainingRows.length){
+        setLiveStatus('error','Delete blocked');
+        showToast('Delete was blocked by the database. '+jobLabel+' was not removed.',true);
+        return;
+      }
+      setLiveStatus('live','Live');
+    }
+
+    delete state.jobs[jobId];
+    delete remotePositions[jobId];
+    removeFromLocations(jobId);
+    if(editingJobId===jobId)closeModal();
+    render();
+    saveState();
+    showToast(jobLabel+' permanently deleted from '+statusLabel+'.');
+  }finally{
+    shippingDeleteInProgress.delete(jobId);
+    if(triggerButton&&triggerButton.isConnected){triggerButton.disabled=false;triggerButton.textContent='Delete Job';}
+  }
 }
 async function markShippingJobShipped(jobId){
   const original=state.jobs[jobId];
@@ -4136,7 +4278,7 @@ async function markShippingJobShipped(jobId){
   job.sourcePlant=plant;
 
   if(db){
-    const row={id:jobId,board_id:sourceBoardIdForShippingJob(job),job_text:job.text,color:Number(job.color)||0,note:packRemoteNote(job),location_key:destination,position:0,created_at:job.created||movedAt};
+    const row={id:jobId,board_id:REMOTE_SHARED_BOARD_ID,job_text:job.text,color:Number(job.color)||0,note:packRemoteNote(job),location_key:destination,position:0,created_at:job.created||movedAt};
     const {error}=await db.from('jobs').upsert(row,{onConflict:'id'});
     if(error){reportRemoteError(error,'Marking job Shipped');return;}
   }
@@ -4182,7 +4324,7 @@ async function sendEditingJobToShipping(){
     readyButton.textContent='Send to Ready to Ship';
     return;
   }
-  const row={id:jobId,board_id:BOARD_ID,job_text:job.text,color:Number(job.color)||0,note:packRemoteNote(job),location_key:destination,position:0,created_at:job.created||movedAt};
+  const row={id:jobId,board_id:REMOTE_SHARED_BOARD_ID,job_text:job.text,color:Number(job.color)||0,note:packRemoteNote(job),location_key:destination,position:0,created_at:job.created||movedAt};
   const {error}=await db.from('jobs').upsert(row,{onConflict:'id'});
   shippingTransferInProgress=false;
   readyButton.disabled=false;
@@ -4208,11 +4350,12 @@ function clearBoard(){
   render();
   saveState();
   if(liveReady&&db){
-    db.from('jobs').select('id,location_key').eq('board_id',BOARD_ID).then(async({data,error})=>{
+    const boardIds=activePlant==='waco2'?[REMOTE_SHARED_BOARD_ID,'waco2']:[REMOTE_SHARED_BOARD_ID];
+    db.from('jobs').select('id,board_id,location_key').in('board_id',boardIds).then(async({data,error})=>{
       if(error){reportRemoteError(error,'Reading jobs before clearing');return;}
-      const ids=(data||[]).filter(row=>!isShippingLocation(row.location_key)).map(row=>row.id);
+      const ids=(data||[]).filter(remoteRowBelongsToActiveBoard).map(row=>row.id);
       if(!ids.length)return;
-      const result=await db.from('jobs').delete().eq('board_id',BOARD_ID).in('id',ids);
+      const result=await db.from('jobs').delete().in('board_id',boardIds).in('id',ids);
       if(result.error)reportRemoteError(result.error,'Clearing jobs');
     });
   }
