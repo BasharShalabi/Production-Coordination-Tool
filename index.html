@@ -342,6 +342,17 @@ body.authenticated.app-selecting .app-selector{display:flex}
   display:block;width:100%;min-width:0;max-width:100%;pointer-events:none;
   white-space:nowrap;overflow:hidden;text-overflow:clip;word-break:keep-all;
 }
+.job-priority-star{
+  position:absolute;left:3px;bottom:2px;z-index:3;display:block;
+  color:#fde047;font-size:16px;line-height:1;pointer-events:none;
+  -webkit-text-stroke:1px #854d0e;
+  filter:drop-shadow(0 0 2px #fff7ae) drop-shadow(0 0 5px #facc15);
+  animation:priorityStarGlow 1.8s ease-in-out infinite alternate;
+}
+@keyframes priorityStarGlow{
+  from{transform:scale(.94);filter:drop-shadow(0 0 2px #fff7ae) drop-shadow(0 0 4px #facc15)}
+  to{transform:scale(1.1);filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px #facc15)}
+}
 .find-control{position:relative;display:flex;align-items:center;gap:5px;min-width:250px}
 .find-control input{
   width:170px;min-height:36px;padding:7px 34px 7px 11px;border:2px solid rgba(115,243,255,.75);
@@ -458,6 +469,20 @@ body.authenticated.app-selecting .app-selector{display:flex}
 .modal-colors{display:flex;flex-wrap:wrap;gap:10px;padding:4px 0 2px}
 .modal-colors .swatch{width:36px;height:36px;border-radius:8px}
 .modal-colors .swatch.selected{border-color:var(--teal-dark);box-shadow:0 0 0 3px rgba(115,243,255,.95)}
+.priority-form-row{margin-top:2px}
+.priority-toggle{
+  display:flex!important;align-items:center;gap:11px;min-height:50px;margin:0!important;padding:10px 13px;
+  border:2px solid #d5b21d;border-radius:10px;background:linear-gradient(135deg,#fffbea,#fff4b8);
+  color:#5f4500!important;cursor:pointer;text-transform:none!important;letter-spacing:0!important;
+}
+.priority-toggle input{
+  width:23px!important;height:23px!important;min-height:23px!important;flex:0 0 23px;margin:0;padding:0;
+  accent-color:#eab308;box-shadow:none!important;
+}
+.priority-toggle-copy{display:flex;flex:1;flex-direction:column;gap:2px;min-width:0}
+.priority-toggle-copy strong{font-size:15px;font-weight:1000;text-transform:uppercase;letter-spacing:.045em}
+.priority-toggle-copy small{color:#725d14;font-size:12px;font-weight:750;line-height:1.25}
+.priority-toggle-star{color:#facc15;font-size:25px;line-height:1;-webkit-text-stroke:1px #854d0e;filter:drop-shadow(0 0 5px #fde047)}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:18px;border-top:2px solid rgba(0,94,102,.18)}
 .modal-actions .tb-btn{min-width:112px;min-height:46px;padding:10px 22px;font-size:15px}
 .backup-modal{width:min(1120px,96vw);max-height:min(900px,94vh)}
@@ -910,6 +935,26 @@ body.display-tv .tv-readonly-pill{display:inline-flex}
 #board>.arrow-stage:not(.vertical-arrow) .arrow-slots:empty,.tutorial-board>.arrow-stage:not(.vertical-arrow) .arrow-slots:empty{border-color:transparent;background:transparent}
 #board>.arrow-stage:not(.vertical-arrow) .job,.tutorial-board>.arrow-stage:not(.vertical-arrow) .job{min-height:42px;padding:5px 3px;font-size:18px}
 #board>.arrow-stage.wide-arrow .arrow-slots,.tutorial-board>.arrow-stage.wide-arrow .arrow-slots{width:calc(100% - 8px);overflow-x:hidden;overflow-y:auto}
+#board>.arrow-stage.capacity-arrow,.tutorial-board>.arrow-stage.capacity-arrow{isolation:isolate}
+#board>.arrow-stage.capacity-arrow .arrow-line,.tutorial-board>.arrow-stage.capacity-arrow .arrow-line{height:36px;margin-top:4px;margin-bottom:6px}
+#board>.arrow-stage.capacity-arrow .arrow-line:before,.tutorial-board>.arrow-stage.capacity-arrow .arrow-line:before{top:15px;height:6px}
+#board>.arrow-stage.capacity-arrow .arrow-line:after,.tutorial-board>.arrow-stage.capacity-arrow .arrow-line:after{top:6px;border-top-width:12px;border-bottom-width:12px;border-left-width:18px}
+#board>.arrow-stage.capacity-arrow.left .arrow-line:after,.tutorial-board>.arrow-stage.capacity-arrow.left .arrow-line:after{border-left:none;border-right-width:18px}
+#board>.arrow-stage.capacity-arrow.vertical-arrow .arrow-line-v:before,.tutorial-board>.arrow-stage.capacity-arrow.vertical-arrow .arrow-line-v:before{left:11px;width:6px}
+#board>.arrow-stage.capacity-arrow.vertical-arrow .arrow-line-v:after,.tutorial-board>.arrow-stage.capacity-arrow.vertical-arrow .arrow-line-v:after{
+  left:2px;border-left-width:12px;border-right-width:12px;border-top-width:18px
+}
+#board>.arrow-stage.capacity-arrow.vertical-arrow.up .arrow-line-v:after,.tutorial-board>.arrow-stage.capacity-arrow.vertical-arrow.up .arrow-line-v:after{border-top:none;border-bottom-width:18px}
+#board>.arrow-stage.capacity-arrow .arrow-slots:not(:empty),.tutorial-board>.arrow-stage.capacity-arrow .arrow-slots:not(:empty){
+  border-width:2px;border-color:rgba(29,79,143,.42);background:rgba(255,255,255,.86);box-shadow:0 4px 10px rgba(30,57,59,.12)
+}
+.zoom-transition-label{display:none}
+.zoom-flow-arrow{display:none}
+body.job-dragging #board>.arrow-stage.capacity-arrow{
+  z-index:30;overflow:visible;transform:scaleX(1.45);transform-origin:center;
+  background:rgba(224,242,254,.9);outline:3px dashed #0284c7;outline-offset:2px;border-radius:9px
+}
+body.job-dragging #board>.arrow-stage.capacity-arrow>*{transform:scaleX(.69)}
 #board>.plain-connector,.tutorial-board>.plain-connector{z-index:3}
 #board>.department[data-dept-id="rma"],#board>.department[data-dept-id="customer_witness"],.tutorial-board>.department[data-dept-id="rma"],.tutorial-board>.department[data-dept-id="customer_witness"]{align-self:stretch;min-height:0;height:auto;padding:8px}
 #board>.department[data-dept-id="failed_test"],.tutorial-board>.department[data-dept-id="failed_test"]{
@@ -965,11 +1010,58 @@ body.display-tv .tv-readonly-pill{display:inline-flex}
 .board-shell.zoomed .plain-connector.dashed-connector .zoom-plain-line{
   height:0;background:none;border-top:4px dashed var(--line);border-radius:0;
 }
-/* Select Zoom is a clean department focus view. Workflow arrows remain on the full board. */
+/* Select Zoom keeps only selected departments and their shared transition lanes. */
 .board-shell.zoomed #board>.arrow-stage,
 .board-shell.zoomed #board>.plain-connector,
 .tutorial-board.is-focused>.arrow-stage,
 .tutorial-board.is-focused>.plain-connector{display:none!important}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus{
+  display:flex!important;position:relative!important;left:auto!important;top:auto!important;
+  flex:0 0 190px;width:190px!important;height:auto!important;min-height:clamp(390px,65vh,720px);
+  padding:12px 9px!important;overflow:hidden!important;border:2px solid #8bbdc1;border-radius:11px;
+  background:rgba(255,255,255,.88);box-shadow:0 9px 22px rgba(30,57,59,.14)
+}
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus{min-height:470px}
+.board-shell.zoomed #board>.plain-connector.box-zoom-connector{
+  display:flex!important;position:relative!important;left:auto!important;top:auto!important;
+  flex:0 0 116px;width:116px!important;height:auto!important;min-height:clamp(390px,65vh,720px);
+  align-items:center;justify-content:center
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-transition-label,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-transition-label{
+  display:block;width:100%;min-height:38px;margin-bottom:5px;padding:5px 4px;border-radius:6px;
+  background:var(--teal-dark);color:#fff;font-size:12px;font-weight:950;line-height:1.2;text-align:center
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .arrow-line,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .arrow-line{
+  display:none!important
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow.vertical-arrow:not(.routed-arrow) .arrow-line-v,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus.vertical-arrow:not(.routed-arrow) .arrow-line-v{
+  display:none!important
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow.routed-arrow .arrow-route-line,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus.routed-arrow .arrow-route-line{
+  display:none!important
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-arrow,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-arrow{
+  display:flex;align-items:center;justify-content:center;width:100%;height:58px;flex:0 0 58px;margin:0 0 7px;
+  border-radius:8px;background:linear-gradient(90deg,rgba(224,242,254,.3),rgba(115,243,255,.38),rgba(224,242,254,.3));
+  color:var(--teal-dark);font-size:52px;font-weight:1000;line-height:1;text-shadow:0 2px 0 rgba(255,255,255,.9)
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .arrow-slots,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .arrow-slots{
+  position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+  display:grid;width:100%!important;max-width:100%;max-height:none;margin:0!important;padding:6px!important;
+  flex:1 1 auto;transform:none!important;grid-template-columns:1fr;align-content:start;overflow-x:hidden;overflow-y:auto;
+  border:2px solid rgba(29,79,143,.28);border-radius:8px;background:rgba(248,252,252,.95)
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .arrow-slots:empty,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .arrow-slots:empty{border-style:dashed;background:rgba(224,242,254,.35)}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .job,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .job{min-height:44px;font-size:17px;transform:none}
 #board>.department>.slots,
 .tutorial-board>.department>.slots{grid-template-columns:repeat(2,minmax(0,1fr))}
 .board-shell.zoomed #board>.department>.slots,
@@ -983,6 +1075,7 @@ body.display-tv .app-title{display:none!important}
 .shipping-section{margin-top:16px;border:2px solid #8bbdc1;border-radius:14px;background:rgba(255,255,255,.68);overflow:hidden}.shipping-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;background:var(--teal-dark);color:#fff}.shipping-section-head h2{margin:0;font-size:18px;font-weight:1000;text-transform:uppercase}.shipping-section-head span{color:var(--electric);font-size:12px;font-weight:900}.shipping-ready-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px}.shipping-plant{min-height:230px;padding:12px;border:2px solid #a7c9cc;border-radius:11px;background:#f8fcfc}.shipping-plant h3{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px;color:#075985;font-size:17px;text-transform:uppercase}.shipping-job-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:9px}.shipping-card{position:relative;padding:13px;border:2px solid rgba(0,0,0,.18);border-radius:9px;box-shadow:0 5px 12px rgba(15,23,42,.12)}.shipping-card strong{display:block;padding-right:58px;font-size:18px;line-height:1.2;overflow-wrap:anywhere}.shipping-card small{display:block;margin-top:7px;font-size:11px;font-weight:800;opacity:.87}.shipping-card button{margin-top:10px;border:1px solid rgba(0,0,0,.3);border-radius:7px;background:rgba(255,255,255,.91);color:#0f172a;padding:7px 9px;font-size:12px;font-weight:950;cursor:pointer}.shipping-empty{padding:34px 15px;color:#64748b;font-size:13px;font-weight:800;text-align:center}
 .shipping-archive{width:100%;border-collapse:collapse;background:#fff}.shipping-archive th,.shipping-archive td{padding:11px 12px;border-bottom:1px solid #d8e3e4;text-align:left;font-size:13px}.shipping-archive th{background:#e4f4f5;color:var(--teal-dark);font-size:11px;font-weight:1000;letter-spacing:.05em;text-transform:uppercase}.shipping-archive td:first-child{font-weight:950}.shipping-archive button{border:1px solid #8bbdc1;border-radius:6px;background:#fff;padding:6px 8px;font-size:11px;font-weight:900;cursor:pointer}
 .shipping-card-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.shipping-card-actions button{margin-top:0}.shipping-archive-actions{display:flex;align-items:center;flex-wrap:wrap;gap:6px}.shipping-card button.shipping-delete,.shipping-archive button.shipping-delete{border-color:#b91c1c;background:#fff1f2;color:#b91c1c}.shipping-card button.shipping-delete:hover,.shipping-archive button.shipping-delete:hover{background:#b91c1c;color:#fff}.shipping-card button:disabled,.shipping-archive button:disabled{cursor:wait;opacity:.58}
+.shipping-card>.job-priority-star{left:auto;right:9px;top:9px;bottom:auto;font-size:21px}
 .shipping-chart{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px}.chart-card{padding:14px;border:1px solid #b9d5d7;border-radius:10px;background:#fff}.chart-card h3{margin:0 0 12px;color:var(--teal-dark);font-size:14px;text-transform:uppercase}.chart-bars{display:flex;align-items:flex-end;gap:12px;height:125px;padding-top:12px;border-bottom:2px solid #b9d5d7}.chart-bar-wrap{display:flex;flex:1;align-items:center;justify-content:flex-end;flex-direction:column;height:100%;gap:5px}.chart-bar{width:min(66px,72%);min-height:4px;border-radius:6px 6px 0 0;background:linear-gradient(var(--electric),var(--teal))}.chart-bar-wrap span{color:#526b6d;font-size:11px;font-weight:900}
 @media(max-width:900px){.app-choice-grid,.shipping-ready-grid,.shipping-chart{grid-template-columns:1fr}.shipping-stats{grid-template-columns:1fr 1fr}.shipping-header{align-items:flex-start;flex-direction:column}}
 </style>
@@ -1258,6 +1351,13 @@ body.display-tv .app-title{display:none!important}
         <label>Box color</label>
         <div class="modal-colors" id="modalColors"><button class="swatch" title="Maroon" aria-label="Maroon" style="background: rgb(139, 47, 63);"></button><button class="swatch" title="Blue" aria-label="Blue" style="background: rgb(47, 95, 158);"></button><button class="swatch" title="Green" aria-label="Green" style="background: rgb(39, 133, 106);"></button><button class="swatch" title="Yellow" aria-label="Yellow" style="background: rgb(245, 200, 75);"></button><button class="swatch selected" title="Orange" aria-label="Orange" style="background: rgb(245, 158, 11);"></button><button class="swatch" title="Purple" aria-label="Purple" style="background: rgb(124, 58, 237);"></button><button class="swatch" title="Gray" aria-label="Gray" style="background: rgb(107, 114, 128);"></button><button class="swatch" title="Black" aria-label="Black" style="background: rgb(17, 24, 39);"></button><button class="swatch" title="Red" aria-label="Red" style="background: rgb(220, 38, 38);"></button><button class="swatch" title="Teal" aria-label="Teal" style="background: rgb(20, 184, 166);"></button></div>
         </div>
+        <div class="form-row priority-form-row">
+          <label class="priority-toggle" for="jobPriority">
+            <input id="jobPriority" type="checkbox">
+            <span class="priority-toggle-copy"><strong>Priority job</strong><small>Add a glowing yellow star to this job.</small></span>
+            <span class="priority-toggle-star" aria-hidden="true">★</span>
+          </label>
+        </div>
         <div class="form-row">
         <label for="jobNote">Job notes</label>
         <textarea id="jobNote" maxlength="400" placeholder="Optional note for this job. The folded corner will show this note on hover."></textarea>
@@ -1364,17 +1464,17 @@ const DEPTS=[
   {id:'testing',label:'Testing',layout:{left:'74%',top:'42px',width:'11.2%',height:'292px'}},
   {id:'final_weld',label:'Final Weld',layout:{left:'88.8%',top:'42px',width:'11.2%',height:'292px'}},
 
-  {id:'welding_buffing',label:'Welding / Buffing',layout:{left:'0',top:'530px',width:'10.2%',height:'300px'}},
-  {id:'m_blast',label:'M-Blast',layout:{left:'12.5%',top:'530px',width:'10.2%',height:'300px'}},
-  {id:'prime_paint',label:'Prime / Paint',layout:{left:'25%',top:'530px',width:'10.2%',height:'300px'}},
-  {id:'radiator',label:'Radiator',layout:{left:'37.5%',top:'530px',width:'10.2%',height:'300px'}},
-  {id:'t_complete',label:'T-Complete',layout:{left:'50%',top:'530px',width:'11%',height:'300px'}},
-  {id:'final_buffing',label:'Final Buffing',layout:{left:'89%',top:'530px',width:'11%',height:'300px'}},
-  {id:'final_paint',label:'Final Paint',layout:{left:'76%',top:'530px',width:'11.5%',height:'300px'}},
-  {id:'final_finish',label:'Final Finish',layout:{left:'63%',top:'530px',width:'11.5%',height:'300px'}},
-  {id:'engineering',label:'Engineering',layout:{left:'62.5%',top:'900px',width:'11.5%',height:'292px'}},
-  {id:'qc',label:'QC',layout:{left:'75.5%',top:'900px',width:'11.5%',height:'292px'}},
-  {id:'completed',label:'Completed',layout:{left:'88.5%',top:'900px',width:'11.5%',height:'292px'},completed:true},
+  {id:'welding_buffing',label:'Welding / Buffing',layout:{left:'0',top:'530px',width:'9.6%',height:'300px'}},
+  {id:'m_blast',label:'M-Blast',layout:{left:'12.8%',top:'530px',width:'9.6%',height:'300px'}},
+  {id:'prime_paint',label:'Prime / Paint',layout:{left:'25.6%',top:'530px',width:'9.6%',height:'300px'}},
+  {id:'radiator',label:'Radiator',layout:{left:'38.4%',top:'530px',width:'9.6%',height:'300px'}},
+  {id:'t_complete',label:'T-Complete',layout:{left:'51.2%',top:'530px',width:'10.6%',height:'300px'}},
+  {id:'final_buffing',label:'Final Buffing',layout:{left:'89.54%',top:'530px',width:'10.46%',height:'300px'}},
+  {id:'final_paint',label:'Final Paint',layout:{left:'76.27%',top:'530px',width:'10.47%',height:'300px'}},
+  {id:'final_finish',label:'Final Finish',layout:{left:'63%',top:'530px',width:'10.47%',height:'300px'}},
+  {id:'engineering',label:'Engineering',layout:{left:'62.5%',top:'900px',width:'10.65%',height:'292px'}},
+  {id:'qc',label:'QC',layout:{left:'75.95%',top:'900px',width:'10.65%',height:'292px'}},
+  {id:'completed',label:'Completed',layout:{left:'89.4%',top:'900px',width:'10.6%',height:'292px'},completed:true},
 
   {id:'rma',label:'RMA',layout:{left:'0',top:'900px',width:'13.5%',height:'292px'},special:true},
   {id:'customer_witness',label:'Customer Witness',layout:{left:'14.7%',top:'900px',width:'13.5%',height:'292px'},special:true},
@@ -1390,23 +1490,23 @@ const AREAS=[
 ];
 
 const ARROWS=[
-  {id:'winding_to_lacing',label:'Winding to Lacing',layout:{left:'11.4%',top:'42px',width:'3.4%',height:'292px'},dir:'right'},
-  {id:'lacing_to_core_coil',label:'Lacing to Core & Coil',layout:{left:'26%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
-  {id:'core_coil_to_oven',label:'Core & Coil to Oven',layout:{left:'40.8%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
-  {id:'oven_to_tanking',label:'Oven to Tanking',layout:{left:'55.6%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
-  {id:'tanking_to_testing',label:'Tanking to Testing',layout:{left:'70.4%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
-  {id:'testing_to_final_weld',label:'Testing to Final Weld',layout:{left:'85.2%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
-  {id:'final_weld_to_final_buffing',label:'Final Weld to Final Buffing',layout:{left:'89%',top:'334px',width:'11%',height:'196px'},dir:'down'},
-  {id:'final_buffing_to_final_paint',label:'Final Buffing to Final Paint',layout:{left:'87.5%',top:'530px',width:'1.5%',height:'300px'},dir:'left'},
-  {id:'final_paint_to_final_finish',label:'Final Paint to Final Finish',layout:{left:'74.5%',top:'530px',width:'1.5%',height:'300px'},dir:'left'},
-  {id:'final_finish_to_engineering',label:'Final Finish to Engineering',layout:{left:'62.5%',top:'830px',width:'12%',height:'70px'},dir:'down'},
-  {id:'engineering_to_qc',label:'Engineering to QC',layout:{left:'74%',top:'900px',width:'1.5%',height:'292px'},dir:'right'},
-  {id:'qc_to_completed',label:'QC to Completed',layout:{left:'87%',top:'900px',width:'1.5%',height:'292px'},dir:'right'},
-  {id:'welding_buffing_to_m_blast',label:'Weld to Blast',layout:{left:'10.2%',top:'530px',width:'2.3%',height:'300px'},dir:'right'},
-  {id:'m_blast_to_prime_paint',label:'Blast to Paint',layout:{left:'22.7%',top:'530px',width:'2.3%',height:'300px'},dir:'right'},
-  {id:'prime_paint_to_radiator',label:'Prime to Radiator',layout:{left:'35.2%',top:'530px',width:'2.3%',height:'300px'},dir:'right'},
-  {id:'radiator_to_t_complete',label:'Radiator to T-Complete',layout:{left:'47.7%',top:'530px',width:'2.3%',height:'300px'},dir:'right'},
-  {id:'t_complete_to_tanking',label:'T-Complete to Tanking',layout:{left:'55.3%',top:'334px',width:'9.8%',height:'196px'},dir:'up',route:'up-right'}
+  {id:'winding_to_lacing',from:'winding',to:'lacing',label:'Winding to Lacing',layout:{left:'11.4%',top:'42px',width:'3.4%',height:'292px'},dir:'right'},
+  {id:'lacing_to_core_coil',from:'lacing',to:'core_coil',label:'Lacing to Core & Coil',layout:{left:'26%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
+  {id:'core_coil_to_oven',from:'core_coil',to:'oven',label:'Core & Coil to Oven',layout:{left:'40.8%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
+  {id:'oven_to_tanking',from:'oven',to:'tanking',label:'Oven to Tanking',layout:{left:'55.6%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
+  {id:'tanking_to_testing',from:'tanking',to:'testing',label:'Tanking to Testing',layout:{left:'70.4%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
+  {id:'testing_to_final_weld',from:'testing',to:'final_weld',label:'Testing to Final Weld',layout:{left:'85.2%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
+  {id:'final_weld_to_final_buffing',from:'final_weld',to:'final_buffing',label:'Final Weld to Final Buffing',layout:{left:'89.4%',top:'334px',width:'10.6%',height:'196px'},dir:'down',capacity:true},
+  {id:'final_buffing_to_final_paint',from:'final_buffing',to:'final_paint',label:'Final Buffing to Final Paint',layout:{left:'86.74%',top:'530px',width:'2.8%',height:'300px'},dir:'left',capacity:true},
+  {id:'final_paint_to_final_finish',from:'final_paint',to:'final_finish',label:'Final Paint to Final Finish',layout:{left:'73.47%',top:'530px',width:'2.8%',height:'300px'},dir:'left',capacity:true},
+  {id:'final_finish_to_engineering',from:'final_finish',to:'engineering',label:'Final Finish to Engineering',layout:{left:'62.2%',top:'830px',width:'11.66%',height:'70px'},dir:'down',capacity:true},
+  {id:'engineering_to_qc',from:'engineering',to:'qc',label:'Engineering to QC',layout:{left:'73.15%',top:'900px',width:'2.8%',height:'292px'},dir:'right',capacity:true},
+  {id:'qc_to_completed',from:'qc',to:'completed',label:'QC to Completed',layout:{left:'86.6%',top:'900px',width:'2.8%',height:'292px'},dir:'right',capacity:true},
+  {id:'welding_buffing_to_m_blast',from:'welding_buffing',to:'m_blast',label:'Weld to Blast',layout:{left:'9.6%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
+  {id:'m_blast_to_prime_paint',from:'m_blast',to:'prime_paint',label:'Blast to Paint',layout:{left:'22.4%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
+  {id:'prime_paint_to_radiator',from:'prime_paint',to:'radiator',label:'Prime to Radiator',layout:{left:'35.2%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
+  {id:'radiator_to_t_complete',from:'radiator',to:'t_complete',label:'Radiator to T-Complete',layout:{left:'48%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
+  {id:'t_complete_to_tanking',from:'t_complete',to:'tanking',label:'T-Complete to Tanking',layout:{left:'56.33%',top:'334px',width:'8.74%',height:'196px'},dir:'up',route:'up-right'}
 ];
 
 const PLAIN_CONNECTORS=[
@@ -1603,8 +1703,9 @@ function applyDisplayFit(){
   const zoomed=shell.classList.contains('zoomed');
   if(zoomed){
     const selectedCount=Math.max(1,boxZoomSelection.size);
-    const preferredColumns=Math.min(selectedCount,4);
-    const targetWidth=Math.max(availableWidth,Math.min(2200,preferredColumns*470+(preferredColumns-1)*18));
+    const connectedCount=ARROWS.filter(def=>boxZoomSelection.has(def.from)&&boxZoomSelection.has(def.to)).length;
+    const visibleItems=selectedCount+connectedCount;
+    const targetWidth=Math.max(availableWidth,Math.min(2400,selectedCount*430+connectedCount*190+Math.max(0,visibleItems-1)*18));
     stage.style.width=targetWidth+'px';
   }else{
     stage.style.width='max-content';
@@ -2289,6 +2390,7 @@ function normalizeState(obj){
   next.locations=migratedLocations;
   Object.values(next.jobs).forEach(job=>{
     if(!job||typeof job!=='object')return;
+    job.priority=job.priority===true||job.priority===1||job.priority==='true';
     job.workflow=sanitizeWorkflow(job.workflow).map(step=>({...step,locationKey:migrateLocationKey(step.locationKey)}));
     if(!validIsoTime(job.ovenEnteredAt))job.ovenEnteredAt='';
     if(!validIsoTime(job.lastMovedAt))job.lastMovedAt='';
@@ -2793,10 +2895,10 @@ function makeJob(jobId){
   const ovenTimerActive=isOvenLocation(location)&&!!job.ovenEnteredAt;
   const c=COLORS[job.color||0];
   const el=document.createElement('div');
-  el.className='job';el.draggable=!isTvMode();
+  el.className='job'+(job.priority?' priority-job':'');el.draggable=!isTvMode();
   el.dataset.jobId=jobId;
-  el.title=job.text;
-  el.setAttribute('aria-label','Job '+job.text);
+  el.title=(job.priority?'Priority job: ':'')+job.text;
+  el.setAttribute('aria-label',(job.priority?'Priority job ':'Job ')+job.text);
   el.style.background=c.bg;el.style.color=c.tx;el.style.borderColor='rgba(0,0,0,.3)';
   applyRecentMoveHighlight(el,jobId,job);
 
@@ -2804,6 +2906,15 @@ function makeJob(jobId){
   label.className='job-label';
   label.textContent=job.text;
   el.appendChild(label);
+
+  if(job.priority){
+    const star=document.createElement('span');
+    star.className='job-priority-star';
+    star.textContent='★';
+    star.title='Priority job';
+    star.setAttribute('aria-hidden','true');
+    el.appendChild(star);
+  }
 
   if(ovenTimerActive){
     const clock=document.createElement('span');
@@ -2840,8 +2951,8 @@ function makeJob(jobId){
     showToast(ovenTimerDetails(state.jobs[jobId]));
   });
   el.addEventListener('dblclick',()=>{if(!isTvMode())openModal(jobId)});
-  el.addEventListener('dragstart',e=>{if(isTvMode()){e.preventDefault();return;}dragId=jobId;el.classList.add('dragging');e.dataTransfer.setData('text/plain',jobId);e.dataTransfer.effectAllowed='move'});
-  el.addEventListener('dragend',()=>{dragId=null;el.classList.remove('dragging')});
+  el.addEventListener('dragstart',e=>{if(isTvMode()){e.preventDefault();return;}dragId=jobId;el.classList.add('dragging');document.body.classList.add('job-dragging');e.dataTransfer.setData('text/plain',jobId);e.dataTransfer.effectAllowed='move'});
+  el.addEventListener('dragend',()=>{dragId=null;el.classList.remove('dragging');document.body.classList.remove('job-dragging')});
   return el;
 }
 function renderJobs(container,key){
@@ -2891,9 +3002,23 @@ function makeArrow(def){
   zone.className='stage arrow-stage '+(def.dir==='left'?'left ':def.dir==='up'?'up ':'')+(def.dir==='down'?'down':'');
   if(def.dir==='up'||def.dir==='down')zone.classList.add('vertical-arrow');
   if(def.wide)zone.classList.add('wide-arrow');
+  if(def.capacity)zone.classList.add('capacity-arrow');
   if(def.route)zone.classList.add('routed-arrow','route-'+def.route);
   zone.dataset.arrowId=def.id;
+  zone.setAttribute('aria-label',def.label+' transition lane');
+  zone.title=def.label+' transition lane';
   applyStageLayout(zone,def.layout);
+  const laneLabel=document.createElement('div');
+  laneLabel.className='zoom-transition-label';
+  laneLabel.textContent=def.label;
+  zone.appendChild(laneLabel);
+  const zoomFlow=document.createElement('div');
+  zoomFlow.className='zoom-flow-arrow';
+  const fromDef=DEPTS.find(item=>item.id===def.from);
+  const toDef=DEPTS.find(item=>item.id===def.to);
+  zoomFlow.textContent=Number(stageLayoutOrder(fromDef))<=Number(stageLayoutOrder(toDef))?'→':'←';
+  zoomFlow.setAttribute('aria-hidden','true');
+  zone.appendChild(zoomFlow);
   let visual;
   if(def.route){
     visual=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -2968,7 +3093,7 @@ function createTutorialState(){
   const now=Date.now();
   return {
     jobs:{
-      'tutorial-26001':{text:'26001-1',color:1,note:'Priority job for the tutorial.',created:new Date(now-5*60*60*1000).toISOString(),lastMovedAt:''},
+      'tutorial-26001':{text:'26001-1',color:1,priority:true,note:'Priority job for the tutorial.',created:new Date(now-5*60*60*1000).toISOString(),lastMovedAt:''},
       'tutorial-winding-2':{text:'26014-2',color:3,note:'W/E example job.',created:new Date(now-3*60*60*1000).toISOString(),lastMovedAt:''},
       'tutorial-core':{text:'26022-1',color:2,note:'Ready for the oven.',created:new Date(now-9*60*60*1000).toISOString(),lastMovedAt:''},
       'tutorial-oven':{text:'26031-1',color:4,note:'Temperature verification required before removal.',created:new Date(now-14*60*60*1000).toISOString(),ovenEnteredAt:new Date(now-2*60*60*1000-17*60*1000).toISOString(),lastMovedAt:''},
@@ -3058,7 +3183,7 @@ function makeTutorialJob(jobId){
   const location=tutorialFindJobLocation(jobId);
   const color=COLORS[job.color||0]||COLORS[0];
   const element=document.createElement('div');
-  element.className='job tutorial-job';
+  element.className='job tutorial-job'+(job.priority?' priority-job':'');
   element.dataset.tutorialJobId=jobId;
   element.draggable=!tutorialIsReadOnly();
   element.style.background=color.bg;
@@ -3074,6 +3199,14 @@ function makeTutorialJob(jobId){
   label.className='job-label';
   label.textContent=job.text;
   element.appendChild(label);
+  if(job.priority){
+    const star=document.createElement('span');
+    star.className='job-priority-star';
+    star.textContent='★';
+    star.title='Priority job';
+    star.setAttribute('aria-hidden','true');
+    element.appendChild(star);
+  }
   if(isOvenLocation(location)&&job.ovenEnteredAt){
     const timer=document.createElement('span');
     timer.className='oven-timer-readout';
@@ -3096,12 +3229,14 @@ function makeTutorialJob(jobId){
     if(tutorialIsReadOnly()){event.preventDefault();return;}
     tutorialDragId=jobId;
     element.classList.add('dragging');
+    document.body.classList.add('job-dragging');
     event.dataTransfer.setData('text/plain',jobId);
     event.dataTransfer.effectAllowed='move';
   });
   element.addEventListener('dragend',()=>{
     tutorialDragId=null;
     element.classList.remove('dragging');
+    document.body.classList.remove('job-dragging');
   });
   return element;
 }
@@ -3163,10 +3298,22 @@ function makeTutorialArrow(def){
   zone.className='stage arrow-stage '+(def.dir==='left'?'left ':def.dir==='up'?'up ':'')+(def.dir==='down'?'down':'');
   if(def.dir==='up'||def.dir==='down')zone.classList.add('vertical-arrow');
   if(def.wide)zone.classList.add('wide-arrow');
+  if(def.capacity)zone.classList.add('capacity-arrow');
   if(def.route)zone.classList.add('routed-arrow','route-'+def.route);
   zone.dataset.arrowId=def.id;
+  zone.setAttribute('aria-label',def.label+' practice transition lane');
+  zone.title=def.label+' practice transition lane';
   applyStageLayout(zone,def.layout);
   zone.style.order=stageLayoutOrder(def);
+  const laneLabel=document.createElement('div');
+  laneLabel.className='zoom-transition-label';
+  laneLabel.textContent=def.label;
+  const zoomFlow=document.createElement('div');
+  zoomFlow.className='zoom-flow-arrow';
+  const fromDef=DEPTS.find(item=>item.id===def.from);
+  const toDef=DEPTS.find(item=>item.id===def.to);
+  zoomFlow.textContent=Number(stageLayoutOrder(fromDef))<=Number(stageLayoutOrder(toDef))?'→':'←';
+  zoomFlow.setAttribute('aria-hidden','true');
   let visual;
   if(def.route){
     visual=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -3186,12 +3333,12 @@ function makeTutorialArrow(def){
   slots.className='arrow-slots';
   const key=locationKey('arrow',def.id);
   renderTutorialJobs(slots,key);
-  zone.append(visual,slots);
+  zone.append(laneLabel,zoomFlow,visual,slots);
   setupTutorialDrop(zone,key);
   return zone;
 }
 function tutorialArrowConnectsFocus(def,focus){
-  return false;
+  return !!def&&focus.size>0&&focus.has(def.from)&&focus.has(def.to);
 }
 function applyTutorialHighlight(){
   const board=document.getElementById('tutorialBoard');
@@ -3483,12 +3630,15 @@ function updateBoxZoomView(){
   document.querySelectorAll('#board .arrow-stage').forEach(zone=>{
     const def=ARROWS.find(item=>item.id===zone.dataset.arrowId);
     if(def)zone.style.order=stageLayoutOrder(def);
-    zone.classList.remove('box-zoom-arrow');
+    const connectsSelected=active&&!!def&&boxZoomSelection.has(def.from)&&boxZoomSelection.has(def.to);
+    zone.classList.toggle('box-zoom-arrow',connectsSelected);
   });
   document.querySelectorAll('#board .plain-connector').forEach(zone=>{
     const def=PLAIN_CONNECTORS.find(item=>item.id===zone.dataset.connectorId);
     zone.style.order=def?String(def.order):'';
-    zone.classList.remove('box-zoom-connector');
+    const targets=def&&Array.isArray(def.targets)?def.targets:[];
+    const connectsSelected=active&&!!def&&boxZoomSelection.has(def.from)&&targets.some(target=>boxZoomSelection.has(target));
+    zone.classList.toggle('box-zoom-connector',connectsSelected);
   });
   const labels=DEPTS.filter(d=>boxZoomSelection.has(d.id)).map(d=>d.selectLabel||d.label);
   document.getElementById('boxZoomSummary').textContent=active?labels.join(' • '):'Selected departments';
@@ -3554,6 +3704,7 @@ function openModal(jobId,preferredLocationKey){
   const jobModal=document.getElementById('jobModal');
   const input=document.getElementById('jobText');
   const note=document.getElementById('jobNote');
+  const priority=document.getElementById('jobPriority');
   const stageRow=document.getElementById('stageRow');
   const readyButton=document.getElementById('btnReadyToShip');
   document.getElementById('modalTitle').textContent=editingJobId?'Edit job':'Add job';
@@ -3564,12 +3715,13 @@ function openModal(jobId,preferredLocationKey){
     const job=state.jobs[editingJobId];
     input.value=job.text;
     note.value=job.note||'';
+    priority.checked=!!job.priority;
     selectedColor=job.color||0;
     stageRow.style.display='none';
     readyButton.hidden=!(currentView==='board'&&findJobLocation(editingJobId)==='dept:completed');
     renderJobWorkflow(editingJobId);
   }else{
-    input.value='';note.value='';stageRow.style.display='block';
+    input.value='';note.value='';priority.checked=false;stageRow.style.display='block';
     readyButton.hidden=true;
     document.getElementById('workflowContent').innerHTML='';
     const stageSelect=document.getElementById('stageSelect');
@@ -3588,6 +3740,7 @@ function closeModal(){
 async function submitModal(){
   const text=document.getElementById('jobText').value.trim();
   const note=document.getElementById('jobNote').value.trim();
+  const priority=document.getElementById('jobPriority').checked;
   if(!text)return;
   const destination=editingJobId?'':document.getElementById('stageSelect').value;
   let ovenEnteredAt='';
@@ -3598,12 +3751,12 @@ async function submitModal(){
   snapshot();
   let changedJobId=editingJobId;
   if(editingJobId){
-    state.jobs[editingJobId].text=text;state.jobs[editingJobId].color=selectedColor;state.jobs[editingJobId].note=note;
+    state.jobs[editingJobId].text=text;state.jobs[editingJobId].color=selectedColor;state.jobs[editingJobId].note=note;state.jobs[editingJobId].priority=priority;
   }else{
     const id='job_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
     const createdAt=new Date().toISOString();
     const enteredAt=isOvenLocation(destination)&&ovenEnteredAt?ovenEnteredAt:createdAt;
-    state.jobs[id]={text,color:selectedColor,note,ovenEnteredAt,workflow:[{locationKey:destination,enteredAt,exitedAt:''}],created:createdAt};
+    state.jobs[id]={text,color:selectedColor,note,priority,ovenEnteredAt,workflow:[{locationKey:destination,enteredAt,exitedAt:''}],created:createdAt};
     addToLocation(destination,id);
     changedJobId=id;
   }
@@ -4189,6 +4342,7 @@ function makeShippingCard(jobId){
   const job=state.jobs[jobId];const color=COLORS[Number(job.color)||0]||COLORS[0];
   const card=document.createElement('article');card.className='shipping-card';card.style.background=color.bg;card.style.color=color.tx;
   const title=document.createElement('strong');title.textContent=job.text||jobId;
+  if(job.priority){const star=document.createElement('span');star.className='job-priority-star';star.textContent='★';star.title='Priority job';star.setAttribute('aria-hidden','true');card.appendChild(star)}
   const detail=document.createElement('small');detail.textContent='Ready '+formatActivityTime(shippingStepDate(job,'ready')||job.created);
   const actions=document.createElement('div');actions.className='shipping-card-actions';
   const shipped=document.createElement('button');shipped.type='button';shipped.textContent='Mark Shipped';shipped.addEventListener('click',()=>markShippingJobShipped(jobId));
@@ -4209,7 +4363,7 @@ function renderShippingSystem(){
   [['shipW1ReadyList',w1Ready],['shipW2ReadyList',w2Ready]].forEach(([elementId,ids])=>{const list=document.getElementById(elementId);list.innerHTML='';if(!ids.length){const empty=document.createElement('div');empty.className='shipping-empty';empty.textContent='No jobs are currently ready to ship.';list.appendChild(empty);return;}ids.forEach(id=>list.appendChild(makeShippingCard(id)))});
   const archive=document.getElementById('shippingArchiveBody');archive.innerHTML='';
   if(!shipped.length){const row=document.createElement('tr');const cell=document.createElement('td');cell.colSpan=6;cell.className='shipping-empty';cell.textContent='No shipped jobs have been archived yet.';row.appendChild(cell);archive.appendChild(row)}
-  shipped.forEach(id=>{const job=state.jobs[id];const location=findJobLocation(id);const plant=shippingPlantFor(job,location);const row=document.createElement('tr');[job.text||id,plant==='waco2'?'Waco 2':'Waco 1',formatActivityTime(shippingStepDate(job,'ready')),formatActivityTime(shippingStepDate(job,'shipped')),shippingElapsed(job)].forEach(value=>{const cell=document.createElement('td');cell.textContent=value;row.appendChild(cell)});const action=document.createElement('td');const actions=document.createElement('div');actions.className='shipping-archive-actions';const historyButton=document.createElement('button');historyButton.type='button';historyButton.textContent='View Full History';historyButton.addEventListener('click',()=>openModal(id));const deleteButton=document.createElement('button');deleteButton.type='button';deleteButton.className='shipping-delete';deleteButton.textContent='Delete Job';deleteButton.setAttribute('aria-label','Delete shipped job '+(job.text||id));deleteButton.addEventListener('click',()=>deleteShippingJob(id,deleteButton));actions.append(historyButton,deleteButton);action.appendChild(actions);row.appendChild(action);archive.appendChild(row)});
+  shipped.forEach(id=>{const job=state.jobs[id];const location=findJobLocation(id);const plant=shippingPlantFor(job,location);const row=document.createElement('tr');[(job.priority?'★ ':'')+(job.text||id),plant==='waco2'?'Waco 2':'Waco 1',formatActivityTime(shippingStepDate(job,'ready')),formatActivityTime(shippingStepDate(job,'shipped')),shippingElapsed(job)].forEach(value=>{const cell=document.createElement('td');cell.textContent=value;row.appendChild(cell)});const action=document.createElement('td');const actions=document.createElement('div');actions.className='shipping-archive-actions';const historyButton=document.createElement('button');historyButton.type='button';historyButton.textContent='View Full History';historyButton.addEventListener('click',()=>openModal(id));const deleteButton=document.createElement('button');deleteButton.type='button';deleteButton.className='shipping-delete';deleteButton.textContent='Delete Job';deleteButton.setAttribute('aria-label','Delete shipped job '+(job.text||id));deleteButton.addEventListener('click',()=>deleteShippingJob(id,deleteButton));actions.append(historyButton,deleteButton);action.appendChild(actions);row.appendChild(action);archive.appendChild(row)});
   const charts=document.getElementById('shippingCharts');charts.innerHTML='';const completedRecords=Object.values(state.jobs).filter(job=>sanitizeWorkflow(job.workflow).some(step=>step.locationKey==='dept:completed')).length;
   addChartCard(charts,'Completed and Shipping Status',[{label:'Completed',value:completedRecords},{label:'Ready',value:w1Ready.length+w2Ready.length},{label:'Shipped',value:shipped.length}]);addChartCard(charts,'Shipped by Plant',[{label:'Waco 1',value:shippingIds('waco1','shipped').length},{label:'Waco 2',value:shippingIds('waco2','shipped').length}]);
 }
