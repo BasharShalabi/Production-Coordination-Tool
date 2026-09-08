@@ -265,6 +265,26 @@ body.authenticated.app-selecting .app-selector{display:flex}
   word-break:normal;
   line-height:1.15;
 }
+.department.oven-five-rows .split-wrap{
+  grid-template-columns:1fr;grid-template-rows:repeat(5,minmax(0,1fr));gap:3px;overflow:hidden;
+}
+.department.oven-five-rows .split-col{
+  display:grid;grid-template-columns:31px minmax(0,1fr);gap:3px;align-items:stretch;
+  min-height:0;padding:2px;overflow:hidden;
+}
+.department.oven-five-rows .split-name{
+  display:flex;align-items:center;justify-content:center;margin:0;border-right:1px dashed #a7b7c6;
+  color:var(--teal-dark);font-size:14px;font-weight:1000;
+}
+.department.oven-five-rows .split-col .slots{
+  display:flex;align-items:center;gap:3px;height:100%;min-height:0;padding:0 1px;
+  overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
+}
+.department.oven-five-rows .job{
+  flex:0 0 98px;height:100%!important;min-height:34px!important;max-height:43px;padding:3px!important;
+  gap:2px!important;font-size:15px;
+}
+.department.oven-five-rows .oven-timer-readout{padding:1px 4px;font-size:9px}
 .split-col.drop-active{background:#dbeafe;border-color:#0369a1}
 .split-name{text-align:center;font-size:12px;font-weight:900;color:#475569;margin-bottom:1px}
 .arrow-stage{
@@ -955,6 +975,8 @@ body.job-dragging #board>.arrow-stage.capacity-arrow{
   background:rgba(224,242,254,.9);outline:3px dashed #0284c7;outline-offset:2px;border-radius:9px
 }
 body.job-dragging #board>.arrow-stage.capacity-arrow>*{transform:scaleX(.69)}
+body.job-dragging .board-shell.zoomed #board>.arrow-stage.capacity-arrow{transform:none;overflow:hidden}
+body.job-dragging .board-shell.zoomed #board>.arrow-stage.capacity-arrow>*{transform:none}
 #board>.plain-connector,.tutorial-board>.plain-connector{z-index:3}
 #board>.department[data-dept-id="rma"],#board>.department[data-dept-id="customer_witness"],.tutorial-board>.department[data-dept-id="rma"],.tutorial-board>.department[data-dept-id="customer_witness"]{align-self:stretch;min-height:0;height:auto;padding:8px}
 #board>.department[data-dept-id="failed_test"],.tutorial-board>.department[data-dept-id="failed_test"]{
@@ -983,9 +1005,13 @@ body.job-dragging #board>.arrow-stage.capacity-arrow>*{transform:scaleX(.69)}
   position:absolute;left:50%;top:7px;bottom:7px;z-index:0;width:28px;height:auto;min-height:0;margin:0;transform:translateX(-50%);
 }
 .vertical-arrow:not(.routed-arrow) .arrow-slots{
-  position:absolute;left:8px;right:54%;top:8px;bottom:8px;z-index:2;width:auto;max-height:none;margin:0;
+  position:absolute;left:8px;right:8px;top:8px;bottom:8px;z-index:2;width:auto;max-height:none;margin:0;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:48px;
 }
-.vertical-arrow.up:not(.routed-arrow) .arrow-slots{left:54%;right:8px}
+.vertical-arrow.up:not(.routed-arrow) .arrow-slots{left:8px;right:8px}
+.diagonal-arrow-line{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.diagonal-arrow-line path{fill:none;stroke:var(--line);stroke-width:5;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.diagonal-arrow-line polygon{fill:var(--line)}
 .routed-arrow{position:relative;display:block!important;margin:0!important;padding:0!important;overflow:hidden!important}
 .arrow-route-line{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .arrow-route-line path{fill:none;stroke:var(--line);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
@@ -1008,7 +1034,7 @@ body.job-dragging #board>.arrow-stage.capacity-arrow>*{transform:scaleX(.69)}
 }
 .tutorial-board.is-focused{height:auto;min-width:0}
 .board-shell.zoomed .plain-connector.dashed-connector .zoom-plain-line{
-  height:0;background:none;border-top:4px dashed var(--line);border-radius:0;
+  width:0;height:120px;background:none;border-top:0;border-left:4px dashed #b91c1c;border-radius:0;
 }
 /* Select Zoom keeps only selected departments and their shared transition lanes. */
 .board-shell.zoomed #board>.arrow-stage,
@@ -1045,11 +1071,47 @@ body.job-dragging #board>.arrow-stage.capacity-arrow>*{transform:scaleX(.69)}
 .tutorial-board.is-focused>.arrow-stage.tutorial-focus.routed-arrow .arrow-route-line{
   display:none!important
 }
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .diagonal-arrow-line,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .diagonal-arrow-line{display:none!important}
 .board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-arrow,
 .tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-arrow{
-  display:flex;align-items:center;justify-content:center;width:100%;height:58px;flex:0 0 58px;margin:0 0 7px;
+  display:block;position:relative;width:100%;height:58px;flex:0 0 58px;margin:0 0 7px;
   border-radius:8px;background:linear-gradient(90deg,rgba(224,242,254,.3),rgba(115,243,255,.38),rgba(224,242,254,.3));
-  color:var(--teal-dark);font-size:52px;font-weight:1000;line-height:1;text-shadow:0 2px 0 rgba(255,255,255,.9)
+  color:var(--teal-dark)
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-horizontal:before,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-horizontal:before{
+  content:"";position:absolute;left:10px;right:22px;top:25px;height:7px;border-radius:999px;background:var(--teal-dark)
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-horizontal:after,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-horizontal:after{
+  content:"";position:absolute;right:8px;top:14px;width:0;height:0;
+  border-top:14px solid transparent;border-bottom:14px solid transparent;border-left:20px solid var(--teal-dark)
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-horizontal.zoom-flow-left:before,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-horizontal.zoom-flow-left:before{left:22px;right:10px}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-horizontal.zoom-flow-left:after,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-horizontal.zoom-flow-left:after{
+  left:8px;right:auto;border-left:0;border-right:20px solid var(--teal-dark)
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-vertical,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-vertical{
+  width:72px;height:82px;flex-basis:82px;align-self:center;background:linear-gradient(180deg,rgba(224,242,254,.3),rgba(115,243,255,.38),rgba(224,242,254,.3))
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-vertical:before,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-vertical:before{
+  content:"";position:absolute;left:32px;top:8px;bottom:23px;width:7px;border-radius:999px;background:var(--teal-dark)
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-vertical:after,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-vertical:after{
+  content:"";position:absolute;left:21px;bottom:6px;width:0;height:0;
+  border-left:14px solid transparent;border-right:14px solid transparent;border-top:20px solid var(--teal-dark)
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-vertical.zoom-flow-up:before,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-vertical.zoom-flow-up:before{top:23px;bottom:8px}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-vertical.zoom-flow-up:after,
+.tutorial-board.is-focused>.arrow-stage.tutorial-focus .zoom-flow-vertical.zoom-flow-up:after{
+  top:6px;bottom:auto;border-top:0;border-bottom:20px solid var(--teal-dark)
 }
 .board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .arrow-slots,
 .tutorial-board.is-focused>.arrow-stage.tutorial-focus .arrow-slots{
@@ -1078,6 +1140,98 @@ body.display-tv .app-title{display:none!important}
 .shipping-card>.job-priority-star{left:auto;right:9px;top:9px;bottom:auto;font-size:21px}
 .shipping-chart{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px}.chart-card{padding:14px;border:1px solid #b9d5d7;border-radius:10px;background:#fff}.chart-card h3{margin:0 0 12px;color:var(--teal-dark);font-size:14px;text-transform:uppercase}.chart-bars{display:flex;align-items:flex-end;gap:12px;height:125px;padding-top:12px;border-bottom:2px solid #b9d5d7}.chart-bar-wrap{display:flex;flex:1;align-items:center;justify-content:flex-end;flex-direction:column;height:100%;gap:5px}.chart-bar{width:min(66px,72%);min-height:4px;border-radius:6px 6px 0 0;background:linear-gradient(var(--electric),var(--teal))}.chart-bar-wrap span{color:#526b6d;font-size:11px;font-weight:900}
 @media(max-width:900px){.app-choice-grid,.shipping-ready-grid,.shipping-chart{grid-template-columns:1fr}.shipping-stats{grid-template-columns:1fr 1fr}.shipping-header{align-items:flex-start;flex-direction:column}}
+
+/* Hour by Hour occupies exactly the viewport left beneath the controls. */
+body.board-active.hourly-active,body.board-active.hourly-active .app{height:100vh;height:100dvh;min-height:0;overflow:hidden}
+body.board-active.hourly-active .app>.app-title,body.board-active.hourly-active .app>.toolbar{flex:0 0 auto}
+body .board-shell.zoomed{flex:1 1 0%;min-height:0;overflow:hidden!important;padding:8px}
+.board-shell.zoomed #displayStage{
+  display:flex;flex-direction:column;width:100%!important;height:100%;min-height:0;
+  transform:none!important;margin:0!important;gap:8px;
+}
+.board-shell.zoomed .box-zoom-banner{position:relative;flex:0 0 auto;margin:0;padding:6px 10px;gap:8px}
+.board-shell.zoomed .select-zoom-copy{min-width:0}
+.board-shell.zoomed .select-zoom-copy strong{font-size:clamp(14px,1.3vw,22px)}
+.board-shell.zoomed .select-zoom-copy span{font-size:clamp(12px,1vw,18px);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.board-shell.zoomed .box-zoom-banner button{flex:0 0 auto}
+.board-shell.zoomed #board{
+  display:grid!important;flex:1 1 0%;width:100%;height:0;min-width:0;min-height:0;
+  grid-template-columns:var(--zoom-tracks,minmax(0,1fr));
+  grid-template-rows:repeat(var(--zoom-rows,1),minmax(0,1fr));grid-auto-rows:minmax(0,1fr);
+  gap:6px;align-items:stretch;overflow:hidden;
+}
+.board-shell.zoomed #board>.stage,
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow,
+.board-shell.zoomed #board>.plain-connector.box-zoom-connector{
+  width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
+  max-width:none!important;max-height:none!important;margin:0!important;align-self:stretch;justify-self:stretch;box-shadow:none;
+}
+.board-shell.zoomed #board>.department,
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow{
+  flex-direction:column;align-items:stretch;overflow:hidden;padding:6px!important;border:2px solid #47787c;background:#e7f0f3;
+}
+.board-shell.zoomed #board>.department .stage-title,
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-transition-label{
+  display:flex;align-items:center;justify-content:center;gap:4px;flex:0 0 auto;
+  min-width:0;min-height:0;margin:0 0 5px;padding:5px;
+  font-size:var(--zoom-heading-size,24px);line-height:1.1;letter-spacing:0;overflow-wrap:anywhere;
+}
+.board-shell.zoomed #board .stage-title-label{min-width:0;overflow-wrap:anywhere}
+.board-shell.zoomed #board .dept-count-pill{min-width:20px;height:1.4em;padding:0 4px;font-size:.65em;flex:0 0 auto}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-arrow{
+  flex:0 0 var(--zoom-arrow-height,48px);height:var(--zoom-arrow-height,48px);margin:0 0 5px;width:min(90px,85%);align-self:center;background:none;
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-horizontal:before{
+  left:8%;right:18%;top:calc(50% - 3px);height:6px;
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .zoom-flow-horizontal:after{
+  left:auto;right:4%;top:calc(50% - 10px);border:10px solid transparent;border-left:16px solid var(--teal-dark);border-right:0;
+}
+.board-shell.zoomed #board>.department>.slots,
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .arrow-slots,
+.board-shell.zoomed #board>.department .split-col .slots{
+  position:static!important;display:grid!important;flex:1 1 0%;width:100%!important;height:0!important;
+  min-width:0;min-height:0;max-width:none;max-height:none!important;margin:0!important;padding:3px!important;
+  grid-template-columns:repeat(var(--job-columns,1),minmax(0,1fr));
+  grid-template-rows:repeat(var(--job-rows,1),var(--job-height,48px));
+  align-content:start;align-items:stretch;gap:var(--job-gap,4px);overflow:hidden!important;
+  border:0;border-radius:6px;background:transparent;
+}
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .arrow-slots{
+  border:1px dashed #96aabd;background:rgba(247,238,246,.55);border-radius:7px;
+}
+.board-shell.zoomed #board>.department .split-wrap{
+  flex:1 1 0%;height:0;min-height:0;overflow:hidden;grid-template-columns:1fr;grid-template-rows:repeat(var(--cols),minmax(0,1fr));gap:4px;
+}
+.board-shell.zoomed #board>.department .split-col{
+  display:flex;flex-direction:row;align-items:stretch;min-height:0;min-width:0;overflow:hidden;padding:2px;gap:4px;
+}
+.board-shell.zoomed #board>.department .split-name{display:flex;align-items:center;justify-content:center;flex:0 0 28px;min-width:0;margin:0;font-size:var(--zoom-heading-size,22px)}
+.board-shell.zoomed #board>.department .split-col .slots{height:100%!important}
+.board-shell.zoomed #board .job,
+.board-shell.zoomed #board>.arrow-stage.box-zoom-arrow .job,
+.board-shell.zoomed #board>.department[data-dept-id="oven"] .job{
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  width:100%;height:100%!important;min-width:0;min-height:0!important;max-height:none;
+  padding:var(--job-padding,4px)!important;gap:1px;font-size:var(--job-font,26px);line-height:1.05;overflow:hidden;
+}
+.board-shell.zoomed #board .job-label{
+  width:100%;flex:0 1 auto;min-height:0;font-size:inherit;line-height:1.05;
+  white-space:normal;word-break:normal;overflow-wrap:anywhere;overflow:visible;text-overflow:clip;text-align:center;
+}
+.board-shell.zoomed #board .oven-timer-readout{flex:0 1 auto;padding:1px 3px;font-size:var(--timer-font,12px);line-height:1.05}
+.board-shell.zoomed #board .job-priority-star{font-size:min(16px,var(--job-font,26px));left:2px;bottom:1px}
+.board-shell.zoomed #board .job-x{font-size:min(15px,var(--job-font,26px));width:16px;height:16px;line-height:14px;top:1px;right:1px}
+.board-shell.zoomed #board>.plain-connector.box-zoom-connector .zoom-plain-line{width:100%;height:0;border-left:0;border-top:4px dashed #b91c1c;background:none}
+
+body.display-tv .board-shell:not(.zoomed) #board .stage-title{font-size:32px;line-height:1.12}
+body.display-tv .board-shell:not(.zoomed) #board .job{font-size:28px;min-height:56px}
+body.display-tv .board-shell:not(.zoomed) #board .job-label{white-space:normal;overflow-wrap:anywhere;word-break:normal;overflow:visible;line-height:1.12}
+body.display-tv .board-shell:not(.zoomed) #board .arrow-stage .job{font-size:23px}
+body.display-tv .board-shell:not(.zoomed) #board .oven-five-rows .job{font-size:15px}
+body.display-tv .board-shell:not(.zoomed) #board .oven-timer-readout{font-size:17px}
+body.display-tv .board-shell:not(.zoomed) #board .oven-five-rows .oven-timer-readout{font-size:10px}
+
 </style>
 </head>
 <body>
@@ -1472,8 +1626,8 @@ const DEPTS=[
   {id:'final_buffing',label:'Final Buffing',layout:{left:'89.54%',top:'530px',width:'10.46%',height:'300px'}},
   {id:'final_paint',label:'Final Paint',layout:{left:'76.27%',top:'530px',width:'10.47%',height:'300px'}},
   {id:'final_finish',label:'Final Finish',layout:{left:'63%',top:'530px',width:'10.47%',height:'300px'}},
-  {id:'engineering',label:'Engineering',layout:{left:'62.5%',top:'900px',width:'10.65%',height:'292px'}},
-  {id:'qc',label:'QC',layout:{left:'75.95%',top:'900px',width:'10.65%',height:'292px'}},
+  {id:'engineering',label:'Engineering',layout:{left:'61.2%',top:'900px',width:'10.65%',height:'292px'}},
+  {id:'qc',label:'QC',layout:{left:'75.3%',top:'900px',width:'10.65%',height:'292px'}},
   {id:'completed',label:'Completed',layout:{left:'89.4%',top:'900px',width:'10.6%',height:'292px'},completed:true},
 
   {id:'rma',label:'RMA',layout:{left:'0',top:'900px',width:'13.5%',height:'292px'},special:true},
@@ -1486,7 +1640,7 @@ const AREAS=[
   {id:'fabrication',label:'2. Fabrication',layout:{left:'0',top:'488px',width:'61.8%',height:'358px'}},
   {id:'internal',label:'3. Internal Assembly & Testing',layout:{left:'58.4%',top:'0',width:'41.6%',height:'488px'}},
   {id:'finish',label:'4. Final Finish',layout:{left:'62.2%',top:'488px',width:'37.8%',height:'358px'}},
-  {id:'completion',label:'5. Final Completion',layout:{left:'61.8%',top:'858px',width:'38.2%',height:'342px'}}
+  {id:'completion',label:'5. Final Completion',layout:{left:'60.5%',top:'858px',width:'39.5%',height:'342px'}}
 ];
 
 const ARROWS=[
@@ -1499,9 +1653,9 @@ const ARROWS=[
   {id:'final_weld_to_final_buffing',from:'final_weld',to:'final_buffing',label:'Final Weld to Final Buffing',layout:{left:'89.4%',top:'334px',width:'10.6%',height:'196px'},dir:'down',capacity:true},
   {id:'final_buffing_to_final_paint',from:'final_buffing',to:'final_paint',label:'Final Buffing to Final Paint',layout:{left:'86.74%',top:'530px',width:'2.8%',height:'300px'},dir:'left',capacity:true},
   {id:'final_paint_to_final_finish',from:'final_paint',to:'final_finish',label:'Final Paint to Final Finish',layout:{left:'73.47%',top:'530px',width:'2.8%',height:'300px'},dir:'left',capacity:true},
-  {id:'final_finish_to_engineering',from:'final_finish',to:'engineering',label:'Final Finish to Engineering',layout:{left:'62.2%',top:'830px',width:'11.66%',height:'70px'},dir:'down',capacity:true},
-  {id:'engineering_to_qc',from:'engineering',to:'qc',label:'Engineering to QC',layout:{left:'73.15%',top:'900px',width:'2.8%',height:'292px'},dir:'right',capacity:true},
-  {id:'qc_to_completed',from:'qc',to:'completed',label:'QC to Completed',layout:{left:'86.6%',top:'900px',width:'2.8%',height:'292px'},dir:'right',capacity:true},
+  {id:'final_finish_to_engineering',from:'final_finish',to:'engineering',label:'Final Finish to Engineering',layout:{left:'61.2%',top:'830px',width:'12.27%',height:'70px'},dir:'down',capacity:true,diagonal:'down-left'},
+  {id:'engineering_to_qc',from:'engineering',to:'qc',label:'Engineering to QC',layout:{left:'71.85%',top:'900px',width:'3.45%',height:'292px'},dir:'right',capacity:true},
+  {id:'qc_to_completed',from:'qc',to:'completed',label:'QC to Completed',layout:{left:'85.95%',top:'900px',width:'3.45%',height:'292px'},dir:'right',capacity:true},
   {id:'welding_buffing_to_m_blast',from:'welding_buffing',to:'m_blast',label:'Weld to Blast',layout:{left:'9.6%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
   {id:'m_blast_to_prime_paint',from:'m_blast',to:'prime_paint',label:'Blast to Paint',layout:{left:'22.4%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
   {id:'prime_paint_to_radiator',from:'prime_paint',to:'radiator',label:'Prime to Radiator',layout:{left:'35.2%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
@@ -1681,6 +1835,7 @@ function resetDisplayStage(){
 function applyDisplayFit(){
   if(!isAutoFitMode()){
     resetDisplayStage();
+    if(boxZoomSelection.size)layoutHourByHour();
     return;
   }
   const shell=document.querySelector('.board-shell');
@@ -1702,11 +1857,13 @@ function applyDisplayFit(){
   const availableHeight=Math.max(1,shell.clientHeight-verticalPadding);
   const zoomed=shell.classList.contains('zoomed');
   if(zoomed){
-    const selectedCount=Math.max(1,boxZoomSelection.size);
-    const connectedCount=ARROWS.filter(def=>boxZoomSelection.has(def.from)&&boxZoomSelection.has(def.to)).length;
-    const visibleItems=selectedCount+connectedCount;
-    const targetWidth=Math.max(availableWidth,Math.min(2400,selectedCount*430+connectedCount*190+Math.max(0,visibleItems-1)*18));
-    stage.style.width=targetWidth+'px';
+    // Hour by Hour fills the available viewport; each selected path shares that height.
+    stage.style.width=availableWidth+'px';
+    stage.style.setProperty('--display-scale','1');
+    stage.dataset.displayScale='100%';
+    layoutHourByHour();
+    fitCompactJobLabels();
+    return;
   }else{
     stage.style.width='max-content';
     const board=document.getElementById('board');
@@ -2362,6 +2519,11 @@ let dragId=null;
 
 function storageKey(){return 'order_status_board_v4_'+BOARD_ID;}
 function defaultWeeks(){return Array.from({length:6},(_,i)=>({date:'',color:i%COLORS.length}));}
+function departmentSplits(def,plant=activePlant){
+  if(!def||!Array.isArray(def.split))return [];
+  if(def.id==='oven'&&plant==='waco2')return ['A','B','C','D','E'];
+  return def.split;
+}
 function migrateLocationKey(key){
   const value=String(key||'');
   if(value.startsWith('dept:wt'))return value.replace('dept:wt','dept:customer_witness');
@@ -2425,13 +2587,14 @@ function loadState(){
     state=normalizeState(state);
   }
 }
-function departmentJobCount(def,boardState=state){
+function departmentJobCount(def,boardState=state,plant=activePlant){
   if(!def||!boardState)return 0;
   const jobs=boardState.jobs||{};
   const locations=boardState.locations||{};
   const countFor=key=>(locations[key]||[]).filter(id=>jobs[id]).length;
-  if(Array.isArray(def.split)){
-    return def.split.reduce((sum,split)=>sum+countFor(locationKey('dept',def.id,split)),0);
+  const splits=departmentSplits(def,plant);
+  if(splits.length){
+    return splits.reduce((sum,split)=>sum+countFor(locationKey('dept',def.id,split)),0);
   }
   return countFor(locationKey('dept',def.id));
 }
@@ -2758,10 +2921,72 @@ function setupDepartmentAdd(el,key){
     openModal(null,key);
   });
 }
+function hourByHourJobGrid(width,height,labels,hasTimer=false){
+  const count=labels.length,longest=Math.max(1,...labels.map(text=>String(text).length));
+  const preferredColumns=Math.max(1,Math.floor((width+5)/170));
+  const preferredHeight=hasTimer?64:48;
+  function candidate(columns){
+    const rows=Math.max(1,Math.ceil(count/columns));
+    const gap=Math.min(5,Math.max(0,Math.min(width/columns,height/rows)*.06));
+    const w=Math.max(1,(width-gap*(columns-1))/columns);
+    const cellHeight=Math.max(1,Math.min(preferredHeight,(height-gap*(rows-1))/rows));
+    const padding=Math.min(4,w*.04,cellHeight*.06);
+    const timer=hasTimer?Math.max(1,Math.min(14,cellHeight*.23)):0;
+    const font=Math.max(1,Math.min(26,(w-2*padding-10)/(longest*.63),(cellHeight-2*padding-timer-3)/1.2));
+    return {columns,rows,font,gap,padding,timer:timer||12,cellHeight};
+  }
+  // Sparse boards keep normal-sized cards at the top, including empty columns.
+  let best=candidate(preferredColumns);
+  if(best.cellHeight>=preferredHeight-.5||!count)return best;
+  // Only a full tray needs denser packing; cards never grow to fill its height.
+  for(let columns=1;columns<=Math.max(count,preferredColumns);columns++){
+    const next=candidate(columns);
+    if(next.font>best.font+.1)best=next;
+  }
+  return best;
+}
+function fitHourByHourJobs(){
+  const board=document.getElementById('board');
+  if(!board||!boxZoomSelection.size)return;
+  board.querySelectorAll('.box-zoom-selected,.box-zoom-arrow').forEach(stage=>{
+    const size=Math.max(9,Math.min(30,stage.clientWidth*.085,stage.clientHeight*.075));
+    stage.style.setProperty('--zoom-heading-size',size+'px');
+    stage.style.setProperty('--zoom-arrow-height',Math.max(20,Math.min(48,stage.clientHeight*.08))+'px');
+  });
+  board.querySelectorAll('.box-zoom-selected .slots,.box-zoom-arrow .arrow-slots').forEach(slots=>{
+    const jobs=[...slots.children].filter(node=>node.classList.contains('job'));
+    const labels=jobs.map(job=>job.querySelector('.job-label')?.textContent||'');
+    const timer=jobs.some(job=>job.querySelector('.oven-timer-readout'));
+    const style=getComputedStyle(slots);
+    const width=slots.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);
+    const height=slots.clientHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom);
+    const fit=hourByHourJobGrid(width,height,labels,timer);
+    slots.style.setProperty('--job-columns',fit.columns);
+    slots.style.setProperty('--job-rows',fit.rows);
+    slots.style.setProperty('--job-height',fit.cellHeight+'px');
+    slots.style.setProperty('--job-font',fit.font+'px');
+    slots.style.setProperty('--job-gap',fit.gap+'px');
+    slots.style.setProperty('--job-padding',fit.padding+'px');
+    slots.style.setProperty('--timer-font',fit.timer+'px');
+    jobs.forEach(job=>{
+      const label=job.querySelector('.job-label');
+      if(!label)return;
+      label.style.fontSize='';
+      // Measure the actual glyphs as well as the grid estimate.
+      let font=fit.font;
+      for(let step=0;step<6&&font>1&&(job.scrollHeight>job.clientHeight+1||label.scrollWidth>label.clientWidth+1);step++){
+        font=Math.max(1,font*.85);label.style.fontSize=font+'px';
+      }
+    });
+  });
+}
 function fitCompactJobLabels(){
   requestAnimationFrame(()=>{
+    if(boxZoomSelection.size)fitHourByHourJobs();
     document.querySelectorAll('#board .job-label, #tutorialBoard .job-label').forEach(label=>{
+      if(label.closest('.board-shell.zoomed'))return;
       label.style.fontSize='';
+      if(document.body.classList.contains('display-tv'))return;
       const available=label.clientWidth;
       const required=label.scrollWidth;
       if(!available||required<=available)return;
@@ -2964,6 +3189,8 @@ function makeDept(def){
   const card=document.createElement('section');
   card.className='stage department'+(def.special?' special':'')+(def.failed?' failed-test':'')+(def.completed?' completed-stage':'');
   card.dataset.deptId=def.id;
+  const splits=departmentSplits(def);
+  if(def.id==='oven'&&activePlant==='waco2')card.classList.add('oven-five-rows');
   if(def.id==='winding'||def.id==='welding_buffing')card.classList.add('header-emphasis');
   applyStageLayout(card,def.layout);
 
@@ -2980,9 +3207,9 @@ function makeDept(def){
   title.append(titleLabel,pill);
   card.appendChild(title);
 
-  if(def.split){
-    const wrap=document.createElement('div');wrap.className='split-wrap';wrap.style.setProperty('--cols',def.split.length);
-    def.split.forEach(s=>{
+  if(splits.length){
+    const wrap=document.createElement('div');wrap.className='split-wrap';wrap.style.setProperty('--cols',splits.length);
+    splits.forEach(s=>{
       const col=document.createElement('div');col.className='split-col';
       const sn=document.createElement('div');sn.className='split-name';sn.textContent=s;col.appendChild(sn);
       const slots=document.createElement('div');slots.className='slots';
@@ -3013,10 +3240,8 @@ function makeArrow(def){
   laneLabel.textContent=def.label;
   zone.appendChild(laneLabel);
   const zoomFlow=document.createElement('div');
-  zoomFlow.className='zoom-flow-arrow';
-  const fromDef=DEPTS.find(item=>item.id===def.from);
-  const toDef=DEPTS.find(item=>item.id===def.to);
-  zoomFlow.textContent=Number(stageLayoutOrder(fromDef))<=Number(stageLayoutOrder(toDef))?'→':'←';
+  const zoomOrientation=(def.dir==='up'||def.dir==='down')?'vertical':'horizontal';
+  zoomFlow.className='zoom-flow-arrow zoom-flow-'+zoomOrientation+' zoom-flow-'+def.dir;
   zoomFlow.setAttribute('aria-hidden','true');
   zone.appendChild(zoomFlow);
   let visual;
@@ -3029,6 +3254,16 @@ function makeArrow(def){
     path.setAttribute('d','M2 100 V90 H97 V10');
     const head=document.createElementNS('http://www.w3.org/2000/svg','polygon');
     head.setAttribute('points','97,0 94,10 100,10');
+    visual.append(path,head);
+  }else if(def.diagonal){
+    visual=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    visual.setAttribute('class','diagonal-arrow-line');
+    visual.setAttribute('viewBox','0 0 100 100');
+    visual.setAttribute('preserveAspectRatio','none');
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d','M57 0 L43 84');
+    const head=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    head.setAttribute('points','43,100 37,82 49,84');
     visual.append(path,head);
   }else{
     visual=document.createElement('div');
@@ -3250,6 +3485,7 @@ function makeTutorialDept(def){
   const card=document.createElement('section');
   card.className='stage department'+(def.special?' special':'')+(def.failed?' failed-test':'')+(def.completed?' completed-stage':'');
   card.dataset.deptId=def.id;
+  const splits=departmentSplits(def,'waco1');
   if(def.id==='winding'||def.id==='welding_buffing')card.classList.add('header-emphasis');
   applyStageLayout(card,def.layout);
   card.style.order=stageLayoutOrder(def);
@@ -3261,14 +3497,14 @@ function makeTutorialDept(def){
   const count=document.createElement('span');
   count.className='dept-count-pill';
   count.dataset.tutorialDeptCount=def.id;
-  count.textContent=String(departmentJobCount(def,tutorialState));
+  count.textContent=String(departmentJobCount(def,tutorialState,'waco1'));
   title.append(label,count);
   card.appendChild(title);
-  if(def.split){
+  if(splits.length){
     const wrap=document.createElement('div');
     wrap.className='split-wrap';
-    wrap.style.setProperty('--cols',def.split.length);
-    def.split.forEach(split=>{
+    wrap.style.setProperty('--cols',splits.length);
+    splits.forEach(split=>{
       const column=document.createElement('div');
       column.className='split-col';
       const splitName=document.createElement('div');
@@ -3309,10 +3545,8 @@ function makeTutorialArrow(def){
   laneLabel.className='zoom-transition-label';
   laneLabel.textContent=def.label;
   const zoomFlow=document.createElement('div');
-  zoomFlow.className='zoom-flow-arrow';
-  const fromDef=DEPTS.find(item=>item.id===def.from);
-  const toDef=DEPTS.find(item=>item.id===def.to);
-  zoomFlow.textContent=Number(stageLayoutOrder(fromDef))<=Number(stageLayoutOrder(toDef))?'→':'←';
+  const zoomOrientation=(def.dir==='up'||def.dir==='down')?'vertical':'horizontal';
+  zoomFlow.className='zoom-flow-arrow zoom-flow-'+zoomOrientation+' zoom-flow-'+def.dir;
   zoomFlow.setAttribute('aria-hidden','true');
   let visual;
   if(def.route){
@@ -3324,6 +3558,16 @@ function makeTutorialArrow(def){
     path.setAttribute('d','M2 100 V90 H97 V10');
     const head=document.createElementNS('http://www.w3.org/2000/svg','polygon');
     head.setAttribute('points','97,0 94,10 100,10');
+    visual.append(path,head);
+  }else if(def.diagonal){
+    visual=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    visual.setAttribute('class','diagonal-arrow-line');
+    visual.setAttribute('viewBox','0 0 100 100');
+    visual.setAttribute('preserveAspectRatio','none');
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d','M57 0 L43 84');
+    const head=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    head.setAttribute('points','43,100 37,82 49,84');
     visual.append(path,head);
   }else{
     visual=document.createElement('div');
@@ -3617,31 +3861,82 @@ function setBoxZoomMenu(open){
   button.classList.toggle('active',open||boxZoomSelection.size>0);
   button.setAttribute('aria-expanded',String(open));
 }
+// Build directed paths from workflow connections, independent of board coordinates.
+// A branch or a row break repeats its endpoint visually, using the same job location.
+function hourByHourRows(selection,maxDepartments=3){
+  maxDepartments=Math.max(2,maxDepartments);
+  const edges=[...ARROWS.map(def=>({from:def.from,to:def.to,def,kind:'arrow'})),
+    ...PLAIN_CONNECTORS.flatMap(def=>(def.targets||[]).map(to=>({from:def.from,to,def,kind:'plain'})))]
+    .filter(edge=>selection.has(edge.from)&&selection.has(edge.to));
+  const incoming=id=>edges.filter(edge=>edge.to===id);
+  const outgoing=id=>edges.filter(edge=>edge.from===id);
+  const visited=new Set(),rows=[];
+  function walk(first){
+    let row=[{kind:'dept',id:first.from}],edge=first;
+    while(edge&&!visited.has(edge)){
+      visited.add(edge);
+      row.push({kind:edge.kind,id:edge.def.id,from:edge.from,to:edge.to},{kind:'dept',id:edge.to});
+      const next=outgoing(edge.to);
+      if(incoming(edge.to).length!==1||next.length!==1)break;
+      if((row.length+1)/2>=maxDepartments){rows.push(row);row=[{kind:'dept',id:edge.to}];}
+      edge=next[0];
+    }
+    if(row.length>1)rows.push(row);
+  }
+  edges.filter(edge=>incoming(edge.from).length!==1||outgoing(edge.from).length!==1).forEach(edge=>{if(!visited.has(edge))walk(edge);});
+  edges.forEach(edge=>{if(!visited.has(edge))walk(edge);});
+  DEPTS.filter(def=>selection.has(def.id)&&!edges.some(edge=>edge.from===def.id||edge.to===def.id))
+    .forEach(def=>rows.push([{kind:'dept',id:def.id}]));
+  return rows;
+}
+function layoutHourByHour(){
+  const board=document.getElementById('board');
+  const shell=document.querySelector('.board-shell');
+  board.querySelectorAll('.zoom-repeat').forEach(node=>node.remove());
+  board.querySelectorAll(':scope > .stage').forEach(node=>{
+    node.style.gridRow='';node.style.gridColumn='';node.style.order='';
+    node.classList.remove('box-zoom-selected','box-zoom-arrow','box-zoom-connector');
+  });
+  if(!boxZoomSelection.size)return;
+  const paths=hourByHourRows(boxZoomSelection,Number.MAX_SAFE_INTEGER);
+  const rows=paths.filter(row=>row.length>1);
+  const isolated=paths.filter(row=>row.length===1).flat();
+  if(isolated.length)rows.push(isolated);
+  const longest=rows.reduce((a,b)=>a.length>=b.length?a:b,[]);
+  const tracks=longest.map(item=>item.kind==='dept'?'minmax(0,2.6fr)':item.kind==='plain'?'minmax(0,.25fr)':'minmax(0,1fr)');
+  board.style.setProperty('--zoom-tracks',tracks.join(' '));
+  board.style.setProperty('--zoom-rows',String(Math.max(1,rows.length)));
+  const used=new Set();
+  rows.forEach((row,rowIndex)=>row.forEach((item,columnIndex)=>{
+    const token=item.kind+':'+item.id;
+    const selector=item.kind==='dept'?'[data-dept-id="'+item.id+'"]':item.kind==='arrow'?'[data-arrow-id="'+item.id+'"]':'[data-connector-id="'+item.id+'"]';
+    let node=board.querySelector(selector);
+    if(used.has(token)){
+      const def=(item.kind==='dept'?DEPTS:item.kind==='arrow'?ARROWS:PLAIN_CONNECTORS).find(def=>def.id===item.id);
+      node=item.kind==='dept'?makeDept(def):item.kind==='arrow'?makeArrow(def):makePlainConnector(def);
+      node.classList.add('zoom-repeat');
+      node.querySelectorAll('[id]').forEach(child=>child.removeAttribute('id'));
+      board.appendChild(node);
+    }
+    used.add(token);
+    node.classList.add(item.kind==='dept'?'box-zoom-selected':item.kind==='arrow'?'box-zoom-arrow':'box-zoom-connector');
+    const firstColumn=Math.round(columnIndex*tracks.length/row.length)+1;
+    const nextColumn=Math.round((columnIndex+1)*tracks.length/row.length)+1;
+    node.style.gridRow=String(rowIndex+1);node.style.gridColumn=firstColumn+' / '+nextColumn;
+    if(item.kind==='arrow')node.querySelector('.zoom-flow-arrow').className='zoom-flow-arrow zoom-flow-horizontal zoom-flow-right';
+  }));
+}
 function updateBoxZoomView(){
   const shell=document.querySelector('.board-shell');
   const active=boxZoomSelection.size>0;
   shell.classList.toggle('zoomed',active);
-  document.querySelectorAll('#board .department').forEach(card=>{
-    const def=DEPTS.find(item=>item.id===card.dataset.deptId);
-    const selected=!!def&&boxZoomSelection.has(def.id);
-    card.classList.toggle('box-zoom-selected',selected);
-    card.style.order=def?stageLayoutOrder(def):'';
-  });
-  document.querySelectorAll('#board .arrow-stage').forEach(zone=>{
-    const def=ARROWS.find(item=>item.id===zone.dataset.arrowId);
-    if(def)zone.style.order=stageLayoutOrder(def);
-    const connectsSelected=active&&!!def&&boxZoomSelection.has(def.from)&&boxZoomSelection.has(def.to);
-    zone.classList.toggle('box-zoom-arrow',connectsSelected);
-  });
-  document.querySelectorAll('#board .plain-connector').forEach(zone=>{
-    const def=PLAIN_CONNECTORS.find(item=>item.id===zone.dataset.connectorId);
-    zone.style.order=def?String(def.order):'';
-    const targets=def&&Array.isArray(def.targets)?def.targets:[];
-    const connectsSelected=active&&!!def&&boxZoomSelection.has(def.from)&&targets.some(target=>boxZoomSelection.has(target));
-    zone.classList.toggle('box-zoom-connector',connectsSelected);
-  });
-  const labels=DEPTS.filter(d=>boxZoomSelection.has(d.id)).map(d=>d.selectLabel||d.label);
-  document.getElementById('boxZoomSummary').textContent=active?labels.join(' • '):'Selected departments';
+  document.body.classList.toggle('hourly-active',active);
+  layoutHourByHour();
+  const rows=hourByHourRows(boxZoomSelection,Number.MAX_SAFE_INTEGER);
+  const labels=rows.map(row=>row.filter(item=>item.kind==='dept').map(item=>{
+    const def=DEPTS.find(def=>def.id===item.id);return def.selectLabel||def.label;
+  }).join(' → '));
+  document.getElementById('boxZoomSummary').textContent=active?labels.join('  •  '):'Selected departments';
   document.getElementById('btnBoxZoom').classList.toggle('active',active||!document.getElementById('boxZoomMenu').hidden);
   fitCompactJobLabels();
   scheduleDisplayFit();
@@ -3680,8 +3975,9 @@ function buildStageSelect(){
   const sel=document.getElementById('stageSelect');sel.innerHTML='';
   const groupDept=document.createElement('optgroup');groupDept.label='Departments';
   DEPTS.forEach(d=>{
-    if(d.split){
-      d.split.forEach(s=>{
+    const splits=departmentSplits(d);
+    if(splits.length){
+      splits.forEach(s=>{
         const o=document.createElement('option');o.value=locationKey('dept',d.id,s);o.textContent=(d.selectLabel||d.label)+' '+s;groupDept.appendChild(o);
       });
     }else{
@@ -4165,7 +4461,8 @@ function openBackupModal(fileName,parsed){
 function orderedBackupLocationKeys(backupState){
   const ordered=[];
   DEPTS.forEach(def=>{
-    if(def.split)def.split.forEach(split=>ordered.push(locationKey('dept',def.id,split)));
+    const splits=departmentSplits(def);
+    if(splits.length)splits.forEach(split=>ordered.push(locationKey('dept',def.id,split)));
     else ordered.push(locationKey('dept',def.id));
   });
   ARROWS.forEach(def=>ordered.push(locationKey('arrow',def.id)));
@@ -4634,7 +4931,7 @@ document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redoChange()}
 });
-window.addEventListener('resize',()=>{fitCompactJobLabels();scheduleConnectorLayout();scheduleDisplayFit();if(tutorialIsOpen())scheduleTutorialFit();if(activityPanelOpen)positionActivityPanel()});
+window.addEventListener('resize',()=>{if(boxZoomSelection.size)layoutHourByHour();fitCompactJobLabels();scheduleConnectorLayout();scheduleDisplayFit();if(tutorialIsOpen())scheduleTutorialFit();if(activityPanelOpen)positionActivityPanel()});
 document.addEventListener('fullscreenchange',scheduleDisplayFit);
 setInterval(()=>{refreshOvenTimerTitles();refreshTutorialTimerTitles();},30000);
 
