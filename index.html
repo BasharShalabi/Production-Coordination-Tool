@@ -915,7 +915,7 @@ body.display-tv .tv-readonly-pill{display:inline-flex}
 .board{
   --board-gap:10px;
   --board-width:3510px;
-  --board-height:1200px;
+  --board-height:1620px;
   display:block;
   width:var(--board-width);
   height:var(--board-height);
@@ -1231,6 +1231,100 @@ body.display-tv .board-shell:not(.zoomed) #board .arrow-stage .job{font-size:23p
 body.display-tv .board-shell:not(.zoomed) #board .oven-five-rows .job{font-size:15px}
 body.display-tv .board-shell:not(.zoomed) #board .oven-timer-readout{font-size:17px}
 body.display-tv .board-shell:not(.zoomed) #board .oven-five-rows .oven-timer-readout{font-size:10px}
+
+
+/* Keep normal vertical connectors visible between their two job columns. */
+.board-shell:not(.zoomed) #board>.vertical-arrow:not(.routed-arrow) .arrow-slots,
+.tutorial-board:not(.is-focused)>.vertical-arrow:not(.routed-arrow) .arrow-slots{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+.board-shell:not(.zoomed) #board>[data-arrow-id="final_finish_to_engineering"] .arrow-line-v,
+.tutorial-board:not(.is-focused)>[data-arrow-id="final_finish_to_engineering"] .arrow-line-v{
+  top:0;bottom:0;
+}
+.board-shell:not(.zoomed) #board>[data-arrow-id="final_finish_to_engineering"] .arrow-slots,
+.tutorial-board:not(.is-focused)>[data-arrow-id="final_finish_to_engineering"] .arrow-slots{
+  top:4px;bottom:4px;padding:2px;column-gap:48px;
+}
+.board-shell:not(.zoomed) #board>[data-arrow-id="final_finish_to_engineering"] .job,
+.tutorial-board:not(.is-focused)>[data-arrow-id="final_finish_to_engineering"] .job{
+  min-height:40px!important;padding:4px;
+}
+
+
+/* More usable card space on the production screen, with the existing TV font size. */
+.board-shell:not(.zoomed) #board>.department{padding:6px}
+.board-shell:not(.zoomed) #board>.department>.slots{padding:3px;gap:3px}
+body.display-tv .board-shell:not(.zoomed) #board>.department:not([data-dept-id="oven"]) .job{
+  min-height:48px;padding:4px 6px;
+}
+body.display-tv .board-shell:not(.zoomed) #board>.department:not([data-dept-id="oven"]) .job:has(.job-priority-star){padding-bottom:12px}
+
+/* TV fills the screen width; scale reserved label space with the fitted canvas. */
+body.display-tv .board-shell:not(.zoomed) #board .production-area-title{
+  top:calc(6px * var(--tv-layout-ratio,1));
+  padding-top:calc(4px * var(--tv-layout-ratio,1));padding-bottom:calc(4px * var(--tv-layout-ratio,1));
+  font-size:calc(22px * var(--tv-layout-ratio,1));
+}
+body.display-tv .board-shell:not(.zoomed) .bottom-panel{padding-top:6px;padding-bottom:6px}
+body.display-tv .board-shell:not(.zoomed) .goal-box{padding-top:6px;padding-bottom:6px}
+body.display-tv .board-shell:not(.zoomed) #board>[data-arrow-id="final_finish_to_engineering"] .job{
+  min-height:calc(40px * var(--tv-layout-ratio,1))!important;
+  padding-top:calc(3px * var(--tv-layout-ratio,1));padding-bottom:calc(3px * var(--tv-layout-ratio,1));
+  font-size:calc(23px * var(--tv-layout-ratio,1));
+}
+
+
+/* Compact full-board cards and bounded transition trays. Zoom keeps its approved layout. */
+.board-shell:not(.zoomed) #board .slots,
+.board-shell:not(.zoomed) #board .arrow-slots{
+  min-width:0;min-height:0;overscroll-behavior:contain;scroll-behavior:auto;
+  overflow-anchor:none;scrollbar-width:thin;
+}
+.board-shell:not(.zoomed) #board .split-col{overflow:hidden}
+.board-shell:not(.zoomed) #board .split-col .slots{flex:1 1 0;overflow-y:auto;overflow-x:hidden}
+.board-shell:not(.zoomed) #board .oven-five-rows .split-col .slots{overflow-x:auto;overflow-y:hidden}
+.board-shell:not(.zoomed) #board>.arrow-stage:not(.vertical-arrow) .arrow-slots{
+  flex:1 1 0;max-height:none;overflow-y:auto;overflow-x:hidden;padding:3px 2px;gap:3px;
+}
+.board-shell:not(.zoomed) #board .job{padding:4px 3px;min-height:36px;font-size:17px}
+body.display-tv .board-shell:not(.zoomed) #board>.department:not([data-dept-id="oven"]) .job{
+  font-size:26px;min-height:44px;padding:3px 4px;
+}
+body.display-tv .board-shell:not(.zoomed) #board>.arrow-stage:not(.vertical-arrow) .job{
+  font-size:22px;min-height:42px;padding:3px 2px;
+}
+body.job-dragging .board-shell:not(.zoomed) #board>.arrow-stage.capacity-arrow{
+  transform:none;overflow:hidden;outline-offset:-3px;
+}
+body.job-dragging .board-shell:not(.zoomed) #board>.arrow-stage.capacity-arrow>*{transform:none}
+.board-shell:not(.zoomed) #board .job.recently-moved{transform:none!important}
+
+
+/* Header-level elbow with transitioned jobs underneath, to Engineering's left. */
+.board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-right,
+.tutorial-board:not(.is-focused)>.arrow-stage.route-down-left-right{pointer-events:none;background:transparent!important;outline:none!important;box-shadow:none!important}
+.board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-right .arrow-route-line path,
+.tutorial-board:not(.is-focused)>.arrow-stage.route-down-left-right .arrow-route-line path{pointer-events:stroke}
+.board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-right .arrow-route-line polygon,
+.tutorial-board:not(.is-focused)>.arrow-stage.route-down-left-right .arrow-route-line polygon{pointer-events:all}
+.board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-right .zoom-transition-label,
+.tutorial-board:not(.is-focused)>.arrow-stage.route-down-left-right .zoom-transition-label{display:none}
+.board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-right .arrow-slots,
+.tutorial-board:not(.is-focused)>.arrow-stage.route-down-left-right .arrow-slots{
+  left:1.9417476%;right:auto;top:30.8000000%;bottom:auto;
+  width:52.4271845%;height:65.2000000%;max-height:none;
+  grid-template-columns:minmax(0,1fr);gap:4px;padding:4px;pointer-events:auto;
+  background:transparent!important;border:0!important;box-shadow:none!important;overflow-x:hidden;overflow-y:auto;
+}
+.board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-right.drop-active .arrow-slots,
+.tutorial-board:not(.is-focused)>.arrow-stage.route-down-left-right.drop-active .arrow-slots{outline:3px dashed #0284c7;outline-offset:-3px}
+body.display-tv .board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-right .job{font-size:22px;min-height:42px!important;padding:3px 4px}
+
+
+/* Keep the tray below the raised T-Complete crossbar in full-board views. */
+.board-shell:not(.zoomed) #board>.route-up-right .arrow-slots,
+.tutorial-board:not(.is-focused)>.route-up-right .arrow-slots{top:43%;bottom:4%}
 
 </style>
 </head>
@@ -1607,60 +1701,58 @@ const COLORS=[
   {name:'Red',bg:'#dc2626',tx:'#fff1f2'},
   {name:'Teal',bg:'#14b8a6',tx:'#042f2e'}
 ];
-const BOARD_LAYOUT_HEIGHT=1200;
+const BOARD_LAYOUT_HEIGHT=1620;
 
 const DEPTS=[
-  {id:'winding',label:'Winding',layout:{left:'.2%',top:'42px',width:'11.2%',height:'292px'}},
-  {id:'lacing',label:'Lacing',layout:{left:'14.8%',top:'42px',width:'11.2%',height:'292px'}},
-  {id:'core_coil',label:'Core & Coil',layout:{left:'29.6%',top:'42px',width:'11.2%',height:'292px'}},
-  {id:'oven',label:'Oven',layout:{left:'44.4%',top:'42px',width:'11.2%',height:'292px'},split:['A','B','C']},
-  {id:'tanking',label:'Tanking',layout:{left:'59.2%',top:'42px',width:'11.2%',height:'292px'},split:['1st','2nd']},
-  {id:'testing',label:'Testing',layout:{left:'74%',top:'42px',width:'11.2%',height:'292px'}},
-  {id:'final_weld',label:'Final Weld',layout:{left:'88.8%',top:'42px',width:'11.2%',height:'292px'}},
-
-  {id:'welding_buffing',label:'Welding / Buffing',layout:{left:'0',top:'530px',width:'9.6%',height:'300px'}},
-  {id:'m_blast',label:'M-Blast',layout:{left:'12.8%',top:'530px',width:'9.6%',height:'300px'}},
-  {id:'prime_paint',label:'Prime / Paint',layout:{left:'25.6%',top:'530px',width:'9.6%',height:'300px'}},
-  {id:'radiator',label:'Radiator',layout:{left:'38.4%',top:'530px',width:'9.6%',height:'300px'}},
-  {id:'t_complete',label:'T-Complete',layout:{left:'51.2%',top:'530px',width:'10.6%',height:'300px'}},
-  {id:'final_buffing',label:'Final Buffing',layout:{left:'89.54%',top:'530px',width:'10.46%',height:'300px'}},
-  {id:'final_paint',label:'Final Paint',layout:{left:'76.27%',top:'530px',width:'10.47%',height:'300px'}},
-  {id:'final_finish',label:'Final Finish',layout:{left:'63%',top:'530px',width:'10.47%',height:'300px'}},
-  {id:'engineering',label:'Engineering',layout:{left:'61.2%',top:'900px',width:'10.65%',height:'292px'}},
-  {id:'qc',label:'QC',layout:{left:'75.3%',top:'900px',width:'10.65%',height:'292px'}},
-  {id:'completed',label:'Completed',layout:{left:'89.4%',top:'900px',width:'10.6%',height:'292px'},completed:true},
-
-  {id:'rma',label:'RMA',layout:{left:'0',top:'900px',width:'13.5%',height:'292px'},special:true},
-  {id:'customer_witness',label:'Customer Witness',layout:{left:'14.7%',top:'900px',width:'13.5%',height:'292px'},special:true},
-  {id:'failed_test',label:'Failed Unit',layout:{left:'74%',top:'348px',width:'11.2%',height:'128px'},failed:true}
+  {"id":"winding","label":"Winding","layout":{"left":".2%","top":"42px","width":"11.2%","height":"440px"}},
+  {"id":"lacing","label":"Lacing","layout":{"left":"14.8%","top":"42px","width":"11.2%","height":"440px"}},
+  {"id":"core_coil","label":"Core & Coil","layout":{"left":"29.6%","top":"42px","width":"11.2%","height":"440px"}},
+  {"id":"oven","label":"Oven","layout":{"left":"44.4%","top":"42px","width":"11.2%","height":"440px"},"split":["A","B","C"]},
+  {"id":"tanking","label":"Tanking","layout":{"left":"59.2%","top":"42px","width":"11.2%","height":"440px"},"split":["1st","2nd"]},
+  {"id":"testing","label":"Testing","layout":{"left":"74%","top":"42px","width":"11.2%","height":"440px"}},
+  {"id":"final_weld","label":"Final Weld","layout":{"left":"88.8%","top":"42px","width":"11.2%","height":"440px"}},
+  {"id":"welding_buffing","label":"Welding / Buffing","layout":{"left":"0%","top":"670px","width":"9%","height":"460px"}},
+  {"id":"m_blast","label":"M-Blast","layout":{"left":"13.1%","top":"670px","width":"9%","height":"460px"}},
+  {"id":"prime_paint","label":"Prime / Paint","layout":{"left":"26.2%","top":"670px","width":"9%","height":"460px"}},
+  {"id":"radiator","label":"Radiator","layout":{"left":"39.3%","top":"670px","width":"9%","height":"460px"}},
+  {"id":"t_complete","label":"T-Complete","layout":{"left":"52.4%","top":"670px","width":"9%","height":"460px"}},
+  {"id":"final_buffing","label":"Final Buffing","layout":{"left":"89.8433333%","top":"670px","width":"9.1133333%","height":"440px"}},
+  {"id":"final_paint","label":"Final Paint","layout":{"left":"76.4216667%","top":"670px","width":"9.1133333%","height":"440px"}},
+  {"id":"final_finish","label":"Final Finish","layout":{"left":"62.2%","top":"670px","width":"9.1133333%","height":"440px"}},
+  {"id":"engineering","label":"Engineering","layout":{"left":"63%","top":"1210px","width":"9.1133333%","height":"400px"}},
+  {"id":"qc","label":"QC","layout":{"left":"76.4216667%","top":"1210px","width":"9.1133333%","height":"400px"}},
+  {"id":"completed","label":"Completed","layout":{"left":"89.8433333%","top":"1210px","width":"9.1133333%","height":"400px"},"completed":true},
+  {"id":"rma","label":"RMA","layout":{"left":"0","top":"1380px","width":"13.2%","height":"230px"},"special":true},
+  {"id":"customer_witness","label":"Customer Witness","layout":{"left":"14.7%","top":"1380px","width":"13.2%","height":"230px"},"special":true},
+  {"id":"failed_test","label":"Failed Unit","layout":{"left":"74%","top":"494px","width":"11.2%","height":"128px"},"failed":true}
 ];
 
 const AREAS=[
-  {id:'core',label:'1. Core & Coil Assembly',layout:{left:'0',top:'0',width:'57.6%',height:'350px'}},
-  {id:'fabrication',label:'2. Fabrication',layout:{left:'0',top:'488px',width:'61.8%',height:'358px'}},
-  {id:'internal',label:'3. Internal Assembly & Testing',layout:{left:'58.4%',top:'0',width:'41.6%',height:'488px'}},
-  {id:'finish',label:'4. Final Finish',layout:{left:'62.2%',top:'488px',width:'37.8%',height:'358px'}},
-  {id:'completion',label:'5. Final Completion',layout:{left:'60.5%',top:'858px',width:'39.5%',height:'342px'}}
+  {"id":"core","label":"1. Core & Coil Assembly","layout":{"left":"0","top":"0","width":"57.6%","height":"488px"}},
+  {"id":"fabrication","label":"2. Fabrication","layout":{"left":"0","top":"628px","width":"61.8%","height":"508px"}},
+  {"id":"internal","label":"3. Internal Assembly & Testing","layout":{"left":"58.4%","top":"0","width":"41.6%","height":"628px"}},
+  {"id":"finish","label":"4. Final Finish","layout":{"left":"62.2%","top":"628px","width":"37.8%","height":"488px"}},
+  {"id":"completion","label":"5. Final Completion","layout":{"left":"62.2%","top":"1168px","width":"37.8%","height":"452px"}}
 ];
 
 const ARROWS=[
-  {id:'winding_to_lacing',from:'winding',to:'lacing',label:'Winding to Lacing',layout:{left:'11.4%',top:'42px',width:'3.4%',height:'292px'},dir:'right'},
-  {id:'lacing_to_core_coil',from:'lacing',to:'core_coil',label:'Lacing to Core & Coil',layout:{left:'26%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
-  {id:'core_coil_to_oven',from:'core_coil',to:'oven',label:'Core & Coil to Oven',layout:{left:'40.8%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
-  {id:'oven_to_tanking',from:'oven',to:'tanking',label:'Oven to Tanking',layout:{left:'55.6%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
-  {id:'tanking_to_testing',from:'tanking',to:'testing',label:'Tanking to Testing',layout:{left:'70.4%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
-  {id:'testing_to_final_weld',from:'testing',to:'final_weld',label:'Testing to Final Weld',layout:{left:'85.2%',top:'42px',width:'3.6%',height:'292px'},dir:'right'},
-  {id:'final_weld_to_final_buffing',from:'final_weld',to:'final_buffing',label:'Final Weld to Final Buffing',layout:{left:'89.4%',top:'334px',width:'10.6%',height:'196px'},dir:'down',capacity:true},
-  {id:'final_buffing_to_final_paint',from:'final_buffing',to:'final_paint',label:'Final Buffing to Final Paint',layout:{left:'86.74%',top:'530px',width:'2.8%',height:'300px'},dir:'left',capacity:true},
-  {id:'final_paint_to_final_finish',from:'final_paint',to:'final_finish',label:'Final Paint to Final Finish',layout:{left:'73.47%',top:'530px',width:'2.8%',height:'300px'},dir:'left',capacity:true},
-  {id:'final_finish_to_engineering',from:'final_finish',to:'engineering',label:'Final Finish to Engineering',layout:{left:'61.2%',top:'830px',width:'12.27%',height:'70px'},dir:'down',capacity:true,diagonal:'down-left'},
-  {id:'engineering_to_qc',from:'engineering',to:'qc',label:'Engineering to QC',layout:{left:'71.85%',top:'900px',width:'3.45%',height:'292px'},dir:'right',capacity:true},
-  {id:'qc_to_completed',from:'qc',to:'completed',label:'QC to Completed',layout:{left:'85.95%',top:'900px',width:'3.45%',height:'292px'},dir:'right',capacity:true},
-  {id:'welding_buffing_to_m_blast',from:'welding_buffing',to:'m_blast',label:'Weld to Blast',layout:{left:'9.6%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
-  {id:'m_blast_to_prime_paint',from:'m_blast',to:'prime_paint',label:'Blast to Paint',layout:{left:'22.4%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
-  {id:'prime_paint_to_radiator',from:'prime_paint',to:'radiator',label:'Prime to Radiator',layout:{left:'35.2%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
-  {id:'radiator_to_t_complete',from:'radiator',to:'t_complete',label:'Radiator to T-Complete',layout:{left:'48%',top:'530px',width:'3.2%',height:'300px'},dir:'right',capacity:true},
-  {id:'t_complete_to_tanking',from:'t_complete',to:'tanking',label:'T-Complete to Tanking',layout:{left:'56.33%',top:'334px',width:'8.74%',height:'196px'},dir:'up',route:'up-right'}
+  {"id":"winding_to_lacing","from":"winding","to":"lacing","label":"Winding to Lacing","layout":{"left":"11.4%","top":"42px","width":"3.4%","height":"440px"},"dir":"right"},
+  {"id":"lacing_to_core_coil","from":"lacing","to":"core_coil","label":"Lacing to Core & Coil","layout":{"left":"26%","top":"42px","width":"3.6%","height":"440px"},"dir":"right"},
+  {"id":"core_coil_to_oven","from":"core_coil","to":"oven","label":"Core & Coil to Oven","layout":{"left":"40.8%","top":"42px","width":"3.6%","height":"440px"},"dir":"right"},
+  {"id":"oven_to_tanking","from":"oven","to":"tanking","label":"Oven to Tanking","layout":{"left":"55.6%","top":"42px","width":"3.6%","height":"440px"},"dir":"right"},
+  {"id":"tanking_to_testing","from":"tanking","to":"testing","label":"Tanking to Testing","layout":{"left":"70.4%","top":"42px","width":"3.6%","height":"440px"},"dir":"right"},
+  {"id":"testing_to_final_weld","from":"testing","to":"final_weld","label":"Testing to Final Weld","layout":{"left":"85.2%","top":"42px","width":"3.6%","height":"440px"},"dir":"right"},
+  {"id":"final_weld_to_final_buffing","from":"final_weld","to":"final_buffing","label":"Final Weld to Final Buffing","layout":{"left":"89.8433333%","top":"482px","width":"9.1133333%","height":"188px"},"dir":"down","capacity":true},
+  {"id":"final_buffing_to_final_paint","from":"final_buffing","to":"final_paint","label":"Final Buffing to Final Paint","layout":{"left":"85.535%","top":"670px","width":"4.3083333%","height":"440px"},"dir":"left","capacity":true},
+  {"id":"final_paint_to_final_finish","from":"final_paint","to":"final_finish","label":"Final Paint to Final Finish","layout":{"left":"71.3133333%","top":"670px","width":"5.1083334%","height":"440px"},"dir":"left","capacity":true},
+  {"id":"final_finish_to_engineering","from":"final_finish","to":"engineering","label":"Final Finish to Engineering","layout":{"left":"56.7%","top":"1110px","width":"10.3%","height":"500px"},"dir":"down","capacity":true,"route":"down-left-right","routePath":"M97.6375403 0.0000000 L97.6375403 14.0000000 L1.9417476 14.0000000 L1.9417476 24.8000000 L61.1650485 24.8000000","routeHead":"61.1650485,24.8000000 56.3106796,22.4000000 56.3106796,27.2000000"},
+  {"id":"engineering_to_qc","from":"engineering","to":"qc","label":"Engineering to QC","layout":{"left":"72.1133333%","top":"1210px","width":"4.3083334%","height":"400px"},"dir":"right","capacity":true},
+  {"id":"qc_to_completed","from":"qc","to":"completed","label":"QC to Completed","layout":{"left":"85.535%","top":"1210px","width":"4.3083333%","height":"400px"},"dir":"right","capacity":true},
+  {"id":"welding_buffing_to_m_blast","from":"welding_buffing","to":"m_blast","label":"Weld to Blast","layout":{"left":"9%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
+  {"id":"m_blast_to_prime_paint","from":"m_blast","to":"prime_paint","label":"Blast to Paint","layout":{"left":"22.1%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
+  {"id":"prime_paint_to_radiator","from":"prime_paint","to":"radiator","label":"Prime to Radiator","layout":{"left":"35.2%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
+  {"id":"radiator_to_t_complete","from":"radiator","to":"t_complete","label":"Radiator to T-Complete","layout":{"left":"48.3%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
+  {"id":"t_complete_to_tanking","from":"t_complete","to":"tanking","label":"T-Complete to Tanking","layout":{"left":"56.7336842%","top":"482px","width":"8.3157895%","height":"188px"},"dir":"up","route":"up-right","routePath":"M2 100 V35 H97 V10"}
 ];
 
 const PLAIN_CONNECTORS=[
@@ -1823,7 +1915,7 @@ function resetDisplayStage(){
   if(!stage)return;
   stage.style.removeProperty('--display-scale');
   const board=document.getElementById('board');
-  if(board)board.style.removeProperty('--board-height');
+  if(board){board.style.removeProperty('--board-height');board.style.removeProperty('--tv-layout-ratio');}
   stage.style.removeProperty('--department-width');
   stage.style.removeProperty('--department-height');
   stage.style.removeProperty('--arrow-width');
@@ -1844,7 +1936,7 @@ function applyDisplayFit(){
 
   stage.style.setProperty('--display-scale','1');
   const fitBoard=document.getElementById('board');
-  if(fitBoard)fitBoard.style.setProperty('--board-height',BOARD_LAYOUT_HEIGHT+'px');
+  if(fitBoard){fitBoard.style.setProperty('--board-height',BOARD_LAYOUT_HEIGHT+'px');fitBoard.style.removeProperty('--tv-layout-ratio');}
   stage.style.removeProperty('--department-width');
   stage.style.removeProperty('--department-height');
   stage.style.removeProperty('--arrow-width');
@@ -1871,8 +1963,11 @@ function applyDisplayFit(){
     const baseNaturalHeight=Math.max(1,stage.scrollHeight);
     const footerHeight=Math.max(0,baseNaturalHeight-Math.max(1,board.scrollHeight));
     const targetStageHeight=baseNaturalWidth*(availableHeight/availableWidth);
-    const fittedBoardHeight=Math.max(BOARD_LAYOUT_HEIGHT,Math.min(1900,targetStageHeight-footerHeight));
+    const fittedBoardHeight=displayMode==='tv'
+      ?Math.max(720,targetStageHeight-footerHeight)
+      :Math.max(BOARD_LAYOUT_HEIGHT,Math.min(1900,targetStageHeight-footerHeight));
     board.style.setProperty('--board-height',fittedBoardHeight+'px');
+    board.style.setProperty('--tv-layout-ratio',String(Math.min(1,fittedBoardHeight/BOARD_LAYOUT_HEIGHT)));
   }
 
   const naturalWidth=Math.max(1,stage.scrollWidth);
@@ -2974,12 +3069,88 @@ function fitHourByHourJobs(){
       label.style.fontSize='';
       // Measure the actual glyphs as well as the grid estimate.
       let font=fit.font;
-      for(let step=0;step<6&&font>1&&(job.scrollHeight>job.clientHeight+1||label.scrollWidth>label.clientWidth+1);step++){
+      for(let step=0;step<6&&font>1&&label.scrollWidth>label.clientWidth+1;step++){
         font=Math.max(1,font*.85);label.style.fontSize=font+'px';
       }
     });
   });
 }
+// Main-board trays scroll independently; no job data or location is changed.
+function advanceTrayScroll(model,limit,now,elapsed,speed){
+  model.position=Math.max(0,Math.min(limit,model.position));
+  if(limit<=1){model.position=0;model.direction=1;return;}
+  if(now<model.pauseUntil)return;
+  model.position=Math.max(0,Math.min(limit,model.position+model.direction*speed*elapsed/1000));
+  if(model.position>=limit||model.position<=0){
+    model.direction=model.position>=limit?-1:1;
+    model.pauseUntil=now+2000;
+  }
+}
+function startBoardTrayScrolling(){
+  const board=document.getElementById('board');
+  const records=new Map();
+  let trays=[],dirty=true,lastTime=0,dragging=false,held=false,resumeAt=0;
+  new MutationObserver(()=>{dirty=true;}).observe(board,{childList:true,subtree:true});
+  function refresh(now){
+    const previous=new Map(trays.map(tray=>[tray.element,tray]));
+    trays=[...board.querySelectorAll('.slots,.arrow-slots')].filter(element=>!element.closest('.zoom-repeat')).map(element=>{
+      if(previous.has(element))return previous.get(element);
+      const key=activePlant+'|'+element.dataset.scrollLocation;
+      const axis=element.closest('.oven-five-rows')?'x':'y';
+      const property=axis==='x'?'scrollLeft':'scrollTop';
+      const model=records.get(key)||{position:element[property],direction:1,pauseUntil:now+2000};
+      records.set(key,model);
+      element[property]=model.position;
+      return {element,axis,property,model,expected:element[property]};
+    });
+    dirty=false;
+  }
+  function trayFor(target){return trays.find(tray=>tray.element===target||tray.element.contains(target));}
+  function pause(tray){
+    if(!tray)return;
+    tray.model.position=tray.element[tray.property];
+    tray.expected=tray.model.position;
+    tray.model.pauseUntil=performance.now()+8000;
+  }
+  board.addEventListener('wheel',event=>pause(trayFor(event.target)),{capture:true,passive:true});
+  board.addEventListener('keydown',event=>{
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','PageUp','PageDown','Home','End',' '].includes(event.key))pause(trayFor(event.target));
+  },true);
+  board.addEventListener('pointerdown',event=>{held=true;pause(trayFor(event.target));},{capture:true,passive:true});
+  function release(){if(held){held=false;resumeAt=performance.now()+8000;}}
+  window.addEventListener('pointerup',release,{passive:true});
+  window.addEventListener('pointercancel',release,{passive:true});
+  window.addEventListener('blur',()=>{held=false;dragging=false;resumeAt=performance.now()+8000;});
+  board.addEventListener('dragstart',()=>{dragging=true;},true);
+  function endDrag(){if(dragging){dragging=false;resumeAt=performance.now()+8000;}}
+  document.addEventListener('dragend',endDrag,true);
+  document.addEventListener('drop',endDrag,true);
+  board.addEventListener('scroll',event=>{
+    const tray=trays.find(item=>item.element===event.target);
+    // Our own scroll events must not restart the user's eight-second timer.
+    if(tray&&Math.abs(tray.element[tray.property]-tray.expected)>1)pause(tray);
+  },true);
+  function tick(now){
+    requestAnimationFrame(tick);
+    const elapsed=Math.min(64,Math.max(0,now-lastTime));lastTime=now;
+    if(document.hidden||currentView!=='board'||boxZoomSelection.size)return;
+    if(dirty)refresh(now);
+    if(held||dragging||now<resumeAt||document.querySelector('.modal-backdrop.open'))return;
+    trays.forEach(tray=>{
+      const {element,axis,property,model}=tray;
+      if(!element.clientHeight||!element.clientWidth)return;
+      const limit=Math.max(0,axis==='x'?element.scrollWidth-element.clientWidth:element.scrollHeight-element.clientHeight);
+      const rect=element.getBoundingClientRect();
+      const scale=(axis==='x'?rect.width/element.offsetWidth:rect.height/element.offsetHeight)||1;
+      // Nine visible pixels per second, including when the board is scaled for TV.
+      advanceTrayScroll(model,limit,now,elapsed,9/scale);
+      element[property]=model.position;
+      tray.expected=element[property];
+    });
+  }
+  requestAnimationFrame(tick);
+}
+
 function fitCompactJobLabels(){
   requestAnimationFrame(()=>{
     if(boxZoomSelection.size)fitHourByHourJobs();
@@ -3181,6 +3352,8 @@ function makeJob(jobId){
   return el;
 }
 function renderJobs(container,key){
+  container.dataset.scrollLocation=key;
+  container.tabIndex=0;
   container.innerHTML='';
   const arr=jobsFor(key);
   arr.forEach(id=>{if(state.jobs[id])container.appendChild(makeJob(id))});
@@ -3251,9 +3424,9 @@ function makeArrow(def){
     visual.setAttribute('viewBox','0 0 100 100');
     visual.setAttribute('preserveAspectRatio','none');
     const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d','M2 100 V90 H97 V10');
+    path.setAttribute('d',def.routePath||'M2 100 V90 H97 V10');
     const head=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-    head.setAttribute('points','97,0 94,10 100,10');
+    head.setAttribute('points',def.routeHead||'97,0 94,10 100,10');
     visual.append(path,head);
   }else if(def.diagonal){
     visual=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -3555,9 +3728,9 @@ function makeTutorialArrow(def){
     visual.setAttribute('viewBox','0 0 100 100');
     visual.setAttribute('preserveAspectRatio','none');
     const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d','M2 100 V90 H97 V10');
+    path.setAttribute('d',def.routePath||'M2 100 V90 H97 V10');
     const head=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-    head.setAttribute('points','97,0 94,10 100,10');
+    head.setAttribute('points',def.routeHead||'97,0 94,10 100,10');
     visual.append(path,head);
   }else if(def.diagonal){
     visual=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -4935,7 +5108,7 @@ window.addEventListener('resize',()=>{if(boxZoomSelection.size)layoutHourByHour(
 document.addEventListener('fullscreenchange',scheduleDisplayFit);
 setInterval(()=>{refreshOvenTimerTitles();refreshTutorialTimerTitles();},30000);
 
-restoreDisplayMode();startDisplayResizeObserver();loadState();buildSwatches();render();initializeLiveBoard();
+restoreDisplayMode();startDisplayResizeObserver();loadState();buildSwatches();render();startBoardTrayScrolling();initializeLiveBoard();
 </script>
 
 </body></html>
