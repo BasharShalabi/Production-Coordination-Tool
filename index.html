@@ -565,6 +565,18 @@ body.authenticated.app-selecting .app-selector{display:flex}
 .workflow-name{color:var(--teal-dark);font-size:14px;font-weight:950;line-height:1.25}
 .workflow-time{margin-top:4px;color:#425e60;font-size:12px;font-weight:750;line-height:1.4}
 .workflow-duration{margin-top:4px;color:var(--teal-medium);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.tank-merge-modal{width:min(720px,96vw)}
+.tank-merge-modal .modal-brand{padding:18px 24px 15px}
+.tank-merge-modal .modal-body{padding:20px 24px 24px}
+.tank-merge-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.tank-merge-card{min-width:0;padding:15px;border:2px solid #b8d6d8;border-radius:10px;background:#fff;color:var(--teal-dark);overflow-wrap:anywhere}
+.tank-merge-card strong{display:block;margin-bottom:8px;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.tank-merge-card span{display:block;font-size:18px;font-weight:900}
+.tank-merge-card small{display:block;margin-top:7px;font-size:12px;font-weight:700;line-height:1.4}
+.tank-merge-explanation{margin:0;color:#39595b;font-size:14px;font-weight:700;line-height:1.5}
+.tank-history-heading{margin:18px 0 9px;color:var(--teal-dark);font-size:14px;font-weight:950}
+.tank-history-detail{margin:0 0 10px;color:#526b6d;font-size:12px;font-weight:750;line-height:1.4}
+@media (max-width:580px){.tank-merge-grid{grid-template-columns:1fr}}
 @media (max-width:820px){
   .job-modal.has-workflow .modal-body{grid-template-columns:1fr}
   .workflow-panel{max-height:390px}
@@ -1621,6 +1633,7 @@ body.display-tv .board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-ri
         </div>
         <div class="modal-actions">
           <button class="tb-btn save" id="btnReadyToShip" type="button" hidden>Send to Ready to Ship</button>
+          <button class="tb-btn save" id="btnTankConsumed" type="button" hidden>Tank Used/Consumed</button>
           <button class="tb-btn" id="btnCancel">Cancel</button>
           <button class="tb-btn primary" id="btnSubmit">Add</button>
         </div>
@@ -1630,6 +1643,20 @@ body.display-tv .board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-ri
         <p class="workflow-subtitle">Complete movement history from the first placement through the current location.</p>
         <div id="workflowContent"></div>
       </section>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="tankMergeBackdrop" aria-hidden="true">
+  <div class="modal tank-merge-modal" role="dialog" aria-modal="true" aria-labelledby="tankMergeTitle">
+    <div class="modal-brand"><h2 id="tankMergeTitle">Tank Used/Consumed</h2><div class="modal-kicker">Verify the matching job before merging</div></div>
+    <div class="modal-body">
+      <p class="tank-merge-explanation">The matching job keeps its location and its own movement history. The tank's complete history and notes will be attached to it. The separate T-Complete job is removed after the save is verified.</p>
+      <div class="tank-merge-grid">
+        <div class="tank-merge-card"><strong>Tank job to consume</strong><span id="tankMergeSource"></span><small id="tankMergeSourceDetails"></small></div>
+        <div class="tank-merge-card"><strong>Matching job to keep</strong><span id="tankMergeTarget"></span><small id="tankMergeTargetDetails"></small></div>
+      </div>
+      <div class="modal-actions"><button class="tb-btn" id="btnTankMergeCancel" type="button">Cancel</button><button class="tb-btn primary" id="btnTankMergeConfirm" type="button">Confirm Tank Used/Consumed</button></div>
     </div>
   </div>
 </div>
@@ -2850,14 +2877,28 @@ function renderJobWorkflow(jobId){
   content.innerHTML='';
   const job=state.jobs[jobId];
   const workflow=job?sanitizeWorkflow(job.workflow):[];
+  const consumed=job&&Array.isArray(job.consumedTanks)?job.consumedTanks:[];
   if(workflow.length<2){
     const empty=document.createElement('div');
     empty.className='workflow-empty';
     empty.textContent='No movement history yet. The workflow will begin after this job moves from its starting location.';
     content.appendChild(empty);
-    return;
+  }else{
+    const currentLocation=findJobLocation(jobId);
+    content.appendChild(makeWorkflowList(workflow,currentLocation));
   }
-  const currentLocation=findJobLocation(jobId);
+  consumed.forEach(tank=>{
+    const heading=document.createElement('h4');heading.className='tank-history-heading';
+    heading.textContent='Tank Used/Consumed · '+String(tank.sourceText||tank.sourceNumber||'Tank job');
+    content.appendChild(heading);
+    const detail=document.createElement('p');detail.className='tank-history-detail';
+    detail.textContent='Consumed '+formatWorkflowDate(tank.consumedAt)+(tank.sourceNote?' · Tank notes: '+tank.sourceNote:'');
+    content.appendChild(detail);
+    const steps=sanitizeWorkflow(tank.workflow);
+    if(steps.length)content.appendChild(makeWorkflowList(steps,''));
+  });
+}
+function makeWorkflowList(workflow,currentLocation){
   const list=document.createElement('ol');
   list.className='workflow-list';
   workflow.forEach((step,index)=>{
@@ -2883,7 +2924,7 @@ function renderJobWorkflow(jobId){
     if(duration.textContent)card.appendChild(duration);
     item.appendChild(node);item.appendChild(card);list.appendChild(item);
   });
-  content.appendChild(list);
+  return list;
 }
 function ovenPromptDefault(){
   const now=new Date();
@@ -4193,6 +4234,7 @@ function openModal(jobId,preferredLocationKey){
   const priority=document.getElementById('jobPriority');
   const stageRow=document.getElementById('stageRow');
   const readyButton=document.getElementById('btnReadyToShip');
+  const tankButton=document.getElementById('btnTankConsumed');
   document.getElementById('modalTitle').textContent=editingJobId?'Edit job':'Add job';
   document.getElementById('btnSubmit').textContent=editingJobId?'Save':'Add';
   buildStageSelect();
@@ -4205,10 +4247,12 @@ function openModal(jobId,preferredLocationKey){
     selectedColor=job.color||0;
     stageRow.style.display='none';
     readyButton.hidden=!(currentView==='board'&&findJobLocation(editingJobId)==='dept:completed');
+    tankButton.hidden=!(currentView==='board'&&findJobLocation(editingJobId)==='dept:t_complete');
     renderJobWorkflow(editingJobId);
   }else{
     input.value='';note.value='';priority.checked=false;stageRow.style.display='block';
     readyButton.hidden=true;
+    tankButton.hidden=true;
     document.getElementById('workflowContent').innerHTML='';
     const stageSelect=document.getElementById('stageSelect');
     if(preferredLocationKey&&[...stageSelect.options].some(option=>option.value===preferredLocationKey))stageSelect.value=preferredLocationKey;
@@ -4511,6 +4555,18 @@ async function exportExcelSummary(){
           removed:exportDate(step.exitedAt),
           timeSpent:durationEnd?exportDuration(step.enteredAt,durationEnd):null,
           status
+        });
+      });
+      (Array.isArray(job.consumedTanks)?job.consumedTanks:[]).forEach(tank=>{
+        sanitizeWorkflow(tank.workflow).forEach((step,index)=>{
+          const info=workflowLocationInfo(step.locationKey);
+          movement.addRow({
+            jobNumber:String(job.text||''),step:index+1,location:info.label,
+            locationType:'Consumed tank',entered:exportDate(step.enteredAt),
+            removed:exportDate(step.exitedAt),
+            timeSpent:step.exitedAt?exportDuration(step.enteredAt,step.exitedAt):null,
+            status:'Tank '+String(tank.sourceText||tank.sourceNumber||'')
+          });
         });
       });
     });
@@ -4941,6 +4997,192 @@ async function markShippingJobShipped(jobId){
   showToast((job.text||jobId)+' marked Shipped.');
 }
 let shippingTransferInProgress=false;
+// The job number must begin the label. A separated comment is allowed; a
+// longer number or letter suffix is never treated as the same job.
+function exactTankJobNumber(label){
+  const match=String(label||'').match(/^\s*(\d{4,}(?:-\d+)*)(?=$|[\s:;,()[\]{}])/);
+  return match?match[1]:'';
+}
+function tankRowIsCandidate(row,plant){
+  return !!row&&!isWaco2SettingsRow(row)&&(isShippingLocation(row.location_key)
+    ?row.location_key.startsWith('ship:'+plant+':')
+    :plant==='waco2'?isWaco2RemoteProductionRow(row):isWaco1RemoteProductionRow(row));
+}
+function tankJobFromRemoteRow(row){
+  const decoded=unpackRemoteNote(row.note);
+  return {...decoded.extra,text:row.job_text,color:Number(row.color)||0,note:decoded.note,
+    ovenEnteredAt:decoded.ovenEnteredAt,workflow:decoded.workflow,created:row.created_at};
+}
+function tankHistoryEntry(sourceId,source,consumedAt){
+  const steps=sanitizeWorkflow(source.workflow);
+  if(!steps.length)steps.push({locationKey:'dept:t_complete',enteredAt:validIsoTime(source.created)?source.created:consumedAt,exitedAt:''});
+  else if(steps[steps.length-1].locationKey!=='dept:t_complete'){
+    const last=steps[steps.length-1];
+    if(!last.exitedAt)last.exitedAt=consumedAt;
+    steps.push({locationKey:'dept:t_complete',enteredAt:consumedAt,exitedAt:''});
+  }
+  if(!steps[steps.length-1].exitedAt)steps[steps.length-1].exitedAt=consumedAt;
+  return {sourceId,sourceNumber:exactTankJobNumber(source.text),sourceText:source.text,
+    sourceNote:source.note||'',consumedAt,workflow:steps};
+}
+function tankMergeLocationLabel(key){
+  const location=isShippingLocation(key)?key:localProductionLocation({location_key:key,board_id:REMOTE_SHARED_BOARD_ID});
+  return workflowLocationInfo(location).label;
+}
+async function readTankMergeRows(sourceId,number){
+  if(!db){
+    const shipping=readLocalBoardState('shipping');
+    const candidates=[];
+    Object.keys(state.jobs).forEach(id=>{
+      if(id!==sourceId&&exactTankJobNumber(state.jobs[id].text)===number)
+        candidates.push({id,job:state.jobs[id],location:findJobLocation(id),board:'production'});
+    });
+    Object.keys(shipping.jobs).forEach(id=>{
+      const job=shipping.jobs[id];
+      const location=Object.keys(shipping.locations).find(key=>(shipping.locations[key]||[]).includes(id))||'';
+      if(id!==sourceId&&shippingPlantFor(job,location)===activePlant&&isShippingLocation(location)&&exactTankJobNumber(job.text)===number)
+        candidates.push({id,job,location,board:'shipping'});
+    });
+    return {source:{id:sourceId,job:state.jobs[sourceId],location:findJobLocation(sourceId)},candidates};
+  }
+  const sourceResult=await db.from('jobs').select('*').eq('id',sourceId).maybeSingle();
+  if(sourceResult.error)throw sourceResult.error;
+  const sourceRow=sourceResult.data;
+  const candidates=[];
+  // PostgREST caps response sizes. Page through all names that start with this
+  // exact number so an unseen duplicate can never become an automatic match.
+  for(let start=0;start<100000;start+=500){
+    const result=await db.from('jobs').select('*').in('board_id',[REMOTE_SHARED_BOARD_ID,'waco2','shipping'])
+      .ilike('job_text','%'+number+'%').order('id').range(start,start+499);
+    if(result.error)throw result.error;
+    (result.data||[]).forEach(row=>{
+      if(row.id!==sourceId&&tankRowIsCandidate(row,activePlant)&&exactTankJobNumber(row.job_text)===number)
+        candidates.push({id:row.id,job:tankJobFromRemoteRow(row),location:row.location_key,row});
+    });
+    if(!result.data||result.data.length<500)break;
+    if(start>=99500)throw new Error('Too many matching job labels to check safely.');
+  }
+  return {source:sourceRow?{id:sourceId,job:tankJobFromRemoteRow(sourceRow),location:sourceRow.location_key,row:sourceRow}:null,candidates};
+}
+let pendingTankMerge=null;
+let tankMergeInProgress=false;
+function closeTankMerge(){
+  if(tankMergeInProgress)return;
+  pendingTankMerge=null;
+  const backdrop=document.getElementById('tankMergeBackdrop');
+  backdrop.classList.remove('open');backdrop.setAttribute('aria-hidden','true');
+}
+async function previewTankConsumption(){
+  if(tankMergeInProgress||!editingJobId||currentView!=='board')return;
+  const sourceId=editingJobId;
+  const local=state.jobs[sourceId];
+  if(!local||findJobLocation(sourceId)!=='dept:t_complete')return;
+  if(db&&!liveReady){showToast('Wait for the board to finish connecting.',true);return;}
+  if(document.getElementById('jobText').value.trim()!==local.text||document.getElementById('jobNote').value.trim()!==(local.note||'')){
+    showToast('Save changes to this tank job first, then reopen Tank Used/Consumed.',true);return;
+  }
+  const number=exactTankJobNumber(local.text);
+  if(!number){showToast('Tank job number must start with a complete number, such as 261175-23.',true);return;}
+  const button=document.getElementById('btnTankConsumed');button.disabled=true;
+  try{
+    const matches=await readTankMergeRows(sourceId,number);
+    if(!matches.source||!matches.source.job||!matches.source.location||
+      (db?!tankRowIsCandidate(matches.source.row,activePlant)||localProductionLocation(matches.source.row)!=='dept:t_complete':matches.source.location!=='dept:t_complete')){
+      showToast('This tank job changed. Refresh the board and try again.',true);return;
+    }
+    if(exactTankJobNumber(matches.source.job.text)!==number){showToast('The tank job number changed. Refresh and try again.',true);return;}
+    if(matches.candidates.length!==1){
+      showToast(matches.candidates.length?'Several jobs have exactly this number. Resolve duplicates before consuming the tank.':'No other job with exactly this number was found on this plant or in Shipping.',true);
+      return;
+    }
+    pendingTankMerge={sourceId,number,targetId:matches.candidates[0].id,
+      sourceFingerprint:db?JSON.stringify(matches.source.row):JSON.stringify(matches.source.job),
+      targetFingerprint:db?JSON.stringify(matches.candidates[0].row):JSON.stringify(matches.candidates[0].job)};
+    document.getElementById('tankMergeSource').textContent=matches.source.job.text;
+    document.getElementById('tankMergeTarget').textContent=matches.candidates[0].job.text;
+    document.getElementById('tankMergeSourceDetails').textContent='T-Complete · '+sanitizeWorkflow(matches.source.job.workflow).length+' history steps'+(matches.source.job.note?' · Notes: '+matches.source.job.note:'');
+    document.getElementById('tankMergeTargetDetails').textContent=tankMergeLocationLabel(matches.candidates[0].location)+' · '+sanitizeWorkflow(matches.candidates[0].job.workflow).length+' history steps';
+    const backdrop=document.getElementById('tankMergeBackdrop');backdrop.classList.add('open');backdrop.setAttribute('aria-hidden','false');
+  }catch(error){console.error('Finding matching tank job',error);showToast('Could not verify the matching job. No records were changed.',true);}
+  finally{button.disabled=false;}
+}
+async function confirmTankConsumption(){
+  if(tankMergeInProgress||!pendingTankMerge)return;
+  const pending=pendingTankMerge;
+  tankMergeInProgress=true;
+  const confirmButton=document.getElementById('btnTankMergeConfirm');
+  confirmButton.disabled=true;confirmButton.textContent='Saving history...';
+  try{
+    const matches=await readTankMergeRows(pending.sourceId,pending.number);
+    const source=matches.source;
+    const target=matches.candidates.length===1?matches.candidates[0]:null;
+    if(!source||!target||target.id!==pending.targetId||
+      (db?!tankRowIsCandidate(source.row,activePlant)||localProductionLocation(source.row)!=='dept:t_complete':source.location!=='dept:t_complete')||
+      (db?JSON.stringify(source.row)!==pending.sourceFingerprint:JSON.stringify(source.job)!==pending.sourceFingerprint)){
+      showToast('A job changed or the match is ambiguous. Review it again before consuming.',true);return;
+    }
+    const alreadyMerged=Array.isArray(target.job.consumedTanks)&&target.job.consumedTanks.some(entry=>entry.sourceId===pending.sourceId);
+    if(!alreadyMerged&&(db?JSON.stringify(target.row)!==pending.targetFingerprint:JSON.stringify(target.job)!==pending.targetFingerprint)){
+      showToast('The matching job changed. Review its latest history before consuming.',true);return;
+    }
+    if(!alreadyMerged){
+      const merged=cloneJsonValue(target.job);
+      merged.consumedTanks=[...(Array.isArray(merged.consumedTanks)?merged.consumedTanks:[]),
+        tankHistoryEntry(pending.sourceId,source.job,new Date().toISOString())];
+      if(db){
+        let query=db.from('jobs').update({note:packRemoteNote(merged)})
+          .eq('id',target.id).eq('board_id',target.row.board_id)
+          .eq('location_key',target.row.location_key).eq('job_text',target.row.job_text);
+        query=target.row.note===null?query.is('note',null):query.eq('note',target.row.note);
+        const result=await query;
+        if(result.error)throw result.error;
+        const check=await db.from('jobs').select('*').eq('id',target.id).maybeSingle();
+        if(check.error)throw check.error;
+        if(!check.data||!Array.isArray(tankJobFromRemoteRow(check.data).consumedTanks)||
+          !tankJobFromRemoteRow(check.data).consumedTanks.some(entry=>entry.sourceId===pending.sourceId)){
+          throw new Error('Matching job did not retain the tank history. The tank job remains in T-Complete.');
+        }
+        target.job=tankJobFromRemoteRow(check.data);
+      }else if(target.board==='shipping'){
+        const shipping=readLocalBoardState('shipping');
+        shipping.jobs[target.id]=merged;
+        writeLocalBoardState('shipping',shipping);
+        if(!((readLocalBoardState('shipping').jobs[target.id].consumedTanks||[]).some(entry=>entry.sourceId===pending.sourceId)))
+          throw new Error('Could not verify the shipping job history.');
+      }else{
+        state.jobs[target.id]=merged;saveState();
+        const saved=readLocalBoardState(BOARD_ID).jobs[target.id];
+        if(!saved||!(saved.consumedTanks||[]).some(entry=>entry.sourceId===pending.sourceId)){
+          state.jobs[target.id]=target.job;
+          throw new Error('Could not save the matching job history in this browser.');
+        }
+        target.job=merged;
+      }
+    }
+    // A retry after a successful save and failed deletion sees sourceId in the
+    // target's history and finishes removal without duplicating that history.
+    confirmButton.textContent='Removing tank job...';
+    if(db){
+      let query=db.from('jobs').delete().eq('id',source.id).eq('board_id',source.row.board_id)
+        .eq('location_key',source.row.location_key).eq('job_text',source.row.job_text);
+      query=source.row.note===null?query.is('note',null):query.eq('note',source.row.note);
+      const result=await query;
+      if(result.error)throw result.error;
+      const check=await db.from('jobs').select('id').eq('id',source.id).maybeSingle();
+      if(check.error)throw check.error;
+      if(check.data)throw new Error('Database did not remove the tank job. Its history has been saved; try Tank Used/Consumed again.');
+    }
+    if(target.board!=='shipping'&&!isShippingLocation(target.location))state.jobs[target.id]=target.job;
+    delete state.jobs[source.id];delete remotePositions[source.id];removeFromLocations(source.id);
+    history=[];redo=[]; // An earlier Undo must never restore a consumed tank record.
+    if(!db&&target.board==='production')saveState();
+    pendingTankMerge=null;
+    const backdrop=document.getElementById('tankMergeBackdrop');backdrop.classList.remove('open');backdrop.setAttribute('aria-hidden','true');
+    closeModal();render();saveState();
+    showToast('Tank consumed. '+pending.number+' keeps both workflow histories.');
+  }catch(error){console.error('Consuming tank job',error);showToast('Tank could not be fully consumed. Its job remains visible. '+(error.message||'Please retry.'),true);}
+  finally{tankMergeInProgress=false;confirmButton.disabled=false;confirmButton.textContent='Confirm Tank Used/Consumed';}
+}
 async function sendEditingJobToShipping(){
   if(shippingTransferInProgress||!editingJobId||currentView!=='board')return;
   const jobId=editingJobId;
@@ -4990,7 +5232,7 @@ async function exportShippingSummary(){
   if(!window.ExcelJS){showToast('Excel export could not start. Check the internet connection and refresh.',true);return;}const workbook=new window.ExcelJS.Workbook();const reportTime=new Date();workbook.creator='Forgent Power Solutions';workbook.title='Waco Shipping Summary';
   const summary=workbook.addWorksheet('Shipping Summary');summary.columns=[{header:'Job Number',key:'job',width:18},{header:'Plant',key:'plant',width:12},{header:'Status',key:'status',width:16},{header:'Ready Date',key:'ready',width:23},{header:'Shipped Date',key:'shipped',width:23},{header:'Total Elapsed',key:'elapsed',width:18},{header:'Notes',key:'notes',width:45}];
   const movement=workbook.addWorksheet('Full Movement History');movement.columns=[{header:'Job Number',key:'job',width:18},{header:'Plant',key:'plant',width:12},{header:'Step',key:'step',width:8},{header:'Location',key:'location',width:34},{header:'Time Entered',key:'entered',width:23},{header:'Time Removed',key:'removed',width:23},{header:'Status',key:'status',width:14}];
-  Object.keys(state.jobs).forEach(id=>{const job=state.jobs[id];const location=findJobLocation(id);const plant=shippingPlantFor(job,location);const status=location.endsWith(':shipped')?'Shipped':'Ready to Ship';summary.addRow({job:job.text||id,plant:plant==='waco2'?'Waco 2':'Waco 1',status,ready:exportDate(shippingStepDate(job,'ready')),shipped:exportDate(shippingStepDate(job,'shipped')),elapsed:shippingElapsed(job),notes:job.note||''});const workflow=sanitizeWorkflow(job.workflow);workflow.forEach((step,index)=>movement.addRow({job:job.text||id,plant:plant==='waco2'?'Waco 2':'Waco 1',step:index+1,location:workflowLocationInfo(step.locationKey).label,entered:exportDate(step.enteredAt),removed:exportDate(step.exitedAt),status:index===workflow.length-1?status:'Finished'}))});
+  Object.keys(state.jobs).forEach(id=>{const job=state.jobs[id];const location=findJobLocation(id);const plant=shippingPlantFor(job,location);const status=location.endsWith(':shipped')?'Shipped':'Ready to Ship';summary.addRow({job:job.text||id,plant:plant==='waco2'?'Waco 2':'Waco 1',status,ready:exportDate(shippingStepDate(job,'ready')),shipped:exportDate(shippingStepDate(job,'shipped')),elapsed:shippingElapsed(job),notes:job.note||''});const workflow=sanitizeWorkflow(job.workflow);workflow.forEach((step,index)=>movement.addRow({job:job.text||id,plant:plant==='waco2'?'Waco 2':'Waco 1',step:index+1,location:workflowLocationInfo(step.locationKey).label,entered:exportDate(step.enteredAt),removed:exportDate(step.exitedAt),status:index===workflow.length-1?status:'Finished'}));(Array.isArray(job.consumedTanks)?job.consumedTanks:[]).forEach(tank=>sanitizeWorkflow(tank.workflow).forEach((step,index)=>movement.addRow({job:job.text||id,plant:plant==='waco2'?'Waco 2':'Waco 1',step:index+1,location:workflowLocationInfo(step.locationKey).label,entered:exportDate(step.enteredAt),removed:exportDate(step.exitedAt),status:'Consumed tank '+String(tank.sourceText||tank.sourceNumber||'')})))});
   styleExportSheet(summary,[4,5],[],3);styleExportSheet(movement,[5,6],[],7);const buffer=await workbook.xlsx.writeBuffer();const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});const saved=await saveExcelFile(blob,'Waco_Shipping_Summary_'+exportTimeStamp(reportTime)+'.xlsx');if(saved)showToast('Shipping summary exported with complete movement history.');
 }
 function clearBoard(){
@@ -5091,6 +5333,10 @@ document.getElementById('loginForm').addEventListener('submit',handleLogin);
 document.getElementById('btnCancel').addEventListener('click',closeModal);
 document.getElementById('btnSubmit').addEventListener('click',submitModal);
 document.getElementById('btnReadyToShip').addEventListener('click',sendEditingJobToShipping);
+document.getElementById('btnTankConsumed').addEventListener('click',previewTankConsumption);
+document.getElementById('btnTankMergeCancel').addEventListener('click',closeTankMerge);
+document.getElementById('btnTankMergeConfirm').addEventListener('click',confirmTankConsumption);
+document.getElementById('tankMergeBackdrop').addEventListener('click',event=>{if(event.target.id==='tankMergeBackdrop')closeTankMerge()});
 document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal()});
 document.getElementById('jobText').addEventListener('keydown',e=>{if(e.key==='Enter')submitModal();if(e.key==='Escape')closeModal()});
 document.getElementById('jobNote').addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
