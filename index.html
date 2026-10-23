@@ -1351,6 +1351,16 @@ body.display-tv .board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-ri
 .week-color-button{flex:0 0 38px;width:38px;height:38px;border-radius:5px}
 .week-color-select{min-width:104px;min-height:46px;flex:1 1 104px;padding:5px 4px;font-size:24px;font-weight:850}
 
+
+/* Transition totals stay outside job trays; focused totals join the lane heading. */
+.arrow-stage>.full-transition-count{position:absolute;z-index:4;top:0;left:50%;transform:translateX(-50%);pointer-events:none;min-width:30px;height:24px;padding:0 4px;font-size:18px;border-color:var(--teal-dark)}
+.arrow-stage.vertical-arrow:not(.routed-arrow)>.full-transition-count{top:50%;transform:translate(-50%,-50%);max-width:46px;font-size:16px}
+.arrow-stage.route-up-right>.full-transition-count{top:calc(43% - 28px);left:40%}
+.arrow-stage.route-down-left-right>.full-transition-count{top:calc(30.8% - 28px);left:28%}
+.board-shell.zoomed #board>.arrow-stage>.full-transition-count,
+.tutorial-board.is-focused>.arrow-stage>.full-transition-count{display:none}
+.zoom-transition-label>.transition-count-pill{position:static;flex:0 0 auto;min-width:24px;height:1.4em;padding:0 4px;font-size:.7em;pointer-events:none}
+
 </style>
 </head>
 <body>
@@ -2744,6 +2754,31 @@ function departmentJobCount(def,boardState=state,plant=activePlant){
   }
   return countFor(locationKey('dept',def.id));
 }
+function transitionJobCount(def,boardState=state){
+  if(!def||!boardState)return 0;
+  const jobs=boardState.jobs||{};
+  return new Set(((boardState.locations||{})[locationKey('arrow',def.id)]||[]).filter(id=>jobs[id])).size;
+}
+function makeTransitionCount(def,boardState=state,full=false){
+  const pill=document.createElement('span');
+  pill.className='dept-count-pill transition-count-pill'+(full?' full-transition-count':'');
+  pill.dataset.arrowCount=def.id;
+  const count=transitionJobCount(def,boardState);
+  pill.textContent=String(count);
+  pill.setAttribute('aria-label',count+' jobs in '+def.label+' transition');
+  pill.title=def.label+': '+count+' jobs in transition';
+  return pill;
+}
+function updateTransitionCountPills(){
+  document.querySelectorAll('#board .transition-count-pill[data-arrow-count]').forEach(pill=>{
+    const def=ARROWS.find(item=>item.id===pill.dataset.arrowCount);
+    if(!def)return;
+    const count=transitionJobCount(def);
+    pill.textContent=String(count);
+    pill.setAttribute('aria-label',count+' jobs in '+def.label+' transition');
+    pill.title=def.label+': '+count+' jobs in transition';
+  });
+}
 function updateDepartmentCountPills(){
   document.querySelectorAll('#board .dept-count-pill[data-dept-count]').forEach(pill=>{
     const def=DEPTS.find(item=>item.id===pill.dataset.deptCount);
@@ -2773,6 +2808,7 @@ function updateCounters(){
   const titleCounter=document.getElementById('completedBoxCounter');
   if(titleCounter)titleCounter.textContent=done;
   updateDepartmentCountPills();
+  updateTransitionCountPills();
 }
 function snapshot(){
   history.push(JSON.stringify(state));
@@ -3476,6 +3512,8 @@ function makeArrow(def){
   const laneLabel=document.createElement('div');
   laneLabel.className='zoom-transition-label';
   laneLabel.textContent=def.label;
+  laneLabel.appendChild(makeTransitionCount(def));
+  zone.appendChild(makeTransitionCount(def,state,true));
   zone.appendChild(laneLabel);
   const zoomFlow=document.createElement('div');
   const zoomOrientation=(def.dir==='up'||def.dir==='down')?'vertical':'horizontal';
@@ -3782,6 +3820,8 @@ function makeTutorialArrow(def){
   const laneLabel=document.createElement('div');
   laneLabel.className='zoom-transition-label';
   laneLabel.textContent=def.label;
+  laneLabel.appendChild(makeTransitionCount(def,tutorialState));
+  zone.appendChild(makeTransitionCount(def,tutorialState,true));
   const zoomFlow=document.createElement('div');
   const zoomOrientation=(def.dir==='up'||def.dir==='down')?'vertical':'horizontal';
   zoomFlow.className='zoom-flow-arrow zoom-flow-'+zoomOrientation+' zoom-flow-'+def.dir;
