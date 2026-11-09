@@ -1473,6 +1473,7 @@ body.display-tv .board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-ri
       </div>
     </div>
     <button class="tb-btn save" id="btnSaveBoard" type="button">Save Board</button>
+    <button class="tb-btn" id="btnRecoveryExport" type="button">Export Recovery</button>
     <button class="tb-btn save" id="btnUploadBoard" type="button">Upload Board</button>
     <input id="boardBackupInput" type="file" accept="application/json,.json" hidden>
     <button class="tb-btn save" id="btnExportSummary" type="button">Export Summary</button>
@@ -2421,12 +2422,80 @@ function reportRemoteError(error,action){
   const setupMissing=error&&(error.code==='42P01'||/relation .* does not exist/i.test(error.message||''));
   showToast(setupMissing?'Database setup is not finished yet. Run the setup SQL first.':action+' failed. Your local copy is still saved.',true);
 }
+// Keep recovery snapshots separate from the working cache; never upload them automatically.
+function exportRecoveryCopies(){
+  const copies={exportedAt:new Date().toISOString(),currentBoard:BOARD_ID,currentState:state,browserCopies:{}};
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(key.startsWith('order_status_board_v4_')||key==='production_coordination_board_live_v1'){
+      try{copies.browserCopies[key]=JSON.parse(localStorage.getItem(key));}catch(e){}
+    }
+  }
+  const url=URL.createObjectURL(new Blob([JSON.stringify(copies,null,2)],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download='LoneStar-recovery-'+Date.now()+'.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
+}
+function preserveRecoveryCopy(copy=state){
+  if(!Object.keys(copy.jobs||{}).length)return;
+  const key=storageKey()+'_recovery_snapshots';
+  const entries=JSON.parse(localStorage.getItem(key)||'[]');
+  const serialized=JSON.stringify(copy);
+  if(entries.length&&JSON.stringify(entries[entries.length-1].state)===serialized)return;
+  entries.push({savedAt:new Date().toISOString(),state:JSON.parse(serialized)});
+  localStorage.setItem(key,JSON.stringify(entries.slice(-10)));
+}
+async function readAllBoardJobs(boardIds,shippingOnly=false){
+  const rows=[];
+  for(let offset=0;;){
+    let query=db.from('jobs').select('*',{count:'exact'}).in('board_id',boardIds);
+    if(shippingOnly)query=query.like('location_key','ship:%');
+    const result=await query.order('id').range(offset,offset+499);
+    if(result.error)return result;
+    if(!Array.isArray(result.data))return {error:{message:'Invalid jobs response'}};
+    rows.push(...result.data);offset+=result.data.length;
+    if(result.count!==null&&result.count!==undefined){
+      if(offset>=result.count)break;
+      if(!result.data.length)return {error:{message:'Incomplete jobs response'}};
+    }else if(!result.data.length)break;
+  }
+  return {data:rows,error:null};
+}
+function protectLocalJobsBeforeLoad(rows){
+  const remoteIds=new Set(rows.map(row=>row.id));
+  const missing=Object.keys(state.jobs||{}).filter(id=>!remoteIds.has(id));
+  try{preserveRecoveryCopy();}catch(error){
+    setLiveStatus('error','Recovery backup failed');
+    alert('The browser could not save a recovery copy. Loading has stopped to protect the jobs on screen. Use Save Board before continuing.');
+    return false;
+  }
+  if(missing.length&&!confirm(missing.length+' browser jobs are absent from the database response. They may be unsaved, moved, or deleted. A recovery snapshot has been kept in this browser. OK: show database jobs. Cancel: keep this browser copy for export and investigation. Nothing will be uploaded or deleted.')){
+    liveReady=false;setLiveStatus('error','Recovery view — not live');return false;
+  }
+  return true;
+}
+function canSaveLiveJob(){
+  if(db&&!liveReady){alert('The board has not loaded successfully from the database. Job changes are paused. Keep this tab open and export the board before troubleshooting.');return false;}
+  return true;
+}
 async function upsertRemoteJob(jobId){
-  if(!liveReady||!db)return;
+  if(!db)return true;
+  if(!liveReady){reportRemoteError({message:'Board is not connected'},'Saving job');return false;}
   const row=remoteJobRow(jobId);
-  if(!row)return;
-  const {error}=await db.from('jobs').upsert(row,{onConflict:'id'});
-  if(error)reportRemoteError(error,'Saving job');
+  if(!row)return false;
+  try{
+    try{preserveRecoveryCopy();}catch(backupError){console.error('Recovery storage unavailable',backupError);}
+    setLiveStatus('connecting','Saving…');
+    const {error}=await db.from('jobs').upsert(row,{onConflict:'id'});
+    if(error)throw error;
+    const check=await db.from('jobs').select('*').eq('id',jobId).maybeSingle();
+    if(check.error)throw check.error;
+    if(!check.data||['board_id','job_text','color','note','location_key'].some(key=>check.data[key]!==row[key]))throw new Error('The saved job could not be verified in the database.');
+    setLiveStatus('live','Live');return true;
+  }catch(error){
+    reportRemoteError(error,'Saving job');
+    alert('JOB SAVE NOT CONFIRMED. Keep this tab open. A browser recovery copy was retained if storage was available. Database message: '+(error.message||String(error)));
+    return false;
+  }
 }
 async function deleteRemoteJob(jobId){
   if(!liveReady||!db)return;
@@ -2477,12 +2546,8 @@ async function syncEntireBoard(){
     const {error}=await db.from('jobs').upsert(rows,{onConflict:'id'});
     if(error){reportRemoteError(error,'Synchronizing jobs');return;}
   }
-  const localIds=new Set(rows.map(row=>row.id));
-  const removed=(remoteJobs||[]).filter(row=>!isShippingLocation(row.location_key)).map(row=>row.id).filter(id=>!localIds.has(id));
-  if(removed.length){
-    const {error}=await db.from('jobs').delete().in('board_id',boardIds).in('id',removed);
-    if(error){reportRemoteError(error,'Synchronizing deleted jobs');return;}
-  }
+  // A browser snapshot is not authoritative for deletion of other users' jobs.
+  // Deletions must use explicit per-job actions, never absence from a bulk sync.
   if(!(await saveRemoteSettings()))return;
   setLiveStatus('live','Live');
 }
@@ -2560,9 +2625,7 @@ async function loadSharedBoard(){
   if(currentView==='shipping')return loadSharedShippingBoard();
   setLiveStatus('connecting','Loading');
   const localCopy=JSON.parse(JSON.stringify(state));
-  const jobsQuery=activePlant==='waco2'
-    ?db.from('jobs').select('*').in('board_id',[REMOTE_SHARED_BOARD_ID,'waco2']).order('location_key').order('position')
-    :db.from('jobs').select('*').eq('board_id',REMOTE_SHARED_BOARD_ID).order('location_key').order('position');
+  const jobsQuery=readAllBoardJobs(activePlant==='waco2'?[REMOTE_SHARED_BOARD_ID,'waco2']:[REMOTE_SHARED_BOARD_ID]);
   const settingsQuery=activePlant==='waco2'
     ?Promise.resolve({data:null,error:null})
     :db.from('board_settings').select('*').eq('board_id',REMOTE_SHARED_BOARD_ID).maybeSingle();
@@ -2570,6 +2633,7 @@ async function loadSharedBoard(){
   if(jobsResult.error){reportRemoteError(jobsResult.error,'Loading shared jobs');return false;}
   if(settingsResult.error){reportRemoteError(settingsResult.error,'Loading board settings');return false;}
 
+  if(!protectLocalJobsBeforeLoad(jobsResult.data||[]))return false;
   state=normalizeState({locations:{},jobs:{},notes:'',goal:'',weeks:defaultWeeks()});
   remotePositions={};
   const productionRows=(jobsResult.data||[]).filter(remoteRowBelongsToActiveBoard);
@@ -2610,9 +2674,10 @@ async function loadSharedBoard(){
 }
 async function loadSharedShippingBoard(){
   setLiveStatus('connecting','Loading');
-  const jobsResult=await db.from('jobs').select('*').in('board_id',['main','waco2','shipping']).like('location_key','ship:%').order('location_key').order('position');
+  const jobsResult=await readAllBoardJobs(['main','waco2','shipping'],true);
   if(jobsResult.error){reportRemoteError(jobsResult.error,'Loading shipping jobs');return false;}
 
+  if(!protectLocalJobsBeforeLoad(jobsResult.data||[]))return false;
   state=normalizeState({locations:{},jobs:{},notes:'',goal:'',weeks:defaultWeeks()});
   remotePositions={};
   (jobsResult.data||[]).filter(row=>isShippingLocation(row.location_key)).forEach(row=>{
@@ -3093,6 +3158,7 @@ function setupDrop(el,key){
     e.preventDefault();el.classList.remove('drop-active');
     const id=e.dataTransfer.getData('text/plain')||dragId;
     if(!id||!state.jobs[id])return;
+    if(!canSaveLiveJob())return;
     const job=state.jobs[id];
     const previousLocation=findJobLocation(id);
     let ovenEnteredAt=job.ovenEnteredAt||'';
@@ -3105,7 +3171,7 @@ function setupDrop(el,key){
     const movedAt=isOvenLocation(key)&&!isOvenLocation(previousLocation)?ovenEnteredAt:new Date().toISOString();
     recordJobMove(job,previousLocation,key,movedAt);
     job.ovenEnteredAt=isOvenLocation(key)?ovenEnteredAt:'';
-    addToLocation(key,id);render();saveState();upsertRemoteJob(id);
+    addToLocation(key,id);saveState();await upsertRemoteJob(id);render();
   });
 }
 function setupDepartmentAdd(el,key){
@@ -4315,6 +4381,7 @@ function closeModal(){
   editingJobId=null;
 }
 async function submitModal(){
+  if(!canSaveLiveJob())return;
   const text=document.getElementById('jobText').value.trim();
   const note=document.getElementById('jobNote').value.trim();
   const priority=document.getElementById('jobPriority').checked;
@@ -4337,7 +4404,11 @@ async function submitModal(){
     addToLocation(destination,id);
     changedJobId=id;
   }
-  closeModal();render();saveState();upsertRemoteJob(changedJobId);
+  saveState();
+  const saved=await upsertRemoteJob(changedJobId);
+  if(saved)closeModal();
+  else editingJobId=changedJobId;
+  render();
 }
 function validWeekDate(value){
   return /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01])$/.test(value);
@@ -5392,6 +5463,7 @@ document.getElementById('displayMenu').addEventListener('click',e=>e.stopPropaga
 document.querySelectorAll('[data-display-mode]').forEach(option=>option.addEventListener('click',()=>setDisplayMode(option.dataset.displayMode)));
 document.addEventListener('click',()=>{setBoxZoomMenu(false);setDisplayMenu(false)});
 document.getElementById('btnSaveBoard').addEventListener('click',saveBoardFile);
+document.getElementById('btnRecoveryExport').addEventListener('click',exportRecoveryCopies);
 document.getElementById('btnUploadBoard').addEventListener('click',()=>{
   if(isTvMode())return;
   const input=document.getElementById('boardBackupInput');
