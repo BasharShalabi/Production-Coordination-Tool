@@ -1827,6 +1827,8 @@ let BOARD_ID='main';
 let db=null;
 let liveChannel=null;
 let liveReady=false;
+let displayAuthRequired=false;
+let explicitSignOut=false;
 let boardDataLoaded=false;
 let remotePositions={};
 let settingsTimer=null;
@@ -2175,11 +2177,14 @@ async function handleLogin(event){
   button.textContent='Sign in';
 }
 async function handleSignOut(){
+  explicitSignOut=true;
+  displayAuthRequired=false;
   if(liveChannel&&db){await db.removeChannel(liveChannel);liveChannel=null;}
   liveReady=false;
   boardDataLoaded=false;
   if(db)await db.auth.signOut();
   showLogin('You have been signed out.');
+  explicitSignOut=false;
 }
 
 function applyStageLayout(element,layout){
@@ -2216,6 +2221,7 @@ function makeProductionArea(def){
 }
 
 function setLiveStatus(kind,text){
+  if(displayAuthRequired){kind='error';text='Updates paused — sign in required';}
   const el=document.getElementById('liveStatus');
   if(el){el.className='live-status '+kind;el.textContent=text;}
   const shipping=document.getElementById('shippingLiveStatus');
@@ -2696,6 +2702,29 @@ async function loadSharedShippingBoard(){
   subscribeToLiveChanges();
   return true;
 }
+function handleBoardAuthChange(event,session){
+  if(event==='SIGNED_OUT'&&!session){
+    liveReady=false;
+    if(!explicitSignOut&&isTvMode()&&(currentView==='board'||currentView==='shipping')){
+      displayAuthRequired=true;
+      setLiveStatus('error','Updates paused — sign in required');
+      return; // Retain the visible snapshot, never label it live.
+    }
+    displayAuthRequired=false;
+    showLogin('Sign in to connect to the live board.');
+  }else if(session&&(event==='SIGNED_IN'||event==='TOKEN_REFRESHED')){
+    const resumeDisplay=displayAuthRequired;
+    displayAuthRequired=false;
+    if(resumeDisplay){
+      // Leave the auth callback before calling any Supabase methods.
+      setTimeout(async()=>{
+        if(explicitSignOut||!db||!['board','shipping'].includes(currentView))return;
+        try{boardDataLoaded=!!(await loadSharedBoard());}
+        catch(error){reportRemoteError(error,'Reconnecting display');}
+      },0);
+    }
+  }
+}
 async function initializeLiveBoard(){
   if(!window.supabase){
     if(location.protocol==='file:'){
@@ -2711,12 +2740,9 @@ async function initializeLiveBoard(){
   db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
     auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
   });
-  db.auth.onAuthStateChange((event,session)=>{
-    if(event==='SIGNED_OUT'&&!session){
-      liveReady=false;
-      showLogin('Your session ended. Sign in again.');
-    }
-  });
+  db.auth.onAuthStateChange(handleBoardAuthChange);
+  // Yodeck may hide the web view between playlist items. Keep renewal running.
+  await db.auth.startAutoRefresh();
   const {data,error}=await db.auth.getSession();
   if(error){showLogin('The secure service could not verify this device. Refresh and try again.');return;}
   if(data&&data.session)showAppSelector();
