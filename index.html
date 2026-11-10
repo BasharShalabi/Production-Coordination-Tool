@@ -2429,26 +2429,34 @@ function reportRemoteError(error,action){
   showToast(setupMissing?'Database setup is not finished yet. Run the setup SQL first.':action+' failed. Your local copy is still saved.',true);
 }
 // Keep recovery snapshots separate from the working cache; never upload them automatically.
+const recoveryMemoryCopies={};
 function exportRecoveryCopies(){
-  const copies={exportedAt:new Date().toISOString(),currentBoard:BOARD_ID,currentState:state,browserCopies:{}};
-  for(let i=0;i<localStorage.length;i++){
+  const copies={exportedAt:new Date().toISOString(),currentBoard:BOARD_ID,currentState:state,memoryCopies:recoveryMemoryCopies,browserCopies:{}};
+  try{for(let i=0;i<localStorage.length;i++){
     const key=localStorage.key(i);
     if(key.startsWith('order_status_board_v4_')||key==='production_coordination_board_live_v1'){
       try{copies.browserCopies[key]=JSON.parse(localStorage.getItem(key));}catch(e){}
     }
   }
+  }catch(error){copies.browserStorageError=error.message||String(error);}
   const url=URL.createObjectURL(new Blob([JSON.stringify(copies,null,2)],{type:'application/json'}));
   const a=document.createElement('a');a.href=url;a.download='LoneStar-recovery-'+Date.now()+'.json';a.click();
   setTimeout(()=>URL.revokeObjectURL(url),10000);
 }
 function preserveRecoveryCopy(copy=state){
-  if(!Object.keys(copy.jobs||{}).length)return;
+  if(!Object.keys(copy.jobs||{}).length)return true;
   const key=storageKey()+'_recovery_snapshots';
-  const entries=JSON.parse(localStorage.getItem(key)||'[]');
-  const serialized=JSON.stringify(copy);
-  if(entries.length&&JSON.stringify(entries[entries.length-1].state)===serialized)return;
-  entries.push({savedAt:new Date().toISOString(),state:JSON.parse(serialized)});
-  localStorage.setItem(key,JSON.stringify(entries.slice(-10)));
+  const entry={savedAt:new Date().toISOString(),state:JSON.parse(JSON.stringify(copy))};
+  // Retain an exportable copy in this tab even if persistent browser storage is full.
+  recoveryMemoryCopies[key]=entry;
+  try{
+    // One latest snapshot per board, not ten full copies of every job and history.
+    localStorage.setItem(key,JSON.stringify([entry]));
+    return true;
+  }catch(error){
+    console.warn('Local recovery storage unavailable; tab recovery copy retained',error);
+    return false;
+  }
 }
 async function readAllBoardJobs(boardIds,shippingOnly=false){
   const rows=[];
@@ -2469,14 +2477,14 @@ async function readAllBoardJobs(boardIds,shippingOnly=false){
 function protectLocalJobsBeforeLoad(rows){
   const remoteIds=new Set(rows.map(row=>row.id));
   const missing=Object.keys(state.jobs||{}).filter(id=>!remoteIds.has(id));
-  try{preserveRecoveryCopy();}catch(error){
-    setLiveStatus('error','Recovery backup failed');
-    alert('The browser could not save a recovery copy. Loading has stopped to protect the jobs on screen. Use Save Board before continuing.');
-    return false;
-  }
-  if(missing.length&&!confirm(missing.length+' browser jobs are absent from the database response. They may be unsaved, moved, or deleted. A recovery snapshot has been kept in this browser. OK: show database jobs. Cancel: keep this browser copy for export and investigation. Nothing will be uploaded or deleted.')){
+  // A backup is not a prerequisite for loading records already present remotely.
+  if(!missing.length)return true;
+  const persisted=preserveRecoveryCopy();
+  const recoveryMessage=persisted?'A recovery snapshot has been kept in this browser.':'Browser storage is unavailable. A recovery copy is held only in this open tab. Use Export Recovery before closing or refreshing it.';
+  if(!confirm(missing.length+' browser jobs are absent from the database response. They may be unsaved, moved, or deleted. '+recoveryMessage+' OK: show database jobs. Cancel: keep this browser copy for export and investigation. Nothing will be uploaded or deleted.')){
     liveReady=false;setLiveStatus('error','Recovery view — not live');return false;
   }
+  if(!persisted)showToast('Local backup unavailable. Use Export Recovery before closing this tab. Database loading will continue.',true);
   return true;
 }
 function canSaveLiveJob(){
