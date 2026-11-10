@@ -2511,10 +2511,30 @@ async function upsertRemoteJob(jobId){
     return false;
   }
 }
+const jobDeletesInProgress=new Set();
 async function deleteRemoteJob(jobId){
-  if(!liveReady||!db)return;
-  const {error}=await db.from('jobs').delete().eq('id',jobId).in('board_id',activePlant==='waco2'?[REMOTE_SHARED_BOARD_ID,'waco2']:[REMOTE_SHARED_BOARD_ID]);
-  if(error)reportRemoteError(error,'Deleting job');
+  if(!db)return true;
+  if(!liveReady)return false;
+  const boardIds=activePlant==='waco2'?[REMOTE_SHARED_BOARD_ID,'waco2']:[REMOTE_SHARED_BOARD_ID];
+  try{
+    const result=await db.from('jobs').delete().eq('id',jobId).in('board_id',boardIds);
+    if(result.error)throw result.error;
+    const check=await db.from('jobs').select('id').eq('id',jobId).limit(1);
+    if(check.error)throw check.error;
+    if(!Array.isArray(check.data)||check.data.length)throw new Error('Deletion could not be confirmed.');
+    return true;
+  }catch(error){reportRemoteError(error,'Deleting job');showToast('Delete was not confirmed. '+(error.message||String(error)),true);return false;}
+}
+async function deleteBoardJob(jobId){
+  if(isTvMode()||!state.jobs[jobId]||jobDeletesInProgress.has(jobId)||!canSaveLiveJob())return;
+  const boardState=state;
+  jobDeletesInProgress.add(jobId);
+  preserveRecoveryCopy();
+  try{
+    if(!await deleteRemoteJob(jobId))return;
+    if(state!==boardState)return;
+    snapshot();delete state.jobs[jobId];delete remotePositions[jobId];removeFromLocations(jobId);saveState();render();
+  }finally{jobDeletesInProgress.delete(jobId);}
 }
 function queueRemoteSettings(){
   if(!liveReady||!db)return;
@@ -2575,17 +2595,19 @@ function applyRemoteJob(payload){
     return;
   }
   if(payload.eventType==='DELETE'){
-    if(currentView==='board'&&!remoteRowBelongsToActiveBoard(payload.old))return;
-    if(currentView==='shipping'&&!isShippingLocation(payload.old&&payload.old.location_key))return;
+    // DELETE events can contain only the primary key. Membership is known locally.
     const id=payload.old&&payload.old.id;
-    if(id){delete state.jobs[id];delete remotePositions[id];removeFromLocations(id);}
+    if(!id||!state.jobs[id])return;
+    preserveRecoveryCopy();
+    delete state.jobs[id];delete remotePositions[id];removeFromLocations(id);
+    saveState();
   }else{
     const row=payload.new;
     if(!row)return;
     const belongsInShipping=currentView==='shipping'&&isShippingLocation(row.location_key)&&['main','waco2','shipping'].includes(row.board_id);
     const belongsOnProductionBoard=currentView==='board'&&remoteRowBelongsToActiveBoard(row);
     if(!belongsInShipping&&!belongsOnProductionBoard){
-      if(state.jobs[row.id]){delete state.jobs[row.id];delete remotePositions[row.id];removeFromLocations(row.id);render();}
+      if(state.jobs[row.id]){preserveRecoveryCopy();delete state.jobs[row.id];delete remotePositions[row.id];removeFromLocations(row.id);saveState();render();}
       return;
     }
     const remoteNote=unpackRemoteNote(row.note);
@@ -3540,7 +3562,7 @@ function makeJob(jobId){
   const x=document.createElement('span');
   x.className='job-x';x.textContent='×';x.title='Delete job';
   x.addEventListener('mousedown',e=>e.stopPropagation());
-  x.addEventListener('click',e=>{e.stopPropagation();if(isTvMode())return;snapshot();delete state.jobs[jobId];removeFromLocations(jobId);render();saveState();deleteRemoteJob(jobId);});
+  x.addEventListener('click',e=>{e.stopPropagation();deleteBoardJob(jobId);});
   el.appendChild(x);
 
   el.addEventListener('click',e=>{
