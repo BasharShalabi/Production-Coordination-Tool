@@ -832,7 +832,6 @@ body.display-tv #btnNotes,
 body.display-tv #btnSaveBoard,
 body.display-tv #btnUploadBoard,
 body.display-tv #btnExportSummary,
-body.display-tv #btnClear,
 body.display-tv .toolbar>.sep{display:none}
 body.display-tv .job-x{display:none!important}
 body.display-tv .job{cursor:default}
@@ -1477,7 +1476,6 @@ body.display-tv .board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-ri
     <button class="tb-btn save" id="btnUploadBoard" type="button">Upload Board</button>
     <input id="boardBackupInput" type="file" accept="application/json,.json" hidden>
     <button class="tb-btn save" id="btnExportSummary" type="button">Export Summary</button>
-    <button class="tb-btn danger" id="btnClear">Clear board</button>
     <div class="sep"></div>
     <span class="counter" id="counter">0 jobs</span>
     <span class="live-status connecting" id="liveStatus">Connecting</span>
@@ -2474,17 +2472,22 @@ async function readAllBoardJobs(boardIds,shippingOnly=false){
   }
   return {data:rows,error:null};
 }
+// Keep the first intact view of a deletion burst until it is investigated.
+function preserveIncidentCopy(){
+  const key=storageKey()+'_incident_snapshot';
+  if(recoveryMemoryCopies[key])return;
+  const entry={savedAt:new Date().toISOString(),state:JSON.parse(JSON.stringify(state))};
+  recoveryMemoryCopies[key]=entry;
+  try{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(entry));}catch(error){console.warn('Incident backup held in this tab only',error);}
+}
 function protectLocalJobsBeforeLoad(rows){
   const remoteIds=new Set(rows.map(row=>row.id));
   const missing=Object.keys(state.jobs||{}).filter(id=>!remoteIds.has(id));
-  // A backup is not a prerequisite for loading records already present remotely.
-  if(!missing.length)return true;
-  const persisted=preserveRecoveryCopy();
-  const recoveryMessage=persisted?'A recovery snapshot has been kept in this browser.':'Browser storage is unavailable. A recovery copy is held only in this open tab. Use Export Recovery before closing or refreshing it.';
-  if(!confirm(missing.length+' browser jobs are absent from the database response. They may be unsaved, moved, or deleted. '+recoveryMessage+' OK: show database jobs. Cancel: keep this browser copy for export and investigation. Nothing will be uploaded or deleted.')){
-    liveReady=false;setLiveStatus('error','Recovery view — not live');return false;
+  if(missing.length){
+    preserveIncidentCopy();
+    preserveRecoveryCopy();
+    showToast('Live board loaded. A browser recovery copy was kept for '+missing.length+' records absent from the database.');
   }
-  if(!persisted)showToast('Local backup unavailable. Use Export Recovery before closing this tab. Database loading will continue.',true);
   return true;
 }
 function canSaveLiveJob(){
@@ -2598,7 +2601,7 @@ function applyRemoteJob(payload){
     // DELETE events can contain only the primary key. Membership is known locally.
     const id=payload.old&&payload.old.id;
     if(!id||!state.jobs[id])return;
-    preserveRecoveryCopy();
+    preserveIncidentCopy();
     delete state.jobs[id];delete remotePositions[id];removeFromLocations(id);
     saveState();
   }else{
@@ -2646,26 +2649,33 @@ function applyRemoteSettings(payload){
 }
 function subscribeToLiveChanges(){
   if(liveChannel)db.removeChannel(liveChannel);
+  const subscriptionBoard=BOARD_ID,subscriptionView=currentView;
+  const isCurrent=()=>BOARD_ID===subscriptionBoard&&currentView===subscriptionView;
   liveChannel=db.channel('production-board-'+BOARD_ID)
-    .on('postgres_changes',{event:'*',schema:'public',table:'jobs'},applyRemoteJob)
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'board_settings'},applyRemoteSettings)
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'board_settings'},applyRemoteSettings)
+    .on('postgres_changes',{event:'*',schema:'public',table:'jobs'},payload=>{if(isCurrent())applyRemoteJob(payload);})
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'board_settings'},payload=>{if(isCurrent())applyRemoteSettings(payload);})
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'board_settings'},payload=>{if(isCurrent())applyRemoteSettings(payload);})
     .subscribe(status=>{
+      if(!isCurrent())return;
       if(status==='SUBSCRIBED')setLiveStatus('live','Live');
       else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setLiveStatus('offline','Reconnecting');
       else if(status==='CLOSED')setLiveStatus('offline','Offline');
       else setLiveStatus('connecting','Connecting');
     });
 }
+let sharedLoadSequence=0;
 async function loadSharedBoard(){
   if(currentView==='shipping')return loadSharedShippingBoard();
   setLiveStatus('connecting','Loading');
+  const loadSequence=++sharedLoadSequence;
+  const loadStateRef=state,loadBoard=BOARD_ID,loadPlant=activePlant;
   const localCopy=JSON.parse(JSON.stringify(state));
   const jobsQuery=readAllBoardJobs(activePlant==='waco2'?[REMOTE_SHARED_BOARD_ID,'waco2']:[REMOTE_SHARED_BOARD_ID]);
   const settingsQuery=activePlant==='waco2'
     ?Promise.resolve({data:null,error:null})
     :db.from('board_settings').select('*').eq('board_id',REMOTE_SHARED_BOARD_ID).maybeSingle();
   const [jobsResult,settingsResult]=await Promise.all([jobsQuery,settingsQuery]);
+  if(loadSequence!==sharedLoadSequence||state!==loadStateRef||BOARD_ID!==loadBoard||activePlant!==loadPlant||currentView!=='board')return false;
   if(jobsResult.error){reportRemoteError(jobsResult.error,'Loading shared jobs');return false;}
   if(settingsResult.error){reportRemoteError(settingsResult.error,'Loading board settings');return false;}
 
@@ -2699,13 +2709,6 @@ async function loadSharedBoard(){
   render();
   subscribeToLiveChanges();
 
-  if(!productionRows.length&&Object.keys(localCopy.jobs||{}).length){
-    if(confirm('The shared board is empty. Upload the jobs saved in this browser?')){
-      state=normalizeState(localCopy);
-      render();
-      await syncEntireBoard();
-    }
-  }
   return true;
 }
 async function loadSharedShippingBoard(){
@@ -4867,6 +4870,8 @@ function fillBackupSummary(stats){
   });
 }
 function openBackupModal(fileName,parsed){
+  if(parsed.payload.boardId!==BOARD_ID){showToast('This backup belongs to another board. Open the matching plant first.',true);return;}
+  document.getElementById('btnReplaceBackup').style.display=db?'none':'';
   pendingBoardBackup={fileName,payload:parsed.payload,state:parsed.state};
   const stats=backupStateStats(parsed.state);
   const savedDate=new Date(parsed.payload.createdAt||'');
@@ -4949,16 +4954,47 @@ function mergeBackupState(backupState){
   Object.keys(imported).forEach(key=>{if(!reserved.has(key)&&safeObjectKey(key)&&typeof state[key]==='undefined')state[key]=imported[key]});
   return {added,skipped};
 }
+let backupRestoreInProgress=false;
 async function mergePendingBackup(){
-  if(!pendingBoardBackup||isTvMode())return;
-  const stats=backupStateStats(pendingBoardBackup.state);
-  if(!confirm('Merge '+stats.jobs+' backup jobs with the current board? Current jobs win when the same job already exists.'))return;
-  snapshot();
-  const result=mergeBackupState(pendingBoardBackup.state);
-  closeBackupModal();render();saveState();await syncEntireBoard();
-  showToast('Backup merged: '+result.added+' jobs added, '+result.skipped+' existing jobs kept.');
+  if(!pendingBoardBackup||isTvMode()||backupRestoreInProgress)return;
+  const backup=pendingBoardBackup,plant=activePlant,board=BOARD_ID;
+  if(currentView!=='board'||backup.payload.boardId!==board){showToast('Open the matching plant before restoring this backup.',true);return;}
+  if(!confirm('Restore missing jobs from this backup to '+(plant==='waco2'?'Waco 2':'Waco 1')+'? Existing database records will not be changed.'))return;
+  backupRestoreInProgress=true;
+  try{
+    preserveIncidentCopy();preserveRecoveryCopy();
+    if(!db){snapshot();const result=mergeBackupState(backup.state);closeBackupModal();render();saveState();showToast('Local backup merged: '+result.added+' jobs added.');return;}
+    const before=await readAllBoardJobs(['main','waco2','shipping']);
+    if(before.error)throw before.error;
+    if(BOARD_ID!==board||activePlant!==plant||currentView!=='board')throw new Error('Board changed. Open the backup again on the intended plant.');
+    const existing=new Set(before.data.map(row=>row.id));
+    const rows=[];const seen=new Set();
+    for(const [location,ids] of Object.entries(backup.state.locations)){
+      if(!/^(dept|arrow):/.test(location))throw new Error('This backup contains an unsupported production location.');
+      ids.forEach((id,position)=>{
+        if(seen.has(id))throw new Error('Duplicate job placement in backup.');seen.add(id);
+        const job=backup.state.jobs[id];if(!job)throw new Error('Missing job details in backup.');
+        if(!existing.has(id))rows.push({id,board_id:REMOTE_SHARED_BOARD_ID,job_text:job.text,color:Number(job.color)||0,note:packRemoteNote(job),location_key:remoteProductionLocation(location,plant),position,created_at:job.created||new Date().toISOString()});
+      });
+    }
+    if(seen.size!==Object.keys(backup.state.jobs).length)throw new Error('Some backup jobs have no location. No restore was started.');
+    for(let i=0;i<rows.length;i+=100){
+      const result=await db.from('jobs').upsert(rows.slice(i,i+100),{onConflict:'id',ignoreDuplicates:true});
+      if(result.error)throw result.error;
+    }
+    const after=await readAllBoardJobs(['main','waco2','shipping']);if(after.error)throw after.error;
+    const confirmed=new Map(after.data.map(row=>[row.id,row]));
+    if(rows.some(row=>!confirmed.has(row.id)))throw new Error('Some restored records could not be verified. Keep the backup and retry; existing IDs will be skipped.');
+    const conflicts=rows.filter(row=>['board_id','job_text','color','note','location_key'].some(key=>confirmed.get(row.id)[key]!==row[key]));
+    if(BOARD_ID===board&&activePlant===plant&&currentView==='board'){
+      closeBackupModal();await loadSharedBoard();saveState();
+    }
+    showToast('Verified '+rows.length+' missing records are present. Existing records were left unchanged.'+(conflicts.length?' '+conflicts.length+' records differ from the backup; newer live values were kept.':''));
+  }catch(error){showToast('Recovery not fully confirmed: '+(error.message||String(error))+'. Keep the backup file. Retrying skips existing IDs.',true);}
+  finally{backupRestoreInProgress=false;}
 }
 async function replaceWithPendingBackup(){
+  if(db){showToast('Use Merge to restore missing records without overwriting live jobs.',true);return;}
   if(!pendingBoardBackup||isTvMode())return;
   const stats=backupStateStats(pendingBoardBackup.state);
   if(!confirm('Replace the current live board with this backup containing '+stats.jobs+' jobs? You can use Undo immediately afterward if needed.'))return;
@@ -5448,25 +5484,6 @@ async function exportShippingSummary(){
   Object.keys(state.jobs).forEach(id=>{const job=state.jobs[id];const location=findJobLocation(id);const plant=shippingPlantFor(job,location);const status=location.endsWith(':shipped')?'Shipped':'Ready to Ship';summary.addRow({job:job.text||id,plant:plant==='waco2'?'Waco 2':'Waco 1',status,ready:exportDate(shippingStepDate(job,'ready')),shipped:exportDate(shippingStepDate(job,'shipped')),elapsed:shippingElapsed(job),notes:job.note||''});const workflow=sanitizeWorkflow(job.workflow);workflow.forEach((step,index)=>movement.addRow({job:job.text||id,plant:plant==='waco2'?'Waco 2':'Waco 1',step:index+1,location:workflowLocationInfo(step.locationKey).label,entered:exportDate(step.enteredAt),removed:exportDate(step.exitedAt),status:index===workflow.length-1?status:'Finished'}));(Array.isArray(job.consumedTanks)?job.consumedTanks:[]).forEach(tank=>sanitizeWorkflow(tank.workflow).forEach((step,index)=>movement.addRow({job:job.text||id,plant:plant==='waco2'?'Waco 2':'Waco 1',step:index+1,location:workflowLocationInfo(step.locationKey).label,entered:exportDate(step.enteredAt),removed:exportDate(step.exitedAt),status:'Consumed tank '+String(tank.sourceText||tank.sourceNumber||'')})))});
   styleExportSheet(summary,[4,5],[],3);styleExportSheet(movement,[5,6],[],7);const buffer=await workbook.xlsx.writeBuffer();const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});const saved=await saveExcelFile(blob,'Waco_Shipping_Summary_'+exportTimeStamp(reportTime)+'.xlsx');if(saved)showToast('Shipping summary exported with complete movement history.');
 }
-function clearBoard(){
-  if(!confirm('Clear all jobs from this board? This keeps the goal and W/E color key.'))return;
-  snapshot();
-  state.jobs={};
-  state.locations={};
-  render();
-  saveState();
-  if(liveReady&&db){
-    const boardIds=activePlant==='waco2'?[REMOTE_SHARED_BOARD_ID,'waco2']:[REMOTE_SHARED_BOARD_ID];
-    db.from('jobs').select('id,board_id,location_key').in('board_id',boardIds).then(async({data,error})=>{
-      if(error){reportRemoteError(error,'Reading jobs before clearing');return;}
-      const ids=(data||[]).filter(remoteRowBelongsToActiveBoard).map(row=>row.id);
-      if(!ids.length)return;
-      const result=await db.from('jobs').delete().in('board_id',boardIds).in('id',ids);
-      if(result.error)reportRemoteError(result.error,'Clearing jobs');
-    });
-  }
-}
-
 document.getElementById('btnAdd').addEventListener('click',()=>openModal());
 document.getElementById('btnUndo').addEventListener('click',undo);
 document.getElementById('btnRedo').addEventListener('click',redoChange);
@@ -5533,7 +5550,6 @@ document.getElementById('btnReplaceBackup').addEventListener('click',replaceWith
 document.getElementById('btnCancelBackup').addEventListener('click',closeBackupModal);
 document.getElementById('backupBackdrop').addEventListener('click',event=>{if(event.target.id==='backupBackdrop')closeBackupModal()});
 document.getElementById('btnExportSummary').addEventListener('click',exportExcelSummary);
-document.getElementById('btnClear').addEventListener('click',clearBoard);
 document.getElementById('btnSignOut').addEventListener('click',handleSignOut);
 document.getElementById('btnBackToOptions').addEventListener('click',returnToMainMenu);
 document.getElementById('btnShippingMenu').addEventListener('click',returnToMainMenu);
