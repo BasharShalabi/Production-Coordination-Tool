@@ -1376,11 +1376,15 @@ body.display-tv .board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-ri
 .board-shell.zoomed #board>.department.winding-split .winding-dot-heading{flex:0 0 22px}
 .board-shell.zoomed #board>.department.winding-split .split-col .slots{height:0!important;flex:1 1 0%;min-height:0;overflow:hidden!important}
 .board-shell:not(.zoomed) #board>.department.winding-split .job{height:auto;flex-shrink:0}
-.board-shell:not(.zoomed) #board>.department.winding-split .job-label{white-space:normal;overflow-wrap:anywhere;overflow:visible;text-overflow:clip}
+/* Plant 1 Winding: each job number stays on ONE line; fitCompactJobLabels()
+   shrinks only the labels that would not fit the column (never below 12px). */
+.board-shell:not(.zoomed) #board>.department.winding-split .job-label,
+body.display-tv .board-shell:not(.zoomed) #board>.department.winding-split .job-label,
+.tutorial-board>.department.winding-split .job-label{white-space:nowrap;overflow-wrap:normal;word-break:keep-all;overflow:hidden;text-overflow:clip}
 /* Plant 1 Winding: readable, consistent full-width cards; no miniature text. */
 .board-shell:not(.zoomed) #board>.department.winding-split .job,
 .tutorial-board>.department.winding-split .job{font-size:22px;min-height:44px;padding:7px 3px;line-height:1.15}
-.board-shell:not(.zoomed) #board>.department.winding-split .job-label{font-size:inherit;line-height:1.15;word-break:normal;overflow-wrap:anywhere}
+.board-shell:not(.zoomed) #board>.department.winding-split .job-label{font-size:inherit;line-height:1.15}
 body.display-tv .board-shell:not(.zoomed) #board>.department.winding-split .job{font-size:26px;min-height:48px}
 .department.winding-split .split-col{padding:2px}
 .department.winding-split .split-wrap{gap:3px}
@@ -3571,7 +3575,18 @@ function fitCompactJobLabels(){
     document.querySelectorAll('#board .job-label, #tutorialBoard .job-label').forEach(label=>{
       if(label.closest('.board-shell.zoomed'))return;
       label.style.fontSize='';
-      if(label.closest('.winding-split'))return;
+      if(label.closest('.winding-split')){
+        // Waco 1 Winding columns: keep every job number on one line, in Control
+        // and TV. Only labels too long for the column are reduced, never below 12px.
+        const normalSize=parseFloat(getComputedStyle(label).fontSize)||22;
+        let size=normalSize;
+        for(let step=0;step<4&&label.clientWidth&&label.scrollWidth>label.clientWidth;step++){
+          size=Math.max(12,Math.floor(size*(label.clientWidth-1)/label.scrollWidth*10)/10);
+          label.style.fontSize=size+'px';
+          if(size<=12)break;
+        }
+        return;
+      }
       if(document.body.classList.contains('display-tv'))return;
       const available=label.clientWidth;
       const required=label.scrollWidth;
