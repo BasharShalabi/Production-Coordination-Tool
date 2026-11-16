@@ -2711,18 +2711,65 @@ function subscribeToLiveChanges(){
   if(liveChannel)db.removeChannel(liveChannel);
   const subscriptionBoard=BOARD_ID,subscriptionView=currentView;
   const isCurrent=()=>BOARD_ID===subscriptionBoard&&currentView===subscriptionView;
-  liveChannel=db.channel('production-board-'+BOARD_ID)
+  // Changes made while this screen was disconnected are never replayed by the
+  // live feed, so after any drop the whole board is reloaded once it is back.
+  let missedUpdates=false;
+  const thisChannel=db.channel('production-board-'+BOARD_ID);
+  liveChannel=thisChannel
     .on('postgres_changes',{event:'*',schema:'public',table:'jobs'},payload=>{if(isCurrent())applyRemoteJob(payload);})
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'board_settings'},payload=>{if(isCurrent())applyRemoteSettings(payload);})
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'board_settings'},payload=>{if(isCurrent())applyRemoteSettings(payload);})
     .subscribe(status=>{
-      if(!isCurrent())return;
-      if(status==='SUBSCRIBED')setLiveStatus('live','Live');
-      else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setLiveStatus('offline','Reconnecting');
-      else if(status==='CLOSED')setLiveStatus('offline','Offline');
+      if(!isCurrent()||liveChannel!==thisChannel)return;
+      if(status==='SUBSCRIBED'){
+        if(missedUpdates){missedUpdates=false;setLiveStatus('connecting','Catching up');resyncLiveBoard('reconnected');}
+        else setLiveStatus('live','Live');
+      }
+      else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){missedUpdates=true;setLiveStatus('offline','Reconnecting');}
+      else if(status==='CLOSED'){missedUpdates=true;setLiveStatus('offline','Offline');}
       else setLiveStatus('connecting','Connecting');
     });
 }
+// Keeps TV screens current and signed in without anyone touching them.
+// Read-only: it only re-reads the board; it never writes or deletes anything.
+const RESYNC_MIN_GAP_MS=15000;
+const TV_SAFETY_RESYNC_MS=15*60*1000;
+let lastResyncAt=0,resyncTimer=0,resyncRunning=false,resyncPending=false,boardHiddenSince=0;
+async function resyncLiveBoard(reason){
+  clearTimeout(resyncTimer);resyncTimer=0;
+  if(!db||!['board','shipping'].includes(currentView)||displayAuthRequired||explicitSignOut)return;
+  // Wait for a better moment: page hidden, someone editing or dragging, or a reload just ran.
+  if(document.hidden){resyncPending=true;return;}
+  resyncPending=false;
+  const busy=document.querySelector('.modal-backdrop.open')||document.body.classList.contains('job-dragging')||resyncRunning;
+  const wait=Math.max(busy?5000:0,RESYNC_MIN_GAP_MS-(Date.now()-lastResyncAt));
+  if(wait>0){resyncTimer=setTimeout(()=>resyncLiveBoard(reason),wait);return;}
+  resyncRunning=true;lastResyncAt=Date.now();
+  try{
+    // getSession() renews an expired sign-in when the refresh is still valid.
+    const {data,error}=await db.auth.getSession();
+    if(error||!data||!data.session){
+      // A brief network failure: try again shortly instead of giving up.
+      if(navigator.onLine===false||error){resyncTimer=setTimeout(()=>resyncLiveBoard(reason),30000);}
+      return;
+    }
+    const loaded=await loadSharedBoard();
+    if(loaded)boardDataLoaded=true;
+    else resyncTimer=setTimeout(()=>resyncLiveBoard(reason),30000);
+  }catch(error){
+    console.error('Board refresh failed ('+reason+')',error);
+    resyncTimer=setTimeout(()=>resyncLiveBoard(reason),30000);
+  }finally{resyncRunning=false;}
+}
+document.addEventListener('visibilitychange',()=>{
+  // Yodeck can hide the page between playlist items; refresh when it returns.
+  if(document.hidden){boardHiddenSince=Date.now();return;}
+  const hiddenFor=boardHiddenSince?Date.now()-boardHiddenSince:0;
+  boardHiddenSince=0;
+  if(hiddenFor>30000||resyncPending||resyncTimer)resyncLiveBoard('screen visible again');
+});
+window.addEventListener('online',()=>resyncLiveBoard('network back'));
+setInterval(()=>{if(isTvMode())resyncLiveBoard('TV safety check');},TV_SAFETY_RESYNC_MS);
 let sharedLoadSequence=0;
 async function loadSharedBoard(){
   if(currentView==='shipping')return loadSharedShippingBoard();
