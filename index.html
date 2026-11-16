@@ -953,7 +953,8 @@ body.display-tv .tv-readonly-pill{display:inline-flex}
   box-shadow:none;pointer-events:none;
 }
 .production-area[data-area-id="fabrication"],
-.production-area[data-area-id="finish"]{
+.production-area[data-area-id="finish"],
+.production-area[data-area-id="finish_bottom"]{
   background:linear-gradient(145deg,rgba(0,158,172,.045),rgba(255,255,255,.2));
 }
 .production-area-title{
@@ -963,8 +964,13 @@ body.display-tv .tv-readonly-pill{display:inline-flex}
   font-size:22px;font-weight:1000;line-height:1.05;letter-spacing:.02em;text-transform:uppercase;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.production-area[data-area-id="finish"] .production-area-title{left:44%;right:auto}
-.production-area[data-area-id="completion"] .production-area-title{left:auto;right:10px}
+.production-area-title:empty{display:none}
+.production-area[data-area-id="completion"] .production-area-title{left:10px;right:auto}
+/* Notes panel docked into the empty spot between RMA and Completed (full board only). */
+.notes-slot{position:absolute;pointer-events:none}
+.board-note.docked{right:auto;bottom:auto;max-width:none;display:none;flex-direction:column;overflow:hidden}
+.board-note.docked.open{display:flex}
+.board-note.docked textarea{flex:1 1 auto;height:auto;min-height:0;resize:none}
 .board-shell.zoomed .production-area,.tutorial-board.is-focused .production-area,.tutorial-board.is-focused .plain-connector{display:none}
 #board>.stage,.tutorial-board>.stage{position:absolute}
 #board>.department,.tutorial-board>.department{z-index:2;margin:0}
@@ -1803,31 +1809,41 @@ const DEPTS=[
   {"id":"core_coil","label":"Core & Coil","layout":{"left":"29.6%","top":"42px","width":"11.2%","height":"440px"}},
   {"id":"oven","label":"Oven","layout":{"left":"44.4%","top":"42px","width":"11.2%","height":"440px"},"split":["A","B","C"]},
   {"id":"tanking","label":"Tanking","layout":{"left":"59.2%","top":"42px","width":"11.2%","height":"440px"},"split":["1st","2nd"]},
-  {"id":"testing","label":"Testing","layout":{"left":"74%","top":"42px","width":"11.2%","height":"440px"}},
-  {"id":"final_weld","label":"Final Weld","layout":{"left":"88.8%","top":"42px","width":"11.2%","height":"440px"}},
-  {"id":"welding_buffing","label":"Welding / Buffing","layout":{"left":"0%","top":"670px","width":"9%","height":"460px"}},
-  {"id":"m_blast","label":"M-Blast","layout":{"left":"13.1%","top":"670px","width":"9%","height":"460px"}},
-  {"id":"prime_paint","label":"Prime / Paint","layout":{"left":"26.2%","top":"670px","width":"9%","height":"460px"}},
-  {"id":"radiator","label":"Radiator","layout":{"left":"39.3%","top":"670px","width":"9%","height":"460px"}},
-  {"id":"t_complete","label":"T-Complete","layout":{"left":"52.4%","top":"670px","width":"9%","height":"460px"}},
-  {"id":"final_buffing","label":"Final Buffing","layout":{"left":"89.8433333%","top":"670px","width":"9.1133333%","height":"440px"}},
-  {"id":"final_paint","label":"Final Paint","layout":{"left":"76.4216667%","top":"670px","width":"9.1133333%","height":"440px"}},
-  {"id":"final_finish","label":"Final Finish","layout":{"left":"62.2%","top":"670px","width":"9.1133333%","height":"440px"}},
-  {"id":"engineering","label":"Engineering","layout":{"left":"63%","top":"1210px","width":"9.1133333%","height":"400px"}},
-  {"id":"qc","label":"QC","layout":{"left":"76.4216667%","top":"1210px","width":"9.1133333%","height":"400px"}},
-  {"id":"completed","label":"Completed","layout":{"left":"89.8433333%","top":"1210px","width":"9.1133333%","height":"400px"},"completed":true},
+  {"id":"testing","label":"Testing","layout":{"left":"74%","top":"42px","width":"10.6%","height":"440px"}},
+  {"id":"final_weld","label":"Final Weld","layout":{"left":"89.4%","top":"42px","width":"10.6%","height":"440px"}},
+  // Layout H: Fabrication boxes widened 9% -> 10.82% (lanes stay 4.1%); T-Complete sits under Tanking.
+  {"id":"welding_buffing","label":"Welding / Buffing","layout":{"left":"0%","top":"670px","width":"10.82%","height":"460px"}},
+  {"id":"m_blast","label":"M-Blast","layout":{"left":"14.92%","top":"670px","width":"10.82%","height":"460px"}},
+  {"id":"prime_paint","label":"Prime / Paint","layout":{"left":"29.84%","top":"670px","width":"10.82%","height":"460px"}},
+  {"id":"radiator","label":"Radiator","layout":{"left":"44.76%","top":"670px","width":"10.82%","height":"460px"}},
+  {"id":"t_complete","label":"T-Complete","layout":{"left":"59.68%","top":"670px","width":"10.82%","height":"460px"}},
+  // Layout G (2026-11-16): Final Weld -> Final Buffing -> Final Paint run straight
+  // down the right edge, then the bottom row flows right-to-left to Completed.
+  // Box sizes are unchanged except Testing/Final Weld/Failed Unit (11.2% -> 10.6%)
+  // to give the Testing -> Final Weld lane more room.
+  {"id":"final_buffing","label":"Final Buffing","layout":{"left":"89.8433333%","top":"630px","width":"9.1133333%","height":"440px"}},
+  {"id":"final_paint","label":"Final Paint","layout":{"left":"89.8433333%","top":"1210px","width":"9.1133333%","height":"400px"}},
+  {"id":"final_finish","label":"Final Finish","layout":{"left":"75.6166667%","top":"1210px","width":"9.1133333%","height":"400px"}},
+  {"id":"engineering","label":"Engineering","layout":{"left":"61.39%","top":"1210px","width":"9.1133333%","height":"400px"}},
+  {"id":"qc","label":"QC","layout":{"left":"47.1633333%","top":"1210px","width":"9.1133333%","height":"400px"}},
+  {"id":"completed","label":"Completed","layout":{"left":"32.9366667%","top":"1210px","width":"9.1133333%","height":"400px"},"completed":true},
   {"id":"rma","label":"RMA","layout":{"left":"0","top":"1380px","width":"13.2%","height":"230px"},"special":true},
-  {"id":"customer_witness","label":"Customer Witness","layout":{"left":"14.7%","top":"1380px","width":"13.2%","height":"230px"},"special":true},
-  {"id":"failed_test","label":"Failed Unit","layout":{"left":"74%","top":"494px","width":"11.2%","height":"128px"},"failed":true}
+  {"id":"customer_witness","label":"Customer Witness","layout":{"left":"72.7%","top":"670px","width":"13.2%","height":"230px"},"special":true},
+  {"id":"failed_test","label":"Failed Unit","layout":{"left":"74%","top":"494px","width":"10.6%","height":"128px"},"failed":true}
 ];
 
 const AREAS=[
   {"id":"core","label":"1. Core & Coil Assembly","layout":{"left":"0","top":"0","width":"57.6%","height":"488px"}},
-  {"id":"fabrication","label":"2. Fabrication","layout":{"left":"0","top":"628px","width":"61.8%","height":"508px"}},
+  {"id":"fabrication","label":"2. Fabrication","layout":{"left":"0","top":"628px","width":"71%","height":"508px"}},
   {"id":"internal","label":"3. Internal Assembly & Testing","layout":{"left":"58.4%","top":"0","width":"41.6%","height":"628px"}},
-  {"id":"finish","label":"4. Final Finish","layout":{"left":"62.2%","top":"628px","width":"37.8%","height":"488px"}},
-  {"id":"completion","label":"5. Final Completion","layout":{"left":"62.2%","top":"1168px","width":"37.8%","height":"452px"}}
+  // Final Finish section is drawn as two shaded pieces: the right-hand column
+  // (Final Buffing / Final Paint) and the bottom-right corner (Final Finish).
+  {"id":"finish","label":"","layout":{"left":"87.3%","top":"628px","width":"12.7%","height":"992px"}},
+  {"id":"finish_bottom","label":"4. Final Finish","layout":{"left":"75.1%","top":"1168px","width":"12.4%","height":"452px"}},
+  {"id":"completion","label":"5. Final Completion","layout":{"left":"32.4%","top":"1168px","width":"42.5%","height":"452px"}}
 ];
+// Empty spot between RMA and Completed; the Notes panel opens here on the full board.
+const NOTES_SLOT_LAYOUT={left:14.6,top:1148,width:17.2,height:462};
 
 const ARROWS=[
   {"id":"winding_to_lacing","from":"winding","to":"lacing","label":"Winding to Lacing","layout":{"left":"11.4%","top":"42px","width":"3.4%","height":"440px"},"dir":"right"},
@@ -1835,18 +1851,18 @@ const ARROWS=[
   {"id":"core_coil_to_oven","from":"core_coil","to":"oven","label":"Core & Coil to Oven","layout":{"left":"40.8%","top":"42px","width":"3.6%","height":"440px"},"dir":"right"},
   {"id":"oven_to_tanking","from":"oven","to":"tanking","label":"Oven to Tanking","layout":{"left":"55.6%","top":"42px","width":"3.6%","height":"440px"},"dir":"right"},
   {"id":"tanking_to_testing","from":"tanking","to":"testing","label":"Tanking to Testing","layout":{"left":"70.4%","top":"42px","width":"3.6%","height":"440px"},"dir":"right"},
-  {"id":"testing_to_final_weld","from":"testing","to":"final_weld","label":"Testing to Final Weld","layout":{"left":"85.2%","top":"42px","width":"3.6%","height":"440px"},"dir":"right"},
-  {"id":"final_weld_to_final_buffing","from":"final_weld","to":"final_buffing","label":"Final Weld to Final Buffing","layout":{"left":"89.8433333%","top":"482px","width":"9.1133333%","height":"188px"},"dir":"down","capacity":true},
-  {"id":"final_buffing_to_final_paint","from":"final_buffing","to":"final_paint","label":"Final Buffing to Final Paint","layout":{"left":"85.535%","top":"670px","width":"4.3083333%","height":"440px"},"dir":"left","capacity":true},
-  {"id":"final_paint_to_final_finish","from":"final_paint","to":"final_finish","label":"Final Paint to Final Finish","layout":{"left":"71.3133333%","top":"670px","width":"5.1083334%","height":"440px"},"dir":"left","capacity":true},
-  {"id":"final_finish_to_engineering","from":"final_finish","to":"engineering","label":"Final Finish to Engineering","layout":{"left":"56.7%","top":"1110px","width":"10.3%","height":"500px"},"dir":"down","capacity":true,"route":"down-left-right","routePath":"M97.6375403 0.0000000 L97.6375403 14.0000000 L1.9417476 14.0000000 L1.9417476 24.8000000 L61.1650485 24.8000000","routeHead":"61.1650485,24.8000000 56.3106796,22.4000000 56.3106796,27.2000000"},
-  {"id":"engineering_to_qc","from":"engineering","to":"qc","label":"Engineering to QC","layout":{"left":"72.1133333%","top":"1210px","width":"4.3083334%","height":"400px"},"dir":"right","capacity":true},
-  {"id":"qc_to_completed","from":"qc","to":"completed","label":"QC to Completed","layout":{"left":"85.535%","top":"1210px","width":"4.3083333%","height":"400px"},"dir":"right","capacity":true},
-  {"id":"welding_buffing_to_m_blast","from":"welding_buffing","to":"m_blast","label":"Weld to Blast","layout":{"left":"9%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
-  {"id":"m_blast_to_prime_paint","from":"m_blast","to":"prime_paint","label":"Blast to Paint","layout":{"left":"22.1%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
-  {"id":"prime_paint_to_radiator","from":"prime_paint","to":"radiator","label":"Prime to Radiator","layout":{"left":"35.2%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
-  {"id":"radiator_to_t_complete","from":"radiator","to":"t_complete","label":"Radiator to T-Complete","layout":{"left":"48.3%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
-  {"id":"t_complete_to_tanking","from":"t_complete","to":"tanking","label":"T-Complete to Tanking","layout":{"left":"56.7336842%","top":"482px","width":"8.3157895%","height":"188px"},"dir":"up","route":"up-right","routePath":"M2 100 V35 H97 V10"}
+  {"id":"testing_to_final_weld","from":"testing","to":"final_weld","label":"Testing to Final Weld","layout":{"left":"84.6%","top":"42px","width":"4.8%","height":"440px"},"dir":"right"},
+  {"id":"final_weld_to_final_buffing","from":"final_weld","to":"final_buffing","label":"Final Weld to Final Buffing","layout":{"left":"89.8433333%","top":"482px","width":"9.1133333%","height":"148px"},"dir":"down","capacity":true},
+  {"id":"final_buffing_to_final_paint","from":"final_buffing","to":"final_paint","label":"Final Buffing to Final Paint","layout":{"left":"89.8433333%","top":"1070px","width":"9.1133333%","height":"140px"},"dir":"down","capacity":true},
+  {"id":"final_paint_to_final_finish","from":"final_paint","to":"final_finish","label":"Final Paint to Final Finish","layout":{"left":"84.73%","top":"1210px","width":"5.1133333%","height":"400px"},"dir":"left","capacity":true},
+  {"id":"final_finish_to_engineering","from":"final_finish","to":"engineering","label":"Final Finish to Engineering","layout":{"left":"70.5033333%","top":"1210px","width":"5.1133333%","height":"400px"},"dir":"left","capacity":true},
+  {"id":"engineering_to_qc","from":"engineering","to":"qc","label":"Engineering to QC","layout":{"left":"56.2766667%","top":"1210px","width":"5.1133333%","height":"400px"},"dir":"left","capacity":true},
+  {"id":"qc_to_completed","from":"qc","to":"completed","label":"QC to Completed","layout":{"left":"42.05%","top":"1210px","width":"5.1133333%","height":"400px"},"dir":"left","capacity":true},
+  {"id":"welding_buffing_to_m_blast","from":"welding_buffing","to":"m_blast","label":"Weld to Blast","layout":{"left":"10.82%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
+  {"id":"m_blast_to_prime_paint","from":"m_blast","to":"prime_paint","label":"Blast to Paint","layout":{"left":"25.74%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
+  {"id":"prime_paint_to_radiator","from":"prime_paint","to":"radiator","label":"Prime to Radiator","layout":{"left":"40.66%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
+  {"id":"radiator_to_t_complete","from":"radiator","to":"t_complete","label":"Radiator to T-Complete","layout":{"left":"55.58%","top":"670px","width":"4.1%","height":"460px"},"dir":"right","capacity":true},
+  {"id":"t_complete_to_tanking","from":"t_complete","to":"tanking","label":"T-Complete to Tanking","layout":{"left":"59.68%","top":"482px","width":"10.82%","height":"188px"},"dir":"up"}
 ];
 
 const PLAIN_CONNECTORS=[
@@ -4434,6 +4450,36 @@ function closeTutorial(){
   document.body.classList.remove('tutorial-open');
   if(document.body.classList.contains('authenticated'))showAppSelector();
 }
+// Notes panel: on the full board it opens inside the empty spot between RMA and
+// Completed and follows it while the board scrolls or scales. Anywhere else
+// (Hour by Hour, Shipping, or when that spot is scrolled out of view) it falls
+// back to its usual bottom-right position. The panel element is never rebuilt.
+let notesDockFrame=0;
+function updateNotesDock(){
+  const panel=document.getElementById('notesPanel');
+  if(!panel)return;
+  const slot=document.querySelector('#board>.notes-slot');
+  const shell=document.querySelector('.board-shell');
+  let rect=null;
+  if(slot&&shell&&currentView==='board'&&!boxZoomSelection.size&&document.body.classList.contains('board-active')){
+    const s=slot.getBoundingClientRect(),c=shell.getBoundingClientRect();
+    const left=Math.max(s.left,c.left),top=Math.max(s.top,c.top);
+    const right=Math.min(s.right,c.right),bottom=Math.min(s.bottom,c.bottom);
+    if(right-left>=160&&bottom-top>=110)rect={left,top,width:right-left,height:bottom-top};
+  }
+  panel.classList.toggle('docked',!!rect);
+  if(rect){
+    panel.style.left=rect.left+'px';panel.style.top=rect.top+'px';
+    panel.style.width=rect.width+'px';panel.style.height=rect.height+'px';
+  }else{panel.style.left=panel.style.top=panel.style.width=panel.style.height='';}
+}
+function notesDockLoop(){
+  notesDockFrame=0;
+  const panel=document.getElementById('notesPanel');
+  updateNotesDock();
+  if(panel&&panel.classList.contains('open'))notesDockFrame=requestAnimationFrame(notesDockLoop);
+}
+function startNotesDock(){if(!notesDockFrame)notesDockFrame=requestAnimationFrame(notesDockLoop);}
 function render(){
   if(currentView==='shipping'){
     renderShippingSystem();
@@ -4448,6 +4494,11 @@ function render(){
   DEPTS.forEach(d=>board.appendChild(makeDept(d)));
   ARROWS.forEach(a=>board.appendChild(makeArrow(a)));
   PLAIN_CONNECTORS.forEach(c=>board.appendChild(makePlainConnector(c)));
+  const notesSlot=document.createElement('div');
+  notesSlot.className='notes-slot';notesSlot.setAttribute('aria-hidden','true');
+  applyStageLayout(notesSlot,{left:NOTES_SLOT_LAYOUT.left+'%',top:NOTES_SLOT_LAYOUT.top+'px',width:NOTES_SLOT_LAYOUT.width+'%',height:NOTES_SLOT_LAYOUT.height+'px'});
+  board.appendChild(notesSlot);
+  startNotesDock();
   updateBoxZoomView();
   document.getElementById('notesText').value=state.notes||'';
   document.getElementById('goalInput').value=state.goal||'';
@@ -5713,7 +5764,7 @@ async function exportShippingSummary(){
 document.getElementById('btnAdd').addEventListener('click',()=>openModal());
 document.getElementById('btnUndo').addEventListener('click',undo);
 document.getElementById('btnRedo').addEventListener('click',redoChange);
-document.getElementById('btnNotes').addEventListener('click',()=>document.getElementById('notesPanel').classList.toggle('open'));
+document.getElementById('btnNotes').addEventListener('click',()=>{document.getElementById('notesPanel').classList.toggle('open');startNotesDock();});
 document.getElementById('btnFindJob').addEventListener('click',findBoardJob);
 document.getElementById('btnClearJobSearch').addEventListener('click',()=>{resetBoardJobSearch();document.getElementById('jobSearchInput').focus()});
 document.getElementById('jobSearchInput').addEventListener('input',event=>{
