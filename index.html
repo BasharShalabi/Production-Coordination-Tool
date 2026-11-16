@@ -287,6 +287,16 @@ body.authenticated.app-selecting .app-selector{display:flex}
 .department.oven-five-rows .oven-timer-readout{padding:1px 4px;font-size:9px}
 .split-col.drop-active{background:#dbeafe;border-color:#0369a1}
 .split-name{text-align:center;font-size:12px;font-weight:900;color:#475569;margin-bottom:1px}
+/* V5: three visual Winding lanes; original outer layout is unchanged. */
+.winding-dot-heading{display:flex;justify-content:center;align-items:center;min-height:22px;flex:0 0 22px}
+.winding-column-dot{display:block;width:12px;height:12px;border-radius:50%}
+.winding-column-red{background:#ef4444}
+.winding-column-yellow{background:#facc15}
+.winding-column-green{background:#22c55e}
+.department.winding-split .split-wrap{grid-template-columns:repeat(3,minmax(0,1fr))}
+.department.winding-split .split-col .slots{grid-template-columns:minmax(0,1fr)}
+.department.winding-split .split-col .job{min-width:0;max-width:100%}
+.department.winding-split .split-col .job-label{min-width:0;overflow-wrap:anywhere;white-space:normal}
 .arrow-stage{
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
   padding:0 1px;
@@ -1360,6 +1370,34 @@ body.display-tv .board-shell:not(.zoomed) #board>.arrow-stage.route-down-left-ri
 .tutorial-board.is-focused>.arrow-stage>.full-transition-count{display:none}
 .zoom-transition-label>.transition-count-pill{position:static;flex:0 0 auto;min-width:24px;height:1.4em;padding:0 4px;font-size:.7em;pointer-events:none}
 
+/* Winding stays three side-by-side columns in Select Zoom as well. */
+.board-shell.zoomed #board>.department.winding-split .split-wrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr)}
+.board-shell.zoomed #board>.department.winding-split .split-col{flex-direction:column}
+.board-shell.zoomed #board>.department.winding-split .winding-dot-heading{flex:0 0 22px}
+.board-shell.zoomed #board>.department.winding-split .split-col .slots{height:0!important;flex:1 1 0%;min-height:0;overflow:hidden!important}
+.board-shell:not(.zoomed) #board>.department.winding-split .job{height:auto;flex-shrink:0}
+.board-shell:not(.zoomed) #board>.department.winding-split .job-label{white-space:normal;overflow-wrap:anywhere;overflow:visible;text-overflow:clip}
+/* Plant 1 Winding: readable, consistent full-width cards; no miniature text. */
+.board-shell:not(.zoomed) #board>.department.winding-split .job,
+.tutorial-board>.department.winding-split .job{font-size:22px;min-height:44px;padding:7px 3px;line-height:1.15}
+.board-shell:not(.zoomed) #board>.department.winding-split .job-label{font-size:inherit;line-height:1.15;word-break:normal;overflow-wrap:anywhere}
+body.display-tv .board-shell:not(.zoomed) #board>.department.winding-split .job{font-size:26px;min-height:48px}
+.department.winding-split .split-col{padding:2px}
+.department.winding-split .split-wrap{gap:3px}
+/* Waco 1 full board only: Winding (3 columns) and Lacing share the space
+   between .2% and 26%. Lacing still ends at 26%, so the Lacing-to-Core & Coil
+   lane and everything downstream stay exactly where they were. Waco 2 and
+   Hour by Hour are not affected.
+   Original:  Winding 11.2% | lane 3.4% | Lacing 11.2%
+   V5:        Winding 14.2% | lane 3.4% | Lacing  8.2%  (Lacing too tight)
+   Balanced:  Winding 13.0% | lane 3.0% | Lacing  9.8%
+   Winding stays 16% wider than the original; Lacing gets 20% more room than V5. */
+.board-shell:not(.zoomed) #board[data-plant="waco1"]>[data-dept-id="winding"]{width:13%!important}
+.board-shell:not(.zoomed) #board[data-plant="waco1"]>[data-arrow-id="winding_to_lacing"]{left:13.2%!important;width:3%!important}
+.board-shell:not(.zoomed) #board[data-plant="waco1"]>[data-dept-id="lacing"]{left:16.2%!important;width:9.8%!important}
+.board-shell:not(.zoomed) #board[data-plant="waco1"]>.department.winding-split .split-col{border:0;border-left:1px solid rgba(0,94,102,.25);background:transparent;padding:2px 4px}
+.board-shell:not(.zoomed) #board[data-plant="waco1"]>.department.winding-split .split-col:first-child{border-left:0}
+.board-shell:not(.zoomed) #board[data-plant="waco1"]>.department.winding-split .job{height:auto;align-self:start}
 </style>
 </head>
 <body>
@@ -2533,10 +2571,12 @@ async function deleteBoardJob(jobId){
   const boardState=state;
   jobDeletesInProgress.add(jobId);
   preserveRecoveryCopy();
+  const undoChange=beginUndoableChange([jobId]);
   try{
     if(!await deleteRemoteJob(jobId))return;
     if(state!==boardState)return;
-    snapshot();delete state.jobs[jobId];delete remotePositions[jobId];removeFromLocations(jobId);saveState();render();
+    delete state.jobs[jobId];delete remotePositions[jobId];removeFromLocations(jobId);
+    finishUndoableChange(undoChange);saveState();render();
   }finally{jobDeletesInProgress.delete(jobId);}
 }
 function queueRemoteSettings(){
@@ -2800,6 +2840,8 @@ function normalizeWeeks(weeks){
 }
 
 function departmentSplits(def,plant=activePlant){
+  // Keep the original location as the red lane so existing jobs need no migration.
+  if(def&&def.id==='winding')return plant==='waco1'?['','orange','green']:[];
   if(!def||!Array.isArray(def.split))return [];
   if(def.id==='oven'&&plant==='waco2')return ['A','B','C','D','E'];
   return def.split;
@@ -2872,6 +2914,7 @@ function departmentJobCount(def,boardState=state,plant=activePlant){
   const jobs=boardState.jobs||{};
   const locations=boardState.locations||{};
   const countFor=key=>(locations[key]||[]).filter(id=>jobs[id]).length;
+  if(def.id==='winding'&&plant==='waco2')return windingJobIds(boardState).filter(id=>jobs[id]).length;
   const splits=departmentSplits(def,plant);
   if(splits.length){
     return splits.reduce((sum,split)=>sum+countFor(locationKey('dept',def.id,split)),0);
@@ -2934,23 +2977,150 @@ function updateCounters(){
   updateDepartmentCountPills();
   updateTransitionCountPills();
 }
-function snapshot(){
-  history.push(JSON.stringify(state));
+// Undo/Redo reverses only this person's own changes, one job at a time.
+// Each entry remembers the job before and after THIS person's change. Before
+// undoing, the database copy must still match what this person saved. If
+// anyone else has moved or edited that job since, the undo is refused and the
+// job is left exactly as it is. The write itself is conditional on the row's
+// updated_at, so a change landing at the same moment is never overwritten.
+// The whole board is never rewritten by Undo.
+const UNDO_COMPARE_FIELDS=['board_id','job_text','color','note','location_key'];
+let undoBusy=false;
+function sameUndoRow(left,right){
+  if(!left||!right)return !left&&!right;
+  return UNDO_COMPARE_FIELDS.every(key=>String(left[key]??'')===String(right[key]??''));
+}
+function undoJobSide(jobId){
+  const job=state.jobs[jobId];
+  if(!job)return {snap:null,row:null};
+  return {snap:{job:cloneJsonValue(job),location:findJobLocation(jobId)},row:remoteJobRow(jobId)};
+}
+function beginUndoableChange(jobIds=[],options={}){
+  const change={jobs:{},settings:null};
+  jobIds.forEach(id=>{change.jobs[id]={before:undoJobSide(id),after:null};});
+  if(options.settings)change.settings={before:cloneJsonValue(state.weeks),after:null};
+  return change;
+}
+function finishUndoableChange(change,options={}){
+  (options.newIds||[]).forEach(id=>{if(!change.jobs[id])change.jobs[id]={before:{snap:null,row:null},after:null};});
+  const overrides=options.after||{};
+  Object.keys(change.jobs).forEach(id=>{change.jobs[id].after=overrides[id]||undoJobSide(id);});
+  if(change.settings)change.settings.after=cloneJsonValue(state.weeks);
+  const jobChanged=Object.values(change.jobs).some(entry=>!sameUndoRow(entry.before.row,entry.after.row)||JSON.stringify(entry.before.snap)!==JSON.stringify(entry.after.snap));
+  const settingsChanged=!!change.settings&&JSON.stringify(change.settings.before)!==JSON.stringify(change.settings.after);
+  if(!jobChanged&&!settingsChanged)return;
+  history.push(change);if(history.length>80)history.shift();
+  redo=[];
+}
+// Local test mode only (no database): backup merge/replace keep whole-board undo.
+function pushLocalWholeBoardUndo(beforeJson){
+  history.push({wholeState:{before:beforeJson,after:JSON.stringify(state)}});
   if(history.length>80)history.shift();
   redo=[];
 }
-function undo(){
-  if(!history.length)return;
-  redo.push(JSON.stringify(state));
-  state=JSON.parse(history.pop());
-  render();saveState();syncEntireBoard();
+function undoChangeLabel(change){
+  const names=Object.keys(change.jobs||{}).map(id=>{
+    const entry=change.jobs[id];
+    const snap=(entry.before&&entry.before.snap)||(entry.after&&entry.after.snap);
+    const row=(entry.before&&entry.before.row)||(entry.after&&entry.after.row);
+    return String((snap&&snap.job&&snap.job.text)||(row&&row.job_text)||id);
+  });
+  if(change.settings)names.push('W/E color key');
+  return names.join(', ')||'change';
 }
-function redoChange(){
-  if(!redo.length)return;
-  history.push(JSON.stringify(state));
-  state=JSON.parse(redo.pop());
-  render();saveState();syncEntireBoard();
+function applyLocalUndoSide(jobId,snap){
+  if(!snap){delete state.jobs[jobId];delete remotePositions[jobId];removeFromLocations(jobId);return;}
+  state.jobs[jobId]=cloneJsonValue(snap.job);
+  if(snap.location)addToLocation(snap.location,jobId);
+  else removeFromLocations(jobId);
 }
+async function writeUndoRow(jobId,currentRow,targetRow,label){
+  try{
+    try{preserveRecoveryCopy();}catch(backupError){console.error('Recovery storage unavailable',backupError);}
+    let result;
+    if(!targetRow){
+      if(!currentRow)return {ok:true};
+      result=await db.from('jobs').delete().eq('id',jobId).eq('updated_at',currentRow.updated_at).select('id');
+    }else if(!currentRow){
+      result=await db.from('jobs').insert(targetRow).select('*');
+      if(result.error&&result.error.code==='23505')return {conflict:true,reason:label+' was added back by someone else, so it was left as is.'};
+    }else{
+      const fields={...targetRow};delete fields.id;
+      result=await db.from('jobs').update(fields).eq('id',jobId).eq('updated_at',currentRow.updated_at).select('*');
+    }
+    if(result.error)throw result.error;
+    if(!Array.isArray(result.data)||result.data.length!==1)return {conflict:true,reason:label+' was changed by someone else at the same moment, so it was left as is.'};
+    return {ok:true};
+  }catch(error){
+    reportRemoteError(error,'Undo');
+    return {error:true,reason:'the database did not confirm the change ('+(error.message||String(error))+'). Nothing else was changed.'};
+  }
+}
+async function applyUndoableChange(change,targetSide,expectSide){
+  const ids=Object.keys(change.jobs||{});
+  const label=undoChangeLabel(change);
+  if(change.settings&&JSON.stringify(state.weeks)!==JSON.stringify(change.settings[expectSide])){
+    return {conflict:true,reason:'the W/E color key was changed by someone else afterwards, so it was left as is.'};
+  }
+  const current={};
+  if(db&&ids.length){
+    const {data,error}=await db.from('jobs').select('*').in('id',ids);
+    if(error){reportRemoteError(error,'Checking job before undo');return {error:true,reason:'the database could not be checked. Nothing was changed.'};}
+    (data||[]).forEach(row=>{current[row.id]=row;});
+    for(const id of ids){
+      if(!sameUndoRow(current[id]||null,change.jobs[id][expectSide].row)){
+        return {conflict:true,reason:label+' was moved or edited by someone else after your change, so it was left as is.'};
+      }
+    }
+  }else if(!db){
+    for(const id of ids){
+      if(JSON.stringify(undoJobSide(id).snap)!==JSON.stringify(change.jobs[id][expectSide].snap)){
+        return {conflict:true,reason:label+' has changed since, so it was left as is.'};
+      }
+    }
+  }
+  for(const id of ids){
+    const target=change.jobs[id][targetSide];
+    if(db){
+      const written=await writeUndoRow(id,current[id]||null,target.row,label);
+      if(!written.ok)return written;
+    }
+    applyLocalUndoSide(id,target.snap);
+  }
+  if(change.settings){state.weeks=cloneJsonValue(change.settings[targetSide]);queueRemoteSettings();}
+  saveState();render();
+  if(editingJobId&&!state.jobs[editingJobId])closeModal();
+  return {ok:true,label};
+}
+async function stepUndoHistory(fromStack,toStack,targetSide,expectSide,actionName){
+  if(undoBusy||!fromStack.length||isTvMode())return;
+  if(!canSaveLiveJob())return;
+  const change=fromStack[fromStack.length-1];
+  if(change.wholeState){
+    fromStack.pop();
+    if(db){showToast(actionName+' is not available for that change on the live board.',true);return;}
+    toStack.push(change);
+    state=normalizeState(JSON.parse(change.wholeState[targetSide]));
+    render();saveState();
+    return;
+  }
+  undoBusy=true;
+  try{
+    const result=await applyUndoableChange(change,targetSide,expectSide);
+    if(result.ok){
+      fromStack.pop();toStack.push(change);if(toStack.length>80)toStack.shift();
+      showToast((actionName==='Undo'?'Undone: ':'Redone: ')+result.label);
+    }else if(result.conflict){
+      // Someone else's newer change wins. This entry can never apply safely again.
+      fromStack.pop();
+      showToast(actionName+' skipped: '+result.reason,true);
+    }else{
+      showToast(actionName+' not completed: '+result.reason,true);
+    }
+  }finally{undoBusy=false;}
+}
+function undo(){return stepUndoHistory(history,redo,'before','after','Undo');}
+function redoChange(){return stepUndoHistory(redo,history,'after','before','Redo');}
 function locationKey(type,id,split){return type+':'+id+(split?':'+split:'');}
 function removeFromLocations(jobId){
   Object.keys(state.locations).forEach(k=>{
@@ -2963,9 +3133,18 @@ function addToLocation(key,jobId){
   if(!state.locations[key])state.locations[key]=[];
   state.locations[key].push(jobId);
 }
-function jobsFor(key){return state.locations[key]||[];}
+function windingJobIds(boardState){
+  const locations=boardState.locations||{};
+  return [...new Set(Object.keys(locations).filter(key=>key==='dept:winding'||key.startsWith('dept:winding:')).flatMap(key=>locations[key]||[]))];
+}
+function jobsFor(key){
+  // Display any jobs saved by the earlier split build in Plant 2's original single box.
+  if(activePlant==='waco2'&&key==='dept:winding')return windingJobIds(state);
+  return state.locations[key]||[];
+}
 function workflowLocationInfo(key){
   const parts=String(key||'').split(':');
+  if(parts[0]==='dept'&&parts[1]==='winding')return {label:'Winding',transition:false,completed:false};
   if(parts[0]==='dept'){
     const def=DEPTS.find(item=>item.id===parts[1]);
     const base=def?(def.selectLabel||def.label):parts[1].replace(/_/g,' ');
@@ -3226,11 +3405,14 @@ function setupDrop(el,key){
       if(!ovenEnteredAt)return;
     }
     if(!state.jobs[id])return;
-    snapshot();
+    const undoChange=beginUndoableChange([id]);
     const movedAt=isOvenLocation(key)&&!isOvenLocation(previousLocation)?ovenEnteredAt:new Date().toISOString();
     recordJobMove(job,previousLocation,key,movedAt);
     job.ovenEnteredAt=isOvenLocation(key)?ovenEnteredAt:'';
-    addToLocation(key,id);saveState();await upsertRemoteJob(id);render();
+    addToLocation(key,id);saveState();
+    // Only a confirmed save becomes undoable.
+    if(await upsertRemoteJob(id))finishUndoableChange(undoChange);
+    render();
   });
 }
 function setupDepartmentAdd(el,key){
@@ -3262,7 +3444,9 @@ function hourByHourJobGrid(width,height,labels,hasTimer=false){
   // Only a full tray needs denser packing; cards never grow to fill its height.
   for(let columns=1;columns<=Math.max(count,preferredColumns);columns++){
     const next=candidate(columns);
-    if(next.font>best.font+.1)best=next;
+    const nextFits=next.rows*next.cellHeight+(next.rows-1)*next.gap<=height+.001;
+    const bestFits=best.rows*best.cellHeight+(best.rows-1)*best.gap<=height+.001;
+    if(nextFits&&(!bestFits||next.font>best.font+.1))best=next;
   }
   return best;
 }
@@ -3281,6 +3465,10 @@ function fitHourByHourJobs(){
     const style=getComputedStyle(slots);
     const width=slots.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);
     const height=slots.clientHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom);
+    // All zoom trays, including Winding, fit their complete contents at once.
+    // Clear any main-board scroll offset before measuring the fitted grid.
+    slots.scrollTop=0;
+    slots.scrollLeft=0;
     const fit=hourByHourJobGrid(width,height,labels,timer);
     slots.style.setProperty('--job-columns',fit.columns);
     slots.style.setProperty('--job-rows',fit.rows);
@@ -3383,6 +3571,7 @@ function fitCompactJobLabels(){
     document.querySelectorAll('#board .job-label, #tutorialBoard .job-label').forEach(label=>{
       if(label.closest('.board-shell.zoomed'))return;
       label.style.fontSize='';
+      if(label.closest('.winding-split'))return;
       if(document.body.classList.contains('display-tv'))return;
       const available=label.clientWidth;
       const required=label.scrollWidth;
@@ -3584,11 +3773,26 @@ function renderJobs(container,key){
   const arr=jobsFor(key);
   arr.forEach(id=>{if(state.jobs[id])container.appendChild(makeJob(id))});
 }
+function makeSplitHeading(def,split){
+  const heading=document.createElement('div');
+  heading.className='split-name';
+  if(def.id==='winding'){
+    const color=split==='orange'?'yellow':split||'red';
+    heading.classList.add('winding-dot-heading');
+    heading.setAttribute('aria-label',color+' column');
+    const dot=document.createElement('span');
+    dot.className='winding-column-dot winding-column-'+color;
+    dot.setAttribute('aria-hidden','true');
+    heading.appendChild(dot);
+  }else heading.textContent=split;
+  return heading;
+}
 function makeDept(def){
   const card=document.createElement('section');
   card.className='stage department'+(def.special?' special':'')+(def.failed?' failed-test':'')+(def.completed?' completed-stage':'');
   card.dataset.deptId=def.id;
   const splits=departmentSplits(def);
+  if(def.id==='winding'&&splits.length)card.classList.add('winding-split');
   if(def.id==='oven'&&activePlant==='waco2')card.classList.add('oven-five-rows');
   if(def.id==='winding'||def.id==='welding_buffing')card.classList.add('header-emphasis');
   applyStageLayout(card,def.layout);
@@ -3610,7 +3814,7 @@ function makeDept(def){
     const wrap=document.createElement('div');wrap.className='split-wrap';wrap.style.setProperty('--cols',splits.length);
     splits.forEach(s=>{
       const col=document.createElement('div');col.className='split-col';
-      const sn=document.createElement('div');sn.className='split-name';sn.textContent=s;col.appendChild(sn);
+      const sn=makeSplitHeading(def,s);col.appendChild(sn);
       const slots=document.createElement('div');slots.className='slots';
       const key=locationKey('dept',def.id,s);
       renderJobs(slots,key);col.appendChild(slots);setupDrop(col,key);setupDepartmentAdd(col,key);wrap.appendChild(col);
@@ -3887,6 +4091,7 @@ function makeTutorialDept(def){
   card.className='stage department'+(def.special?' special':'')+(def.failed?' failed-test':'')+(def.completed?' completed-stage':'');
   card.dataset.deptId=def.id;
   const splits=departmentSplits(def,'waco1');
+  if(def.id==='winding'&&splits.length)card.classList.add('winding-split');
   if(def.id==='winding'||def.id==='welding_buffing')card.classList.add('header-emphasis');
   applyStageLayout(card,def.layout);
   card.style.order=stageLayoutOrder(def);
@@ -3908,9 +4113,7 @@ function makeTutorialDept(def){
     splits.forEach(split=>{
       const column=document.createElement('div');
       column.className='split-col';
-      const splitName=document.createElement('div');
-      splitName.className='split-name';
-      splitName.textContent=split;
+      const splitName=makeSplitHeading(def,split);
       const slots=document.createElement('div');
       slots.className='slots';
       const key=locationKey('dept',def.id,split);
@@ -4224,6 +4427,7 @@ function render(){
   }
   clearRecentMoveTimers();
   const board=document.getElementById('board');
+  board.dataset.plant=activePlant;
   board.innerHTML='';
   AREAS.forEach(area=>board.appendChild(makeProductionArea(area)));
   DEPTS.forEach(d=>board.appendChild(makeDept(d)));
@@ -4381,7 +4585,7 @@ function buildStageSelect(){
     const splits=departmentSplits(d);
     if(splits.length){
       splits.forEach(s=>{
-        const o=document.createElement('option');o.value=locationKey('dept',d.id,s);o.textContent=(d.selectLabel||d.label)+' '+s;groupDept.appendChild(o);
+        const o=document.createElement('option');o.value=locationKey('dept',d.id,s);o.textContent=d.id==='winding'?'Winding '+(s==='orange'?'🟡':s==='green'?'🟢':'🔴'):(d.selectLabel||d.label)+' '+s;groupDept.appendChild(o);
       });
     }else{
       const o=document.createElement('option');o.value=locationKey('dept',d.id);o.textContent=d.selectLabel||d.label;groupDept.appendChild(o);
@@ -4451,7 +4655,8 @@ async function submitModal(){
     ovenEnteredAt=await askOvenEntryTime();
     if(!ovenEnteredAt)return;
   }
-  snapshot();
+  const undoChange=beginUndoableChange(editingJobId?[editingJobId]:[]);
+  const isNewJob=!editingJobId;
   let changedJobId=editingJobId;
   if(editingJobId){
     state.jobs[editingJobId].text=text;state.jobs[editingJobId].color=selectedColor;state.jobs[editingJobId].note=note;state.jobs[editingJobId].priority=priority;
@@ -4465,6 +4670,7 @@ async function submitModal(){
   }
   saveState();
   const saved=await upsertRemoteJob(changedJobId);
+  if(saved)finishUndoableChange(undoChange,{newIds:isNewJob?[changedJobId]:[]});
   if(saved)closeModal();
   else editingJobId=changedJobId;
   render();
@@ -4522,8 +4728,9 @@ function renderWeekPanel(){
     });
     select.value=w.color||0;
     select.addEventListener('change',()=>{
-      snapshot();
+      const undoChange=beginUndoableChange([],{settings:true});
       state.weeks[i].color=parseInt(select.value,10);
+      finishUndoableChange(undoChange);
       renderWeekPanel();saveState();queueRemoteSettings();
     });
     row.appendChild(select);
@@ -4963,7 +5170,7 @@ async function mergePendingBackup(){
   backupRestoreInProgress=true;
   try{
     preserveIncidentCopy();preserveRecoveryCopy();
-    if(!db){snapshot();const result=mergeBackupState(backup.state);closeBackupModal();render();saveState();showToast('Local backup merged: '+result.added+' jobs added.');return;}
+    if(!db){const beforeJson=JSON.stringify(state);const result=mergeBackupState(backup.state);pushLocalWholeBoardUndo(beforeJson);closeBackupModal();render();saveState();showToast('Local backup merged: '+result.added+' jobs added.');return;}
     const before=await readAllBoardJobs(['main','waco2','shipping']);
     if(before.error)throw before.error;
     if(BOARD_ID!==board||activePlant!==plant||currentView!=='board')throw new Error('Board changed. Open the backup again on the intended plant.');
@@ -4998,8 +5205,9 @@ async function replaceWithPendingBackup(){
   if(!pendingBoardBackup||isTvMode())return;
   const stats=backupStateStats(pendingBoardBackup.state);
   if(!confirm('Replace the current live board with this backup containing '+stats.jobs+' jobs? You can use Undo immediately afterward if needed.'))return;
-  snapshot();
+  const beforeJson=JSON.stringify(state);
   state=normalizeState(cloneJsonValue(pendingBoardBackup.state));
+  pushLocalWholeBoardUndo(beforeJson);
   closeBackupModal();render();saveState();await syncEntireBoard();
   showToast('Current board replaced with the uploaded backup.');
 }
@@ -5187,7 +5395,7 @@ async function markShippingJobShipped(jobId){
   if(previous===destination)return;
   if(db&&!liveReady){showToast('Shipping is still connecting. Wait until the status shows Live, then try again.',true);return;}
 
-  const beforeState=JSON.stringify(state);
+  const undoChange=beginUndoableChange([jobId]);
   const job=cloneJsonValue(original);
   const movedAt=new Date().toISOString();
   recordJobMove(job,previous,destination,movedAt);
@@ -5200,9 +5408,9 @@ async function markShippingJobShipped(jobId){
     if(error){reportRemoteError(error,'Marking job Shipped');return;}
   }
 
-  history.push(beforeState);if(history.length>80)history.shift();redo=[];
   state.jobs[jobId]=job;
   addToLocation(destination,jobId);
+  finishUndoableChange(undoChange);
   render();saveState();
   showToast((job.text||jobId)+' marked Shipped.');
 }
@@ -5440,7 +5648,7 @@ async function sendEditingJobToShipping(){
   if(!original||previous!=='dept:completed'){showToast('Only jobs in Completed can be sent to Ready to Ship.',true);return;}
   if(db&&!liveReady){showToast('The board is still connecting. Wait until the status shows Live, then try again.',true);return;}
 
-  const beforeState=JSON.stringify(state);
+  const undoChange=beginUndoableChange([jobId]);
   const job=cloneJsonValue(original);
   const destination=shippingLocation(activePlant,'ready');
   const movedAt=new Date().toISOString();
@@ -5456,8 +5664,9 @@ async function sendEditingJobToShipping(){
   if(!db){
     try{
       sendJobToLocalShipping(jobId,job,destination);
-      history.push(beforeState);if(history.length>80)history.shift();redo=[];
-      delete state.jobs[jobId];removeFromLocations(jobId);closeModal();render();saveState();
+      delete state.jobs[jobId];removeFromLocations(jobId);
+      finishUndoableChange(undoChange);
+      closeModal();render();saveState();
       setLiveStatus('local','Local test');
       showToast((job.text||jobId)+' sent to Ready to Ship in local test mode. Open Ship / Shipped System to continue testing.');
     }catch(error){showToast('The local shipping test could not save this job.',true);}
@@ -5473,8 +5682,10 @@ async function sendEditingJobToShipping(){
   readyButton.textContent='Send to Ready to Ship';
   if(error){reportRemoteError(error,'Sending job to Ready to Ship');return;}
 
-  history.push(beforeState);if(history.length>80)history.shift();redo=[];
-  delete state.jobs[jobId];removeFromLocations(jobId);closeModal();render();saveState();
+  delete state.jobs[jobId];removeFromLocations(jobId);
+  // The job now lives in Shipping; Undo returns it to Completed only if Shipping has not changed it.
+  finishUndoableChange(undoChange,{after:{[jobId]:{snap:null,row}}});
+  closeModal();render();saveState();
   showToast((job.text||jobId)+' sent to Ready to Ship. Open Ship / Shipped System to continue.');
 }
 async function exportShippingSummary(){
