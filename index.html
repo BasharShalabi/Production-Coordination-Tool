@@ -3658,7 +3658,24 @@ function fitCompactJobLabels(){
       const fittedSize=Math.max(9,Math.floor((normalSize*(available-2)/required)*10)/10);
       label.style.fontSize=fittedSize+'px';
     });
+    fitWaco1OvenColumns();
     refreshOvenTimerTitles();
+  });
+}
+// Waco 1 Oven A/B/C: each job number stays on ONE line, sized to the column
+// width (never below 12px), and every card is tall enough for its number and
+// timer, so nothing is cut off or overlaps. Columns still scroll when full.
+// Display only: no job data or location is changed.
+function fitWaco1OvenColumns(){
+  document.querySelectorAll('.board-shell:not(.zoomed) #board>.department[data-dept-id="oven"]:not(.oven-five-rows) .split-col .job-label').forEach(label=>{
+    label.style.whiteSpace='nowrap';label.style.overflowWrap='normal';
+    label.style.overflow='hidden';label.style.flex='0 0 auto';
+    let size=parseFloat(getComputedStyle(label).fontSize)||17;
+    for(let step=0;step<4&&label.clientWidth&&label.scrollWidth>label.clientWidth;step++){
+      size=Math.max(12,Math.floor(size*(label.clientWidth-1)/label.scrollWidth*10)/10);
+      label.style.fontSize=size+'px';
+      if(size<=12)break;
+    }
   });
 }
 function normalizedJobSearch(value){
