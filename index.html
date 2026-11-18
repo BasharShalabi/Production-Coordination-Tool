@@ -1190,6 +1190,9 @@ body .board-shell.zoomed{flex:1 1 0%;min-height:0;overflow:hidden!important;padd
   grid-template-rows:repeat(var(--zoom-rows,1),minmax(0,1fr));grid-auto-rows:minmax(0,1fr);
   gap:6px;align-items:stretch;overflow:hidden;
 }
+/* Packed Hour by Hour: fine column grid, so the space between boxes comes from margins. */
+.board-shell.zoomed #board.zoom-packed{column-gap:0}
+.board-shell.zoomed #board.zoom-packed>.box-zoom-selected,.board-shell.zoomed #board.zoom-packed>.box-zoom-arrow{margin-left:3px;margin-right:3px;min-width:0}
 .board-shell.zoomed #board>.stage,
 .board-shell.zoomed #board>.arrow-stage.box-zoom-arrow,
 .board-shell.zoomed #board>.plain-connector.box-zoom-connector{
@@ -3456,12 +3459,18 @@ function refreshTutorialTimerTitles(){
   });
 }
 function setupDrop(el,key){
+  el.dataset.dropKey=key;
   el.addEventListener('dragover',e=>{if(isTvMode())return;e.preventDefault();el.classList.add('drop-active')});
   el.addEventListener('dragleave',()=>el.classList.remove('drop-active'));
-  el.addEventListener('drop',async e=>{
+  el.addEventListener('drop',e=>{
     if(isTvMode()){el.classList.remove('drop-active');return;}
     e.preventDefault();el.classList.remove('drop-active');
-    const id=e.dataTransfer.getData('text/plain')||dragId;
+    moveJobToLocation(e.dataTransfer.getData('text/plain')||dragId,key);
+  });
+}
+// One move path for mouse drag-and-drop and touch drag.
+async function moveJobToLocation(id,key){
+    if(isTvMode())return;
     if(!id||!state.jobs[id])return;
     if(!canSaveLiveJob())return;
     const job=state.jobs[id];
@@ -3480,7 +3489,73 @@ function setupDrop(el,key){
     // Only a confirmed save becomes undoable.
     if(await upsertRemoteJob(id))finishUndoableChange(undoChange);
     render();
-  });
+}
+// Touch screens: press and hold a job (about 1/4 second), then drag it with the
+// finger and lift over the new box. A quick swipe still scrolls; a tap still taps.
+let touchDrag=null;
+function touchDropTarget(x,y){
+  const hit=document.elementFromPoint(x,y);
+  const target=hit&&hit.closest('#board [data-drop-key]');
+  return target&&target.offsetParent?target:null;
+}
+function endTouchDrag(){
+  if(!touchDrag)return;
+  touchDrag.ghost.remove();
+  if(touchDrag.target)touchDrag.target.classList.remove('drop-active');
+  touchDrag.source.classList.remove('dragging');
+  document.body.classList.remove('job-dragging');
+  dragId=null;touchDrag=null;
+}
+function setupTouchJobDrag(el,jobId){
+  let hold=0,start=null;
+  const stopHold=()=>{clearTimeout(hold);hold=0;};
+  el.addEventListener('touchstart',e=>{
+    stopHold();
+    if(touchDrag)endTouchDrag();
+    if(e.touches.length!==1||isTvMode()||e.target.closest('.job-x,.oven-timer-readout'))return;
+    const t=e.touches[0];start={x:t.clientX,y:t.clientY};
+    hold=setTimeout(()=>{
+      hold=0;
+      if(!el.isConnected||isTvMode()||!state.jobs[jobId])return;
+      const box=el.getBoundingClientRect();
+      const ghost=el.cloneNode(true);
+      ghost.classList.add('touch-drag-ghost');
+      Object.assign(ghost.style,{position:'fixed',left:box.left+'px',top:box.top+'px',width:box.width+'px',height:box.height+'px',margin:'0',zIndex:'9999',pointerEvents:'none',opacity:'.9',boxShadow:'0 8px 22px rgba(0,0,0,.45)',transform:'scale(1.08)'});
+      document.body.appendChild(ghost);
+      touchDrag={jobId,source:el,ghost,offsetX:start.x-box.left,offsetY:start.y-box.top,target:null};
+      dragId=jobId;el.classList.add('dragging');document.body.classList.add('job-dragging');
+      if(navigator.vibrate)navigator.vibrate(30);
+    },250);
+  },{passive:true});
+  el.addEventListener('touchmove',e=>{
+    const t=e.touches[0];
+    if(touchDrag&&touchDrag.source===el){
+      e.preventDefault();
+      touchDrag.ghost.style.left=(t.clientX-touchDrag.offsetX)+'px';
+      touchDrag.ghost.style.top=(t.clientY-touchDrag.offsetY)+'px';
+      const target=touchDropTarget(t.clientX,t.clientY);
+      if(target!==touchDrag.target){
+        if(touchDrag.target)touchDrag.target.classList.remove('drop-active');
+        if(target)target.classList.add('drop-active');
+        touchDrag.target=target;
+      }
+      return;
+    }
+    if(hold&&start&&Math.hypot(t.clientX-start.x,t.clientY-start.y)>10)stopHold();
+  },{passive:false});
+  el.addEventListener('touchend',e=>{
+    stopHold();
+    if(!touchDrag||touchDrag.source!==el)return;
+    e.preventDefault();
+    const t=e.changedTouches[0];
+    const target=touchDropTarget(t.clientX,t.clientY);
+    const id=touchDrag.jobId;
+    endTouchDrag();
+    if(target)moveJobToLocation(id,target.dataset.dropKey);
+  },{passive:false});
+  el.addEventListener('touchcancel',()=>{stopHold();if(touchDrag&&touchDrag.source===el)endTouchDrag();});
+  // Windows treats press-and-hold as right click; don't open a menu over the drag.
+  el.addEventListener('contextmenu',e=>{if(touchDrag||e.pointerType==='touch'||(e.sourceCapabilities&&e.sourceCapabilities.firesTouchEvents))e.preventDefault();});
 }
 function setupDepartmentAdd(el,key){
   el.addEventListener('dblclick',e=>{
@@ -3859,6 +3934,7 @@ function makeJob(jobId){
   el.addEventListener('dblclick',()=>{if(!isTvMode())openModal(jobId)});
   el.addEventListener('dragstart',e=>{if(isTvMode()){e.preventDefault();return;}dragId=jobId;el.classList.add('dragging');document.body.classList.add('job-dragging');e.dataTransfer.setData('text/plain',jobId);e.dataTransfer.effectAllowed='move'});
   el.addEventListener('dragend',()=>{dragId=null;el.classList.remove('dragging');document.body.classList.remove('job-dragging')});
+  setupTouchJobDrag(el,jobId);
   return el;
 }
 function renderJobs(container,key){
@@ -4626,15 +4702,9 @@ function hourByHourRows(selection,maxDepartments=3){
     .forEach(def=>rows.push([{kind:'dept',id:def.id}]));
   return rows;
 }
-function layoutHourByHour(){
-  const board=document.getElementById('board');
-  const shell=document.querySelector('.board-shell');
-  board.querySelectorAll('.zoom-repeat').forEach(node=>node.remove());
-  board.querySelectorAll(':scope > .stage').forEach(node=>{
-    node.style.gridRow='';node.style.gridColumn='';node.style.order='';
-    node.classList.remove('box-zoom-selected','box-zoom-arrow','box-zoom-connector');
-  });
-  if(!boxZoomSelection.size)return;
+// Up to this many departments, Hour by Hour keeps its original layout.
+const HOUR_BY_HOUR_CLASSIC_MAX=3;
+function layoutHourByHourClassic(board){
   const paths=hourByHourRows(boxZoomSelection,Number.MAX_SAFE_INTEGER);
   const rows=paths.filter(row=>row.length>1);
   const isolated=paths.filter(row=>row.length===1).flat();
@@ -4663,17 +4733,80 @@ function layoutHourByHour(){
     if(item.kind==='arrow')node.querySelector('.zoom-flow-arrow').className='zoom-flow-arrow zoom-flow-horizontal zoom-flow-right';
   }));
 }
+// Selected departments once each, in workflow order.
+function hourByHourOrder(selection){
+  const order=[];
+  hourByHourRows(selection,Number.MAX_SAFE_INTEGER).flat().forEach(item=>{
+    if(item.kind==='dept'&&!order.includes(item.id))order.push(item.id);
+  });
+  DEPTS.forEach(def=>{if(selection.has(def.id)&&!order.includes(def.id))order.push(def.id);});
+  return order;
+}
+function layoutHourByHour(){
+  const board=document.getElementById('board');
+  const shell=document.querySelector('.board-shell');
+  board.querySelectorAll('.zoom-repeat').forEach(node=>node.remove());
+  board.querySelectorAll(':scope > .stage').forEach(node=>{
+    node.style.gridRow='';node.style.gridColumn='';node.style.order='';
+    node.classList.remove('box-zoom-selected','box-zoom-arrow','box-zoom-connector');
+  });
+  board.classList.remove('zoom-packed');
+  if(!boxZoomSelection.size)return;
+  // 1 to 3 departments: the original Hour by Hour layout, unchanged.
+  if(boxZoomSelection.size<=HOUR_BY_HOUR_CLASSIC_MAX){layoutHourByHourClassic(board);return;}
+  board.classList.add('zoom-packed');
+  // 4 or more: packed layout. Every selected department appears ONCE, in workflow order,
+  // split into balanced rows that each fill the full width (no empty cells).
+  // An arrow between two selected departments travels with the box it feeds,
+  // so its jobs stay visible and it stays a drop spot.
+  const order=hourByHourOrder(boxZoomSelection);
+  const units=order.map(id=>({dept:id,arrows:ARROWS.filter(def=>def.to===id&&boxZoomSelection.has(def.from)).map(def=>def.id)}));
+  const count=units.length;
+  // Wide screens: about 1.7 boxes across for every box down.
+  const perRow=count<=3?count:Math.ceil(Math.sqrt(count*1.7));
+  const rowCount=Math.ceil(count/perRow);
+  const rows=[];let next=0;
+  for(let r=0;r<rowCount;r++){
+    const size=Math.floor(count/rowCount)+(r<count%rowCount?1:0);
+    rows.push(units.slice(next,next+size));next+=size;
+  }
+  const COLUMNS=600,DEPT_WEIGHT=3.2,ARROW_WEIGHT=1.3;
+  board.style.setProperty('--zoom-tracks','repeat('+COLUMNS+',minmax(0,1fr))');
+  board.style.setProperty('--zoom-rows',String(Math.max(1,rows.length)));
+  rows.forEach((row,rowIndex)=>{
+    const items=row.flatMap(unit=>[...unit.arrows.map(id=>({kind:'arrow',id})),{kind:'dept',id:unit.dept}]);
+    const total=items.reduce((sum,item)=>sum+(item.kind==='dept'?DEPT_WEIGHT:ARROW_WEIGHT),0);
+    let used=0;
+    items.forEach(item=>{
+      const node=board.querySelector(item.kind==='dept'?'[data-dept-id="'+item.id+'"]':'[data-arrow-id="'+item.id+'"]');
+      const start=Math.round(used/total*COLUMNS)+1;
+      used+=item.kind==='dept'?DEPT_WEIGHT:ARROW_WEIGHT;
+      const end=Math.round(used/total*COLUMNS)+1;
+      if(!node)return;
+      node.classList.add(item.kind==='dept'?'box-zoom-selected':'box-zoom-arrow');
+      node.style.gridRow=String(rowIndex+1);node.style.gridColumn=start+' / '+end;
+      if(item.kind==='arrow')node.querySelector('.zoom-flow-arrow').className='zoom-flow-arrow zoom-flow-horizontal zoom-flow-right';
+    });
+  });
+}
 function updateBoxZoomView(){
   const shell=document.querySelector('.board-shell');
   const active=boxZoomSelection.size>0;
   shell.classList.toggle('zoomed',active);
   document.body.classList.toggle('hourly-active',active);
   layoutHourByHour();
-  const rows=hourByHourRows(boxZoomSelection,Number.MAX_SAFE_INTEGER);
-  const labels=rows.map(row=>row.filter(item=>item.kind==='dept').map(item=>{
-    const def=DEPTS.find(def=>def.id===item.id);return def.selectLabel||def.label;
-  }).join(' → '));
-  document.getElementById('boxZoomSummary').textContent=active?labels.join('  •  '):'Selected departments';
+  // Header: "A → B" when an arrow links them, "A • B" when it does not.
+  let summary='';
+  if(boxZoomSelection.size<=HOUR_BY_HOUR_CLASSIC_MAX){
+    summary=hourByHourRows(boxZoomSelection,Number.MAX_SAFE_INTEGER).map(row=>row.filter(item=>item.kind==='dept').map(item=>{
+      const def=DEPTS.find(def=>def.id===item.id);return def.selectLabel||def.label;
+    }).join(' → ')).join('  •  ');
+  }else hourByHourOrder(boxZoomSelection).forEach((id,index,order)=>{
+    const def=DEPTS.find(def=>def.id===id);
+    if(index)summary+=ARROWS.some(arrow=>arrow.from===order[index-1]&&arrow.to===id)?' → ':'  •  ';
+    summary+=def.selectLabel||def.label;
+  });
+  document.getElementById('boxZoomSummary').textContent=active?summary:'Selected departments';
   document.getElementById('btnBoxZoom').classList.toggle('active',active||!document.getElementById('boxZoomMenu').hidden);
   fitCompactJobLabels();
   scheduleDisplayFit();
