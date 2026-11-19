@@ -851,6 +851,9 @@ body.display-tv .week-panel select,
 body.display-tv .week-panel button{cursor:default}
 .tv-readonly-pill{display:none;align-items:center;gap:6px;min-height:30px;padding:5px 10px;border:1px solid var(--electric);border-radius:999px;background:var(--teal-dark);color:var(--electric);font-size:12px;font-weight:950;white-space:nowrap}
 body.display-tv .tv-readonly-pill{display:inline-flex}
+.waco-clock{margin-left:auto;padding:0 6px 0 14px;color:#fff;font-size:20px;font-weight:900;letter-spacing:.3px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.waco-clock .waco-clock-date{color:var(--electric);font-size:15px;font-weight:800;margin-right:10px}
+.waco-clock .waco-clock-zone{color:#cbd5e1;font-size:12px;font-weight:800;margin-left:6px}
 .zoom-menu{position:absolute;top:calc(100% + 9px);left:50%;z-index:80;width:330px;max-height:min(570px,calc(100vh - 145px));padding:14px;background:#fff;border:2px solid var(--teal-dark);border-radius:12px;box-shadow:0 20px 55px rgba(5,37,40,.34);transform:translateX(-50%);overflow:auto}
 .zoom-menu[hidden]{display:none}
 .zoom-menu-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px;padding-bottom:9px;border-bottom:2px solid var(--electric-soft);color:var(--teal-dark);font-size:16px;font-weight:950}
@@ -1533,6 +1536,7 @@ body.display-tv .board-shell:not(.zoomed) #board>.department.winding-split .job{
     <span class="tv-readonly-pill">Read only</span>
     <button class="tb-btn" id="btnBackToOptions" type="button">Main Menu</button>
     <button class="tb-btn" id="btnSignOut" type="button">Sign out</button>
+    <span class="waco-clock" id="wacoClock" title="Waco, Texas time (Central)"></span>
   </div>
   <div class="board-shell">
     <div class="display-stage" id="displayStage">
@@ -6025,6 +6029,23 @@ document.getElementById('btnCancelBackup').addEventListener('click',closeBackupM
 document.getElementById('backupBackdrop').addEventListener('click',event=>{if(event.target.id==='backupBackdrop')closeBackupModal()});
 document.getElementById('btnExportSummary').addEventListener('click',exportExcelSummary);
 document.getElementById('btnSignOut').addEventListener('click',handleSignOut);
+(function startWacoClock(){
+  const el=document.getElementById('wacoClock');
+  if(!el)return;
+  const dateFmt=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',weekday:'short',month:'short',day:'numeric'});
+  const timeFmt=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'});
+  let last='';
+  function tick(){
+    const now=new Date();
+    const text=dateFmt.format(now)+'|'+timeFmt.format(now);
+    if(text===last)return;
+    last=text;
+    el.innerHTML='<span class="waco-clock-date">'+dateFmt.format(now)+'</span>'+timeFmt.format(now)+'<span class="waco-clock-zone">CT</span>';
+  }
+  tick();
+  setInterval(tick,5000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
+})();
 document.getElementById('btnBackToOptions').addEventListener('click',returnToMainMenu);
 document.getElementById('btnShippingMenu').addEventListener('click',returnToMainMenu);
 document.getElementById('btnShippingSignOut').addEventListener('click',handleSignOut);
