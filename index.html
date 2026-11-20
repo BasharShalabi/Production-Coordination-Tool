@@ -1195,6 +1195,8 @@ body .board-shell.zoomed{flex:1 1 0%;min-height:0;overflow:hidden!important;padd
 }
 /* Packed Hour by Hour: fine column grid, so the space between boxes comes from margins. */
 .board-shell.zoomed #board.zoom-packed{column-gap:0}
+/* One-row front-end layout: big job numbers stay on one line (they shrink to fit instead of wrapping). */
+.board-shell.zoomed #board.zoom-front4 .job-label{white-space:nowrap}
 .board-shell.zoomed #board.zoom-packed>.box-zoom-selected,.board-shell.zoomed #board.zoom-packed>.box-zoom-arrow{margin-left:3px;margin-right:3px;min-width:0}
 .board-shell.zoomed #board>.stage,
 .board-shell.zoomed #board>.arrow-stage.box-zoom-arrow,
@@ -3570,10 +3572,13 @@ function setupDepartmentAdd(el,key){
     openModal(null,key);
   });
 }
-function hourByHourJobGrid(width,height,labels,hasTimer=false){
+function hourByHourJobGrid(width,height,labels,hasTimer=false,grow=false){
   const count=labels.length,longest=Math.max(1,...labels.map(text=>String(text).length));
   const preferredColumns=Math.max(1,Math.floor((width+5)/170));
-  const preferredHeight=hasTimer?64:48;
+  // grow (one-row front-end layout only): cards get taller, up to a tenth of the tray, so the box is used.
+  const baseHeight=hasTimer?64:48;
+  const preferredHeight=grow?Math.max(baseHeight,Math.min(110,height/10)):baseHeight;
+  const maxFont=grow?44:26;
   function candidate(columns){
     const rows=Math.max(1,Math.ceil(count/columns));
     const gap=Math.min(5,Math.max(0,Math.min(width/columns,height/rows)*.06));
@@ -3581,11 +3586,20 @@ function hourByHourJobGrid(width,height,labels,hasTimer=false){
     const cellHeight=Math.max(1,Math.min(preferredHeight,(height-gap*(rows-1))/rows));
     const padding=Math.min(4,w*.04,cellHeight*.06);
     const timer=hasTimer?Math.max(1,Math.min(14,cellHeight*.23)):0;
-    const font=Math.max(1,Math.min(26,(w-2*padding-10)/(longest*.63),(cellHeight-2*padding-timer-3)/1.2));
+    const font=Math.max(1,Math.min(maxFont,(w-2*padding-10)/(longest*.63),(cellHeight-2*padding-timer-3)/1.2));
     return {columns,rows,font,gap,padding,timer:timer||12,cellHeight};
   }
   // Sparse boards keep normal-sized cards at the top, including empty columns.
   let best=candidate(preferredColumns);
+  if(grow&&count){
+    // One-row layout: use whichever column count gives the biggest job numbers.
+    const fits=c=>c.rows*c.cellHeight+(c.rows-1)*c.gap<=height+.001;
+    for(let columns=1;columns<=Math.max(count,preferredColumns);columns++){
+      const next=candidate(columns);
+      if(fits(next)&&(!fits(best)||next.font>best.font+.1))best=next;
+    }
+    return best;
+  }
   if(best.cellHeight>=preferredHeight-.5||!count)return best;
   // Only a full tray needs denser packing; cards never grow to fill its height.
   for(let columns=1;columns<=Math.max(count,preferredColumns);columns++){
@@ -3615,7 +3629,7 @@ function fitHourByHourJobs(){
     // Clear any main-board scroll offset before measuring the fitted grid.
     slots.scrollTop=0;
     slots.scrollLeft=0;
-    const fit=hourByHourJobGrid(width,height,labels,timer);
+    const fit=hourByHourJobGrid(width,height,labels,timer,board.classList.contains('zoom-front4'));
     slots.style.setProperty('--job-columns',fit.columns);
     slots.style.setProperty('--job-rows',fit.rows);
     slots.style.setProperty('--job-height',fit.cellHeight+'px');
@@ -4754,7 +4768,7 @@ function layoutHourByHour(){
     node.style.gridRow='';node.style.gridColumn='';node.style.order='';
     node.classList.remove('box-zoom-selected','box-zoom-arrow','box-zoom-connector');
   });
-  board.classList.remove('zoom-packed');
+  board.classList.remove('zoom-packed','zoom-front4');
   if(!boxZoomSelection.size)return;
   // 1 to 3 departments: the original Hour by Hour layout, unchanged.
   if(boxZoomSelection.size<=HOUR_BY_HOUR_CLASSIC_MAX){layoutHourByHourClassic(board);return;}
@@ -4766,25 +4780,30 @@ function layoutHourByHour(){
   const order=hourByHourOrder(boxZoomSelection);
   const units=order.map(id=>({dept:id,arrows:ARROWS.filter(def=>def.to===id&&boxZoomSelection.has(def.from)).map(def=>def.id)}));
   const count=units.length;
+  // Custom layout: Winding, Lacing, Core & Coil and Oven (exactly those four) sit side by side in one row.
+  const oneRow=count===4&&['winding','lacing','core_coil','oven'].every(id=>boxZoomSelection.has(id));
   // Wide screens: about 1.7 boxes across for every box down.
-  const perRow=count<=3?count:Math.ceil(Math.sqrt(count*1.7));
+  const perRow=oneRow||count<=3?count:Math.ceil(Math.sqrt(count*1.7));
+  board.classList.toggle('zoom-front4',oneRow);
   const rowCount=Math.ceil(count/perRow);
   const rows=[];let next=0;
   for(let r=0;r<rowCount;r++){
     const size=Math.floor(count/rowCount)+(r<count%rowCount?1:0);
     rows.push(units.slice(next,next+size));next+=size;
   }
-  const COLUMNS=600,DEPT_WEIGHT=3.2,ARROW_WEIGHT=1.3;
+  // In the one-row layout Winding gets extra width (it splits into three columns) and the arrows are slimmer.
+  const COLUMNS=600,DEPT_WEIGHT=3.2,ARROW_WEIGHT=oneRow?1:1.3;
+  const weightOf=item=>item.kind==='dept'?(oneRow&&item.id==='winding'?4.6:DEPT_WEIGHT):ARROW_WEIGHT;
   board.style.setProperty('--zoom-tracks','repeat('+COLUMNS+',minmax(0,1fr))');
   board.style.setProperty('--zoom-rows',String(Math.max(1,rows.length)));
   rows.forEach((row,rowIndex)=>{
     const items=row.flatMap(unit=>[...unit.arrows.map(id=>({kind:'arrow',id})),{kind:'dept',id:unit.dept}]);
-    const total=items.reduce((sum,item)=>sum+(item.kind==='dept'?DEPT_WEIGHT:ARROW_WEIGHT),0);
+    const total=items.reduce((sum,item)=>sum+weightOf(item),0);
     let used=0;
     items.forEach(item=>{
       const node=board.querySelector(item.kind==='dept'?'[data-dept-id="'+item.id+'"]':'[data-arrow-id="'+item.id+'"]');
       const start=Math.round(used/total*COLUMNS)+1;
-      used+=item.kind==='dept'?DEPT_WEIGHT:ARROW_WEIGHT;
+      used+=weightOf(item);
       const end=Math.round(used/total*COLUMNS)+1;
       if(!node)return;
       node.classList.add(item.kind==='dept'?'box-zoom-selected':'box-zoom-arrow');
