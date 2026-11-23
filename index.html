@@ -241,11 +241,13 @@ body.authenticated.app-selecting .app-selector{display:flex}
 }
 .split-col .slots{grid-template-columns:repeat(auto-fill,minmax(76px,1fr));overflow:visible;flex:0 0 auto}
 .department[data-dept-id="oven"] .split-col .slots,
-.department[data-dept-id="tanking"] .split-col .slots{
+.department[data-dept-id="tanking"] .split-col .slots,
+.department[data-dept-id="final_finish"] .split-col .slots{
   grid-template-columns:minmax(0,1fr);
 }
 .department[data-dept-id="oven"] .job,
-.department[data-dept-id="tanking"] .job{
+.department[data-dept-id="tanking"] .job,
+.department[data-dept-id="final_finish"] .split-col .job{
   height:auto;min-height:42px;padding:6px 3px;
 }
 .department[data-dept-id="oven"] .job-label{
@@ -257,7 +259,8 @@ body.authenticated.app-selecting .app-selector{display:flex}
   word-break:keep-all;
   line-height:1.15;
 }
-.department[data-dept-id="tanking"] .job-label{
+.department[data-dept-id="tanking"] .job-label,
+.department[data-dept-id="final_finish"] .split-col .job-label{
   white-space:normal;
   overflow:visible;
   text-overflow:clip;
@@ -2932,6 +2935,9 @@ function departmentSplits(def,plant=activePlant){
   // Keep the original location as the red lane so existing jobs need no migration.
   // Both plants: red = On hold, orange (shown yellow) = On machine, green = Will be done today.
   if(def&&def.id==='winding')return ['','orange','green'];
+  // Waco 1 Final Finish: 1st and 2nd shift columns, like Tanking. The original location stays
+  // the 1st-shift column so jobs already in Final Finish need no migration.
+  if(def&&def.id==='final_finish'&&plant==='waco1')return ['','2nd'];
   if(!def||!Array.isArray(def.split))return [];
   if(def.id==='oven'&&plant==='waco2')return ['A','B','C','D','E'];
   return def.split;
@@ -3809,7 +3815,8 @@ function fitCompactJobLabels(){
 // timer, so nothing is cut off or overlaps. Columns still scroll when full.
 // Display only: no job data or location is changed.
 function fitWaco1OvenColumns(){
-  document.querySelectorAll('.board-shell:not(.zoomed) #board>.department[data-dept-id="oven"]:not(.oven-five-rows) .split-col .job-label').forEach(label=>{
+  // Waco 1 Final Finish 1st/2nd columns use the same one-line fit.
+  document.querySelectorAll('.board-shell:not(.zoomed) #board>.department[data-dept-id="oven"]:not(.oven-five-rows) .split-col .job-label,.board-shell:not(.zoomed) #board>.department[data-dept-id="final_finish"] .split-col .job-label').forEach(label=>{
     label.style.whiteSpace='nowrap';label.style.overflowWrap='normal';
     label.style.overflow='hidden';label.style.flex='0 0 auto';
     let size=parseFloat(getComputedStyle(label).fontSize)||17;
@@ -4041,7 +4048,7 @@ function makeSplitHeading(def,split){
     dot.className='winding-column-dot winding-column-'+color;
     dot.setAttribute('aria-hidden','true');
     heading.appendChild(dot);
-  }else heading.textContent=split;
+  }else heading.textContent=def.id==='final_finish'&&!split?'1st':split;
   return heading;
 }
 function makeDept(def){
